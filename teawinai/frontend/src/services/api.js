@@ -1,0 +1,105 @@
+import axios from 'axios'
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api'
+
+// Create axios instance
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+})
+
+// Add request interceptor to include auth token
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  }
+)
+
+// Add response interceptor to handle errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token expired or invalid
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      window.location.href = '/login'
+    }
+    return Promise.reject(error)
+  }
+)
+
+// Auth API
+export const authAPI = {
+  login: (credentials) => api.post('/auth/login', credentials),
+  register: (userData) => api.post('/auth/register', userData),
+  getMe: () => api.get('/auth/me'),
+  updateProfile: (profileData) => {
+    // Handle FormData for file uploads
+    if (profileData instanceof FormData) {
+      return api.put('/auth/profile', profileData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+    }
+    // Regular JSON data
+    return api.put('/auth/profile', profileData)
+  },
+  getUserPlaces: () => api.get('/auth/places'),
+  getUserReviews: () => api.get('/auth/reviews'),
+  getUsers: (params) => api.get('/auth/users', { params }),
+  getDashboardStats: () => api.get('/auth/dashboard/stats'),
+}
+
+// Places API
+export const placesAPI = {
+  getPlaces: (params) => api.get('/places', { params }),
+  getPlace: (id) => api.get(`/places/${id}`),
+  createPlace: (placeData) => {
+  // Check if it's FormData (for file uploads)
+  if (placeData instanceof FormData) {
+    return api.post('/places', placeData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+  }
+  // Regular JSON data
+  return api.post('/places', placeData)
+},
+  updatePlace: (id, placeData) => api.put(`/places/${id}`, placeData),
+  deletePlace: (id) => api.delete(`/places/${id}`),
+}
+
+// Trips API
+export const tripsAPI = {
+  planTrip: (data) => api.post('/trips/plan', data),
+  saveTrip: (data) => api.post('/trips/save', data),
+  getMyTrips: (params) => api.get('/trips/my', { params }),
+  deleteTrip: (id) => api.delete(`/trips/${id}`),
+}
+
+// Categories API
+export const categoriesAPI = {
+  getCategories: () => api.get('/categories'),
+}
+
+// Price Updates API
+export const priceUpdatesAPI = {
+  submitPriceUpdate: (data) => api.post('/price-updates', data),
+  getPendingUpdates: (params) => api.get('/price-updates/pending', { params }),
+  approvePriceUpdate: (id, data) => api.put(`/price-updates/${id}/approve`, data),
+  rejectPriceUpdate: (id, data) => api.put(`/price-updates/${id}/reject`, data),
+}
+
+export default api
