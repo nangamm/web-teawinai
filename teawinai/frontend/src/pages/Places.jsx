@@ -13,18 +13,14 @@ const CAT_EMOJI = {
   'ตลาด': '🏪', 'Market': '🏪',
 }
 
-const PRICE_LABEL = {
-  free: 'ฟรี',
-  low: 'ราคาถูก',
-  medium: 'ราคากลาง',
-  high: 'ราคาสูง',
-}
-
-const getPrice = (min, isFree) => {
-  if (isFree || min === 0) return 'free'
-  if (min <= 100) return 'low'
-  if (min <= 300) return 'medium'
-  return 'high'
+const formatPrice = (place) => {
+  if (place.is_free) return 'ฟรี'
+  if (place.price_min && place.price_max && place.price_min !== place.price_max) {
+    return `฿${place.price_min.toLocaleString()} - ฿${place.price_max.toLocaleString()}`
+  }
+  if (place.price_min) return `฿${place.price_min.toLocaleString()}`
+  if (place.price_max) return `฿${place.price_max.toLocaleString()}`
+  return 'N/A'
 }
 
 export function Places() {
@@ -190,7 +186,7 @@ export function Places() {
           <div className="places-grid">
             {places.map(place => {
               const catName = place.category?.name || place.category
-              const priceKey = getPrice(place.price_min ?? 0, place.is_free)
+              const priceLabel = formatPrice(place)
 
               return (
                 <div
@@ -235,8 +231,8 @@ export function Places() {
                   <div className="place-card-body">
                     <div className="place-card-top">
                       <div className="place-card-name">{place.name}</div>
-                      <div className={`place-card-price ${priceKey === 'free' ? 'free' : ''}`}>
-                        {PRICE_LABEL[priceKey]}
+                      <div className={`place-card-price ${place.is_free ? 'free' : ''}`}>
+                        {priceLabel}
                       </div>
                     </div>
 

@@ -339,7 +339,7 @@ export function AddPlace() {
         formDataToSend.append('price_max', parseFloat(formData.price_max))
       }
       
-      formDataToSend.append('is_free', isFreePlace)
+      formDataToSend.append('is_free', isFreePlace ? 'true' : 'false')
       formDataToSend.append('opening_hours', JSON.stringify(formData.opening_hours))
 
       // Append images

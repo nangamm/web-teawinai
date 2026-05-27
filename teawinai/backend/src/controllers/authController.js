@@ -371,6 +371,68 @@ const getDashboardStats = async (req, res) => {
     }
 };
 
+// @desc    Create user with specific role (admin only)
+// @route   POST /api/auth/users
+// @access   Private (Admin only)
+const createUser = async (req, res) => {
+    try {
+        const { name, email, password, role, phone } = req.body;
+
+        // Validate required fields
+        if (!name || !email || !password || !role) {
+            return res.status(400).json({
+                success: false,
+                message: 'กรุณากรอกข้อมูลให้ครบถ้วน (name, email, password, role)'
+            });
+        }
+
+        // Validate role
+        if (!['admin', 'owner', 'user'].includes(role)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Role ต้องเป็น admin, owner หรือ user เท่านั้น'
+            });
+        }
+
+        // Check if user exists
+        const existingUser = await User.findOne({ email });
+
+        if (existingUser) {
+            return res.status(400).json({
+                success: false,
+                message: 'อีเมลนี้ถูกใช้งานแล้ว'
+            });
+        }
+
+        // Create user with specified role
+        const user = await User.create({
+            name,
+            email,
+            password_hash: password,
+            role,
+            phone
+        });
+
+        res.status(201).json({
+            success: true,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                phone: user.phone
+            },
+            message: 'สร้าง user สำเร็จ'
+        });
+    } catch (error) {
+        console.error('Create user error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'เกิดข้อผิดพลาดในการสร้าง user'
+        });
+    }
+};
+
 module.exports = {
     getMe,
     register,
@@ -380,5 +442,6 @@ module.exports = {
     getUserPlaces,
     getUserReviews,
     getUsers,
-    getDashboardStats
+    getDashboardStats,
+    createUser
 };

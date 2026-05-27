@@ -140,7 +140,7 @@ exports.createPlace = async (req, res) => {
         }
 
         // Handle is_free field
-        if (req.body.is_free) {
+        if (req.body.is_free === 'true' || req.body.is_free === true) {
             placeData.is_free = req.body.is_free === 'true';
             // For free places, set prices to 0
             placeData.price_min = 0;

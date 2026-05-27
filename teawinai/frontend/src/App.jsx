@@ -8,7 +8,6 @@ import { Login } from '@/pages/Login'
 import { Register } from '@/pages/Register'
 import { MyTrips } from '@/pages/MyTrips'
 import { AdminDashboard } from '@/pages/AdminDashboard'
-import { Admin } from '@/pages/Admin'
 import { Profile } from '@/pages/Profile'
 import { Places } from '@/pages/Places'
 import { PlaceDetail } from '@/pages/PlaceDetail'
@@ -64,21 +63,21 @@ function App() {
           />
           
           {/* Admin only routes */}
-          <Route 
-            path="/admin" 
+          <Route
+            path="/admin"
             element={
               <ProtectedRoute requiredRole={['admin']}>
                 <AdminDashboard />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/admin/manage" 
+          <Route
+            path="/admin/*"
             element={
               <ProtectedRoute requiredRole={['admin']}>
-                <Admin />
+                <AdminDashboard />
               </ProtectedRoute>
-            } 
+            }
           />
           
           {/* 404 route */}

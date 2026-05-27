@@ -76,23 +76,21 @@ export function Navbar() {
           )}
         </div>
 
-        {/* ── Search (desktop) ── */}
-        <form onSubmit={handleSearch} className="navbar-search">
-          <Search />
-          <input
-            type="text"
-            className="navbar-search-input"
-            placeholder="Search experiences..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-          />
-        </form>
+
 
         {/* ── Right Actions (desktop) ── */}
         <div className="navbar-actions">
-          <button className="navbar-icon-btn" title="เปลี่ยนภาษา">
-            <Globe />
-          </button>
+          {/* ── Search (desktop) ── */}
+          <form onSubmit={handleSearch} className="navbar-search">
+            <Search />
+            <input
+              type="text"
+              className="navbar-search-input"
+              placeholder="Search experiences..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+            />
+          </form>
 
           {isAuthenticated ? (
             <>

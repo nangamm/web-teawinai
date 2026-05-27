@@ -16,6 +16,7 @@ router.get('/reviews', verifyToken, authController.getUserReviews);
 
 // Admin only routes
 router.get('/users', verifyToken, requireRole('admin'), authController.getUsers);
+router.post('/users', verifyToken, requireRole('admin'), authController.createUser);
 router.get('/dashboard/stats', verifyToken, requireRole('admin'), authController.getDashboardStats);
 
 module.exports = router;
