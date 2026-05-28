@@ -77,7 +77,18 @@ export const placesAPI = {
   // Regular JSON data
   return api.post('/places', placeData)
 },
-  updatePlace: (id, placeData) => api.put(`/places/${id}`, placeData),
+  updatePlace: (id, placeData) => {
+    // Handle FormData for file uploads
+    if (placeData instanceof FormData) {
+      return api.put(`/places/${id}`, placeData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+    }
+    // Regular JSON data
+    return api.put(`/places/${id}`, placeData)
+  },
   deletePlace: (id) => api.delete(`/places/${id}`),
 }
 

@@ -3495,3 +3495,531 @@ body {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+/* =============================================
+   Admin Dashboard — Extended (Tabs, Modals)
+   ============================================= */
+
+/* ── Tab Navigation ── */
+.admin-tab-nav {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 48px;
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  background: #0e0e0e;
+}
+
+.admin-tab-bar {
+  display: flex;
+  gap: 0;
+}
+
+.admin-tab-btn {
+  padding: 14px 24px;
+  font-family: 'Kanit', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.45);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: -1px;
+}
+
+.admin-tab-btn:hover { color: rgba(255,255,255,0.7); }
+
+.admin-tab-btn.active {
+  color: #4ecf9a;
+  font-weight: 600;
+  border-bottom-color: #4ecf9a;
+}
+
+.admin-tab-badge {
+  background: rgba(224,82,82,0.2);
+  color: #e05252;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 100px;
+  margin-left: 4px;
+}
+
+/* ── Price Updates Tab ── */
+.admin-price-tab {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 40px 48px 80px;
+}
+
+.admin-price-tab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.admin-price-tab-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+}
+
+/* Price update card */
+.admin-update-card {
+  background: #141414;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.07);
+  padding: 24px;
+  margin-bottom: 16px;
+}
+
+.admin-update-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  gap: 16px;
+}
+
+.admin-update-card-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.admin-update-card-by {
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 2px;
+}
+
+.admin-update-card-date {
+  font-size: 11px;
+  color: rgba(255,255,255,0.25);
+}
+
+.admin-update-card-btns {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.admin-update-approve-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: #116045;
+  color: #fff;
+  font-family: 'Kanit', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.admin-update-approve-btn:hover { background: #0d4e38; }
+.admin-update-approve-btn svg { width: 15px; height: 15px; }
+
+.admin-update-reject-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: rgba(224,82,82,0.15);
+  color: #e05252;
+  font-family: 'Kanit', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid rgba(224,82,82,0.25);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.admin-update-reject-btn:hover { background: rgba(224,82,82,0.25); }
+.admin-update-reject-btn svg { width: 15px; height: 15px; }
+
+.admin-update-price-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  font-size: 13px;
+}
+
+.admin-update-price-label {
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 4px;
+}
+
+.admin-update-price-val { font-weight: 500; color: rgba(255,255,255,0.8); }
+.admin-update-price-new { font-weight: 500; color: #4ecf9a; }
+
+.admin-update-promo {
+  margin-top: 16px;
+  font-size: 13px;
+}
+
+.admin-update-promo-label {
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 4px;
+}
+
+.admin-update-promo-text { color: rgba(255,255,255,0.7); }
+
+/* Empty state */
+.admin-price-empty {
+  text-align: center;
+  padding: 60px 0;
+}
+
+.admin-price-empty svg {
+  color: #4ecf9a;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 16px;
+  display: block;
+}
+
+.admin-price-empty-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 8px;
+}
+
+.admin-price-empty-sub {
+  font-size: 13px;
+  color: rgba(255,255,255,0.35);
+}
+
+/* ── Modal Backdrop ── */
+.admin-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+}
+
+/* Add/Edit Modal */
+.admin-modal {
+  background: #1a1a1a;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 28px;
+  max-width: 640px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+}
+
+.admin-modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 24px;
+}
+
+.admin-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-modal-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: 6px;
+}
+
+.admin-modal-input {
+  width: 100%;
+  background: #222;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-family: 'Kanit', sans-serif;
+  font-size: 13px;
+  color: #fff;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.admin-modal-input:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 2px rgba(17,96,69,0.2);
+}
+
+.admin-modal-input:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.admin-modal-hint {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  margin-top: 4px;
+}
+
+.admin-modal-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+/* Opening hours inside modal */
+.admin-hours-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.3rem;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+}
+
+.admin-hours-day {
+  width: 54px;
+  font-size: 12px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.8);
+  flex-shrink: 0;
+}
+
+.admin-hours-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.admin-hours-time-group {
+  flex: 1;
+}
+
+.admin-hours-time-label {
+  font-size: 10px;
+  color: rgba(255,255,255,0.4);
+  margin-bottom: 2px;
+  display: block;
+}
+
+.admin-hours-sep {
+  color: rgba(255,255,255,0.4);
+  margin-top: 12px;
+  flex-shrink: 0;
+}
+
+.admin-hours-closed-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.admin-hours-closed-label {
+  font-size: 12px;
+  color: rgba(255,255,255,0.6);
+}
+
+.admin-hours-closed-text {
+  flex: 1;
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+}
+
+/* Image upload area */
+.admin-upload-area {
+  border: 2px dashed rgba(255,255,255,0.2);
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.admin-upload-area:hover { border-color: rgba(255,255,255,0.35); }
+
+.admin-upload-icon { font-size: 24px; margin-bottom: 8px; }
+
+.admin-upload-text {
+  color: rgba(255,255,255,0.6);
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.admin-upload-hint {
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+}
+
+.admin-upload-label { cursor: pointer; }
+
+.admin-img-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.admin-img-thumb-wrap { position: relative; }
+
+.admin-img-thumb {
+  width: 100%;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.1);
+  display: block;
+}
+
+.admin-img-remove {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(224,82,82,0.9);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  transition: background 0.15s;
+}
+
+.admin-img-remove:hover { background: #c0392b; }
+
+/* Modal footer */
+.admin-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+.admin-modal-cancel {
+  padding: 10px 20px;
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.6);
+  font-family: 'Kanit', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.admin-modal-cancel:hover {
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+}
+
+.admin-modal-submit {
+  padding: 10px 22px;
+  background: #116045;
+  color: #fff;
+  font-family: 'Kanit', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.admin-modal-submit:hover { background: #0d4e38; }
+
+/* ── Delete Confirm Modal ── */
+.admin-delete-modal {
+  background: #1a1a1a;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 28px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+}
+
+.admin-delete-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.admin-delete-modal-header svg {
+  color: #e05252;
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+}
+
+.admin-delete-modal-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.admin-delete-modal-body {
+  color: rgba(255,255,255,0.5);
+  font-size: 13px;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.admin-delete-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.admin-delete-btn {
+  padding: 10px 20px;
+  background: #e05252;
+  color: #fff;
+  font-family: 'Kanit', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.admin-delete-btn:hover { background: #c0392b; }
+
+@media (max-width: 768px) {
+  .admin-tab-nav { padding: 0 16px; }
+  .admin-price-tab { padding: 24px 16px 60px; }
+  .admin-update-card-top { flex-direction: column; }
+  .admin-update-card-btns { width: 100%; }
+  .admin-update-approve-btn,
+  .admin-update-reject-btn { flex: 1; justify-content: center; }
+  .admin-modal { padding: 20px; }
+  .admin-modal-two-col { grid-template-columns: 1fr; }
+}

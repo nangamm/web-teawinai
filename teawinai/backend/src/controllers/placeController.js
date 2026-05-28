@@ -238,9 +238,43 @@ exports.updatePlace = async (req, res) => {
             }
         }
 
+        // Build update data from req.body (start with a copy)
+        const updateData = { ...req.body };
+
+        // Handle opening_hours from FormData (parse JSON string)
+        if (updateData.opening_hours && typeof updateData.opening_hours === 'string') {
+            try {
+                updateData.opening_hours = JSON.parse(updateData.opening_hours);
+            } catch (error) {
+                console.error('Error parsing opening_hours in update:', error);
+                updateData.opening_hours = {};
+            }
+        }
+
+        // Handle is_free field
+        if (updateData.is_free === 'true' || updateData.is_free === true) {
+            updateData.is_free = updateData.is_free === 'true' || updateData.is_free === true;
+            updateData.price_min = 0;
+            updateData.price_max = 0;
+        }
+
+        // Handle image uploads (new images from multer)
+        if (req.files && req.files.length > 0) {
+            const newImagePaths = req.files.map(file => `/uploads/${file.filename}`);
+            // Merge with existing images if provided via existing_images field
+            const existingImages = updateData.existing_images
+                ? (typeof updateData.existing_images === 'string'
+                    ? [updateData.existing_images]
+                    : updateData.existing_images)
+                : [];
+            updateData.images = [...existingImages, ...newImagePaths];
+        }
+        // Remove transient fields that shouldn't go to MongoDB
+        delete updateData.existing_images;
+
         place = await Place.findByIdAndUpdate(
             req.params.id,
-            req.body,
+            updateData,
             { new: true, runValidators: true }
         ).populate('category', 'name icon')
          .populate('submitted_by', 'name email');

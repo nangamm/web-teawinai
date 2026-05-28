@@ -37,7 +37,7 @@ router.get('/:id', placeController.getPlace);
 
 // Admin and Owner routes
 router.post('/', verifyToken, requireRole('admin', 'owner'), upload.array('images', 5), placeController.createPlace);
-router.put('/:id', verifyToken, requireRole('admin', 'owner'), placeController.updatePlace);
+router.put('/:id', verifyToken, requireRole('admin', 'owner'), upload.array('images', 5), placeController.updatePlace);
 router.delete('/:id', verifyToken, requireRole('admin'), placeController.deletePlace);
 
 module.exports = router;

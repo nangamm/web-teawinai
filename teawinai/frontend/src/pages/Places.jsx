@@ -39,12 +39,12 @@ export function Places() {
   useEffect(() => { fetchPlaces() }, [filters])
 
   const fetchCategories = async () => {
-    setCategories([
-      { _id: '69f72644594626f56e6fa0d6', name: 'คาเฟ่' },
-      { _id: '69f72644594626f56e6fa0d5', name: 'วัด' },
-      { _id: '69f72644594626f56e6fa0d7', name: 'ร้านอาหาร' },
-      { _id: '69f72644594626f56e6fa0d8', name: 'สวนสาธารณะ' },
-    ])
+    try {
+      const response = await categoriesAPI.getCategories()
+      setCategories(response.data.data || [])
+    } catch {
+      setCategories([])
+    }
   }
 
   const fetchPlaces = async () => {
