@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Users, MapPin, DollarSign, Clock, CheckCircle, XCircle, Settings, TrendingUp, Search, Star, Edit, Trash2, Plus, AlertCircle, LayoutDashboard, Navigation, Banknote } from 'lucide-react'
+import { Users, MapPin, DollarSign, Clock, CheckCircle, XCircle, Settings, TrendingUp, Search, Star, Edit, Trash2, AlertCircle, LayoutDashboard, Navigation, Banknote } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { placesAPI, priceUpdatesAPI, authAPI, categoriesAPI } from '@/services/api'
 import { isAdmin } from '@/utils/auth'
@@ -95,18 +95,6 @@ export function AdminDashboard() {
     }
   }
 
-  const handleAddPlace = async (placeData) => {
-    try {
-      await placesAPI.createPlace(placeData)
-      setShowAddModal(false)
-      fetchDashboardData()
-      toast.success('เพิ่มสถานที่สำเร็จ')
-    } catch (error) {
-      console.error('Error adding place:', error)
-      toast.error('ไม่สามารถเพิ่มสถานที่ได้')
-    }
-  }
-
   const handleEditPlace = async (placeData) => {
     try {
       await placesAPI.updatePlace(editingPlace._id, placeData)
@@ -179,14 +167,6 @@ export function AdminDashboard() {
     })
   }
 
-  const openAddModal = () => {
-    setEditingPlace(null)
-    setIsFree('false')
-    setOpeningHours({ จันทร์: { open:'',close:'',closed:false }, อังคาร: { open:'',close:'',closed:false }, พุธ: { open:'',close:'',closed:false }, พฤหัสบดี: { open:'',close:'',closed:false }, ศุกร์: { open:'',close:'',closed:false }, เสาร์: { open:'',close:'',closed:false }, อาทิตย์: { open:'',close:'',closed:false } })
-    setImages([])
-    setShowAddModal(true)
-  }
-
   const openEditModal = (place) => {
     setEditingPlace(place)
     setIsFree(place.is_free ? 'true' : 'false')
@@ -221,7 +201,7 @@ export function AdminDashboard() {
       if (img.file) fd.append('images', img.file)
       else if (img.existingUrl) fd.append('existing_images', img.existingUrl)
     })
-    editingPlace ? handleEditPlace(fd) : handleAddPlace(fd)
+    handleEditPlace(fd)
   }
 
   const updateHour = (day, field, value) => {
@@ -273,9 +253,6 @@ export function AdminDashboard() {
               Ratchathani's premier destination guide.
             </p>
           </div>
-          <button className="admin-hero-btn" onClick={openAddModal}>
-            <Plus />New Attraction
-          </button>
         </div>
       </div>
 
@@ -472,7 +449,7 @@ export function AdminDashboard() {
       {showAddModal && (
         <div className="admin-modal-backdrop">
           <div className="admin-modal">
-            <div className="admin-modal-title">{editingPlace ? 'แก้ไขสถานที่' : 'เพิ่มสถานที่'}</div>
+            <div className="admin-modal-title">แก้ไขสถานที่</div>
 
             <form onSubmit={handleFormSubmit} className="admin-modal-form">
               <div>
