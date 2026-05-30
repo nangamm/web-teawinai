@@ -6,15 +6,27 @@ const Category = require('../models/Category');
 // @access   Public
 exports.getPlaces = async (req, res) => {
     try {
-        const { category, status = 'active', page = 1, limit = 50, search } = req.query;
+        const { category, status = 'active', page = 1, limit = 50, search, province, district, subdistrict } = req.query;
         
-        console.log('Get places query params:', { category, status, page, limit, search });
+        console.log('Get places query params:', { category, status, page, limit, search, province, district, subdistrict });
         
         // Build query
         let query = { status };
         
         if (search) {
             query.name = { $regex: search, $options: 'i' }; // Case-insensitive search
+        }
+        
+        if (province) {
+            query.province = province;
+        }
+        
+        if (district) {
+            query.district = district;
+        }
+        
+        if (subdistrict) {
+            query.subdistrict = subdistrict;
         }
         
         if (category) {
@@ -116,6 +128,14 @@ exports.createPlace = async (req, res) => {
             ...req.body,
             submitted_by: req.user.id
         };
+
+        // Validate required location fields
+        if (!placeData.province || !placeData.district || !placeData.subdistrict) {
+            return res.status(400).json({
+                success: false,
+                message: 'กรุณาระบุจังหวัด อำเภอ และตำบล'
+            });
+        }
 
         // Handle both map_link and google_map_link for backward compatibility
         if (req.body.map_link) {

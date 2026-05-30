@@ -328,6 +328,9 @@ export function AddPlace() {
       formDataToSend.append('name', formData.name)
       formDataToSend.append('category', formData.category)
       formDataToSend.append('address', fullAddress)
+      formDataToSend.append('province', formData.province)
+      formDataToSend.append('district', formData.district)
+      formDataToSend.append('subdistrict', formData.subdistrict)
       formDataToSend.append('map_link', formData.map_link)
       
       // Handle pricing based on whether it's a free place

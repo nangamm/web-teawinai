@@ -8,7 +8,8 @@ const { selectPlacesByBudget } = require('../utils/budgetAlgorithm');
 // @access   Public
 exports.planTrip = async (req, res) => {
     try {
-        const { budget, categories = [], maxPlaces = 10 } = req.body;
+        const { budget, categories = [], maxPlaces = 10, location = {} } = req.body;
+        const { province, district, subdistrict } = location;
 
         if (!budget || budget <= 0) {
             return res.status(400).json({
@@ -17,8 +18,14 @@ exports.planTrip = async (req, res) => {
             });
         }
 
-        // Get all active places
-        const places = await Place.find({ status: 'active' })
+        // Build location filter
+        const locationFilter = { status: 'active' };
+        if (province) locationFilter.province = province;
+        if (district) locationFilter.district = district;
+        if (subdistrict) locationFilter.subdistrict = subdistrict;
+
+        // Get places filtered by location
+        const places = await Place.find(locationFilter)
             .populate('category', 'name icon')
             .lean();
 

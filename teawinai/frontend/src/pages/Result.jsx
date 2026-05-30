@@ -68,9 +68,6 @@ export function Result() {
     return { dining, tours }
   }
 
-  // Suggested visit time per index (fallback)
-  const TIMES = ['08:30 AM', '10:30 AM', '12:30 PM', '02:30 PM', '05:00 PM', '07:00 PM']
-
   if (loading) {
     return (
       <div className="result-skeleton">
@@ -155,14 +152,11 @@ export function Result() {
 
                   {/* Content */}
                   <div className="result-place-content">
-                    <div className="result-place-top">
-                      <span className="result-place-time">{TIMES[index] || `Stop #${index + 1}`}</span>
+                    <div className="result-place-name">{place.name}
                       <span className={`result-place-cost${isFree ? ' free' : ''}`}>
                         {isFree ? '฿0 Entrance' : `฿${cost} Est. Cost`}
                       </span>
                     </div>
-
-                    <div className="result-place-name">{place.name}</div>
 
                     <div className="result-place-desc">{place.address}</div>
 

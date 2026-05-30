@@ -16,10 +16,153 @@ const CAT_EMOJI = {
 
 export function Home() {
   const navigate = useNavigate()
-  const [formData, setFormData] = useState({ budget: '', categories: [], maxPlaces: '5' })
+  const [formData, setFormData] = useState({ budget: '', categories: [], maxPlaces: '5', province: '', district: '', subdistrict: '' })
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
+  
+  // Thailand provinces and districts data (from AddPlace.jsx)
+  const provinces = [
+    'อุบลราชธานี'
+  ]
+
+  const districtsByProvince = {
+    'อุบลราชธานี': [
+      'เมืองอุบลราชธานี',
+      'กุดข้าวปุ้น',
+      'โขงเจียม',
+      'เขื่องใน',
+      'เขมราฐ',
+      'เดชอุดม',
+      'ตระการพืชผล',
+      'ตาลสุม',
+      'ทุ่งศรีอุดม',
+      'นาจะหลวย',
+      'นาตาล',
+      'นาเยีย',
+      'น้ำขุ่น',
+      'น้ำยืน',
+      'บุณฑริก',
+      'พิบูลมังสาหาร',
+      'โพธิ์ไทร',
+      'ม่วงสามสิบ',
+      'วารินชำราบ',
+      'ศรีเมืองใหม่',
+      'สว่างวีระวงศ์',
+      'สำโรง',
+      'สิรินธร',
+      'ดอนมดแดง',
+      'เหล่าเสือโก้ก'
+    ]
+  }
+
+  const subdistrictsByDistrict = {
+    'อุบลราชธานี': {
+      'เมืองอุบลราชธานี': [
+        'ในเมือง', 'จระเข้', 'ไร่น้อย', 'กระโสบ', 'กุดลาด',
+        'ขามใหญ่', 'แจระแม', 'หนองขอน', 'ปทุม', 'หนองบ่อ',
+        'หัวเรือ', 'หนองฮอ', 'ดอนมดแดง', 'เหล่าเสือโก้ก',
+        'หนองไห', 'ขามป้อม', 'บ้านเป็ด', 'พะลาน', 'กาดิน'
+      ],
+      'กุดข้าวปุ้น': [
+        'ข้าวปุ้น', 'กาบิน', 'แก้งเหนือ', 'โนนสวาง', 'หนองทันน้ำ'
+      ],
+      'โขงเจียม': [
+        'โขงเจียม', 'ห้วยไผ่', 'นาโพธิ์กลาง', 'หนองแสงน้อย', 'ห้วยยาง'
+      ],
+      'เขื่องใน': [
+        'เขื่องใน', 'สร้างถ่อ', 'ค้อทอง', 'ก่อเอ้', 'หัวดอน',
+        'ชีทวน', 'ท่าไห', 'นาคำใหญ่', 'แดงหม้อ', 'ธาตุน้อย',
+        'บ้านไทย', 'บ้านกอก', 'สหธาตุ', 'หนองเมือง'
+      ],
+      'เขมราฐ': [
+        'เขมราฐ', 'แก้งเหนือ', 'หนองผือ', 'นาแวง', 'เจียด',
+        'หนองนกทา', 'หนองสิม', 'ขามป้อม', 'พะลาน'
+      ],
+      'เดชอุดม': [
+        'เดชอุดม', 'นาส่วง', 'นาเจริญ', 'ทุ่งเทิง', 'สมสะอาด',
+        'กลาง', 'แก้ง', 'ท่าโพธิ์ศรี', 'บัวงาม', 'คำครั่ง',
+        'โนนสมบูรณ์', 'นาเกษม', 'กุดประทาย', 'ตบหู'
+      ],
+      'ตระการพืชผล': [
+        'ขุหลุ', 'กระเดียน', 'เกษม', 'กุดเรือ', 'คอนสาย',
+        'คำเจริญ', 'ถ้ำแข้', 'ท่าหลวง', 'บ้านแดง', 'บึงเจ็บ',
+        'เซเป็ด', 'สะพือ', 'หนองเต่า', 'ขามเปี้ย', 'ตระการ',
+        'ตากแดด', 'ไหล่ทุ่ง', 'นาสะไม', 'นาพิน'
+      ],
+      'ตาลสุม': [
+        'ตาลสุม', 'สำโรง', 'จิกเทิง', 'หนองกุง', 'นาคาย', 'คำหว้า'
+      ],
+      'ทุ่งศรีอุดม': [
+        'โนนโพธิ์', 'หนองอ้ม', 'นาเกษม', 'กุดเรือ', 'นาห่อม'
+      ],
+      'นาจะหลวย': [
+        'นาจะหลวย', 'โนนสมบูรณ์', 'พรสวรรค์', 'บ้านตูม', 'โสกแสง', 'โนนใหญ่'
+      ],
+      'นาตาล': [
+        'นาตาล', 'นาถ่อน', 'พะลาน', 'พังเคน'
+      ],
+      'นาเยีย': [
+        'นาเยีย', 'นาดี', 'นาเรือง'
+      ],
+      'น้ำขุ่น': [
+        'ขี้เหล็ก', 'โซง', 'ตาเกา', 'ไพบูลย์'
+      ],
+      'น้ำยืน': [
+        'โซง', 'ยาง', 'เก่าขาม', 'ไพบูลย์', 'สีวิเชียร',
+        'ยางใหญ่', 'บุเปือย'
+      ],
+      'บุณฑริก': [
+        'โพนงาม', 'ห้วยข่า', 'คอแลน', 'นาโพธิ์', 'หนองสะโน',
+        'โนนค้อ', 'บัวงาม', 'บ้านแมด'
+      ],
+      'พิบูลมังสาหาร': [
+        'พิบูล', 'กุดชมภู', 'ดอนจิก', 'ทรายมูล', 'นาโพธิ์',
+        'โนนกลาง', 'บ้านแขม', 'โพธิ์ไทร', 'ระเว', 'หนองบัวฮี',
+        'อ่างศิลา', 'โนนกาหลง', 'นาจาน', 'ไร่ใต้', 'หนองบัว'
+      ],
+      'โพธิ์ไทร': [
+        'โพธิ์ไทร', 'ม่วงใหญ่', 'สำโรง', 'สองคอน', 'สารภี', 'เหล่างาม'
+      ],
+      'ม่วงสามสิบ': [
+        'ม่วงสามสิบ', 'เหล่าบก', 'ดุมใหญ่', 'หนองช้างใหญ่', 'หนองเมือง',
+        'เตย', 'หนองไข่นก', 'หนองเหล่า', 'หนองฮาง', 'ยางสักกระโพหลุ่ม'
+      ],
+      'วารินชำราบ': [
+        'วารินชำราบ', 'ธาตุ', 'ท่าลาด', 'โนนผึ้ง', 'หนองกินเพล',
+        'โนนโหนน', 'ห้วยขะยุง', 'บุ่งหวาย', 'คำน้ำแซบ', 'บุ่งไหม',
+        'สระสมิง', 'คำขวาง', 'โพธิ์ใหญ่', 'แสนสุข', 'หนองไห', 'เมืองศรีไค'
+      ],
+      'ศรีเมืองใหม่': [
+        'นาคำ', 'แก้งกอก', 'เอือดใหญ่', 'วาริน', 'ลาดควาย',
+        'สงยาง', 'ตะบ่าย', 'คำเขื่อนแก้ว', 'หนามแท่ง', 'อ่างสุวรรณ'
+      ],
+      'สว่างวีระวงศ์': [
+        'สว่าง', 'บุ่งมะแลง', 'แก้งโนนน้อย', 'ท่าช้าง'
+      ],
+      'สำโรง': [
+        'สำโรง', 'โนนกาเล็น', 'หนองไฮ', 'ขามป้อม', 'ห้วยเดื่อ',
+        'ค้อน้อย', 'บอน', 'โคกก่อง'
+      ],
+      'สิรินธร': [
+        'นิคมสร้างตนเอง', 'นาแวง', 'คันไร่', 'ช่องเม็ก', 'โนนก่อ'
+      ],
+      'ดอนมดแดง': [
+        'ดอนมดแดง', 'เหล่าแดง', 'ท่าเมือง', 'คำไฮใหญ่'
+      ],
+      'เหล่าเสือโก้ก': [
+        'เหล่าเสือโก้ก', 'โพนเมือง', 'แพงใหญ่', 'หนองเมือง'
+      ]
+    }
+  }
+
+  const getDistrictsByProvince = (province) => {
+    return districtsByProvince[province] || []
+  }
+
+  const getSubdistrictsByDistrict = (province, district) => {
+    return subdistrictsByDistrict[province]?.[district] || []
+  }
 
   useEffect(() => { fetchCategories() }, [])
 
@@ -46,6 +189,7 @@ export function Home() {
     const e = {}
     if (!formData.budget || formData.budget <= 0) e.budget = 'กรุณากรอกงบประมาณที่มากกว่า 0'
     if (!formData.categories.length) e.categories = 'กรุณาเลือกอย่างน้อย 1 หมวดหมู่'
+    if (!formData.province) e.province = 'กรุณาเลือกจังหวัด'
     setErrors(e)
     return !Object.keys(e).length
   }
@@ -58,7 +202,12 @@ export function Home() {
       const res = await tripsAPI.planTrip({
         budget: parseFloat(formData.budget),
         categories: formData.categories,
-        maxPlaces: parseInt(formData.maxPlaces)
+        maxPlaces: parseInt(formData.maxPlaces),
+        location: {
+          province: formData.province,
+          district: formData.district,
+          subdistrict: formData.subdistrict
+        }
       })
       navigate('/result', { state: { tripPlan: res.data.data || res.data } })
       toast.success('วางแผนทริปสำเร็จ!')
@@ -96,23 +245,76 @@ export function Home() {
         <form onSubmit={handleSubmit}>
           <div className="booking-card">
 
-            {/* Row: Date + Budget */}
+            {/* Row: Province + District + Subdistrict */}
             <div className="card-row">
               <div className="field-group">
-                <div className="field-label">Your Journey</div>
-                <div className="input-box">
-                  <Calendar />
-                  <input
+                <div className="field-label">จังหวัด</div>
+                <div className={`input-box${errors.province ? ' has-error' : ''}`}>
+                  <select
                     className="bare-input"
-                    type="text"
-                    placeholder="Select Dates"
-                    readOnly
-                  />
+                    value={formData.province}
+                    onChange={e => {
+                      setFormData(p => ({ ...p, province: e.target.value, district: '', subdistrict: '' }))
+                      if (errors.province) setErrors(p => ({ ...p, province: '' }))
+                    }}
+                  >
+                    <option value="">เลือกจังหวัด</option>
+                    {provinces.map(prov => (
+                      <option key={prov} value={prov}>{prov}</option>
+                    ))}
+                  </select>
+                  <ChevronDown size={16} />
+                </div>
+                {errors.province && (
+                  <div className="field-error"><AlertCircle size={11} />{errors.province}</div>
+                )}
+              </div>
+
+              <div className="field-group">
+                <div className="field-label">อำเภอ</div>
+                <div className="input-box">
+                  <select
+                    className="bare-input"
+                    value={formData.district}
+                    onChange={e => {
+                      setFormData(p => ({ ...p, district: e.target.value, subdistrict: '' }))
+                    }}
+                    disabled={!formData.province}
+                  >
+                    <option value="">เลือกอำเภอ</option>
+                    {getDistrictsByProvince(formData.province).map(dist => (
+                      <option key={dist} value={dist}>{dist}</option>
+                    ))}
+                  </select>
+                  <ChevronDown size={16} />
                 </div>
               </div>
 
               <div className="field-group">
-                <div className="field-label">Budget Tier</div>
+                <div className="field-label">ตำบล</div>
+                <div className="input-box">
+                  <select
+                    className="bare-input"
+                    value={formData.subdistrict}
+                    onChange={e => {
+                      setFormData(p => ({ ...p, subdistrict: e.target.value }))
+                    }}
+                    disabled={!formData.district}
+                  >
+                    <option value="">เลือกตำบล</option>
+                    {getSubdistrictsByDistrict(formData.province, formData.district).map(sub => (
+                      <option key={sub} value={sub}>{sub}</option>
+                    ))}
+                  </select>
+                  <ChevronDown size={16} />
+                </div>
+              </div>
+            </div>
+
+            {/* Budget field */}
+            <div className="card-row">
+              <div className="field-group">
+                <div className="field-label">งบประมาณ</div>
                 <div className={`input-box${errors.budget ? ' has-error' : ''}`}>
                   <div className="b-icon">฿</div>
                   <input

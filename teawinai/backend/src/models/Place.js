@@ -16,6 +16,21 @@ const placeSchema = new mongoose.Schema({
     required: true,
     trim: true
   },
+  province: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  district: {
+    type: String,
+    required: true,
+    trim: true
+  },
+  subdistrict: {
+    type: String,
+    required: true,
+    trim: true
+  },
   map_link: {
     type: String,
     required: true,
