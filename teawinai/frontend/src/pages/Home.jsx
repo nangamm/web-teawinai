@@ -246,7 +246,7 @@ export function Home() {
           <div className="booking-card">
 
             {/* Row: Province + District + Subdistrict */}
-            <div className="card-row">
+            <div className="card-row-3">
               <div className="field-group">
                 <div className="field-label">จังหวัด</div>
                 <div className={`input-box${errors.province ? ' has-error' : ''}`}>
@@ -263,7 +263,6 @@ export function Home() {
                       <option key={prov} value={prov}>{prov}</option>
                     ))}
                   </select>
-                  <ChevronDown size={16} />
                 </div>
                 {errors.province && (
                   <div className="field-error"><AlertCircle size={11} />{errors.province}</div>
@@ -286,7 +285,6 @@ export function Home() {
                       <option key={dist} value={dist}>{dist}</option>
                     ))}
                   </select>
-                  <ChevronDown size={16} />
                 </div>
               </div>
 
@@ -306,7 +304,6 @@ export function Home() {
                       <option key={sub} value={sub}>{sub}</option>
                     ))}
                   </select>
-                  <ChevronDown size={16} />
                 </div>
               </div>
             </div>

@@ -1,11 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@100..900&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
 }
 
 @layer base {
@@ -48,7 +48,7 @@ body {
 }
 
 .page {
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   min-height: 100vh;
   position: relative;
   overflow: hidden;
@@ -116,7 +116,7 @@ body {
 
 /* ── Hero Headline ── */
 .hero-title {
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: clamp(3.2rem, 7.5vw, 5.8rem);
   font-weight: 900;
   line-height: 1.0;
@@ -145,6 +145,14 @@ body {
 .card-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+/* ── Three-column row ── */
+.card-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 12px;
   margin-bottom: 14px;
 }
@@ -195,7 +203,7 @@ body {
   border: none;
   outline: none;
   background: transparent;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 13px;
   font-weight: 400;
   color: #111;
@@ -311,7 +319,7 @@ body {
   padding: 14px;
   background: var(--green);
   color: #fff;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -385,7 +393,7 @@ body {
   gap: 24px;
 }
 
-/* ── Logo ── */
+/* Logo */
 .navbar-logo {
   display: flex;
   align-items: center;
@@ -408,7 +416,7 @@ body {
   white-space: nowrap;
 }
 
-/* ── Center nav links ── */
+/* Center nav links */
 .navbar-links {
   display: flex;
   align-items: center;
@@ -448,7 +456,7 @@ body {
   border-radius: 2px;
 }
 
-/* ── Search bar ── */
+/* Search bar */
 .navbar-search {
   display: flex;
   align-items: center;
@@ -478,7 +486,7 @@ body {
   border: none;
   outline: none;
   background: transparent;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 12.5px;
   font-weight: 300;
   color: #fff;
@@ -489,12 +497,72 @@ body {
   color: rgba(255,255,255,0.5);
 }
 
-/* ── Right actions ── */
+/* Right actions */
 .navbar-actions {
   display: flex;
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
+}
+
+/* Dropdown container */
+.navbar-dropdown-container {
+  position: relative;
+}
+
+/* Dropdown menu */
+.navbar-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  border: 1px solid #eae8e3;
+  min-width: 180px;
+  padding: 6px;
+  z-index: 100;
+}
+
+.navbar-dropdown-item {
+  display: block;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 400;
+  color: #333;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+
+.navbar-menu-button {
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: 'Noto Sans Thai', sans-serif;
+}
+
+.navbar-dropdown-item:hover {
+  background: #f4f2ee;
+  color: var(--green);
+}
+
+.navbar-dropdown-item:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+  background: #f4f2ee;
+  color: var(--green);
+}
+
+.navbar-dropdown-item.logout {
+  color: #e05252;
+}
+
+.navbar-dropdown-item.logout:hover {
+  background: #fff5f5;
+  color: #c0392b;
 }
 
 .navbar-icon-btn {
@@ -522,14 +590,14 @@ body {
   height: 15px;
 }
 
-/* Book Now / CTA */
+/* Account CTA */
 .navbar-cta {
   display: inline-flex;
   align-items: center;
   padding: 8px 18px;
   background: var(--green);
   color: #fff;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 13px;
   font-weight: 500;
   border-radius: 100px;
@@ -551,7 +619,7 @@ body {
   padding: 7px 16px;
   background: transparent;
   color: rgba(255,255,255,0.85);
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 13px;
   font-weight: 400;
   border-radius: 100px;
@@ -568,14 +636,36 @@ body {
   color: #fff;
 }
 
-/* ── Mobile menu ── */
+/* Mobile menu */
 .navbar-mobile {
   display: none;
+}
+
+@media (max-width: 1024px) {
+  .navbar-inner {
+    padding: 0 24px;
+    gap: 16px;
+  }
+
+  .navbar-link {
+    padding: 5px 10px;
+  }
+
+  .navbar-search {
+    display: none;
+  }
+
+  .navbar-cta,
+  .navbar-cta-ghost {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
 }
 
 @media (max-width: 768px) {
   .navbar-links { display: none; }
   .navbar-search { display: none; }
+  .navbar-dropdown-container { display: none; }
   .navbar-mobile { display: block; }
 
   .navbar-inner {
@@ -602,9 +692,31 @@ body {
     transition: background 0.15s, color 0.15s;
   }
 
+  .navbar-mobile-button {
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-family: 'Noto Sans Thai', sans-serif;
+  }
+
+  .navbar-mobile-link-icon {
+    display: inline;
+    margin-right: 6px;
+    vertical-align: -2px;
+  }
+
   .navbar-mobile-link:hover {
     background: rgba(255,255,255,0.1);
     color: #fff;
+  }
+
+  .navbar-mobile-link.active {
+    background: rgba(255,255,255,0.14);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: inset 3px 0 0 #fff;
   }
 
   .navbar-mobile-search {
@@ -628,7 +740,7 @@ body {
     border: none;
     outline: none;
     background: transparent;
-    font-family: 'Kanit', sans-serif;
+    font-family: 'Noto Sans Thai', sans-serif;
     font-size: 13px;
     color: #fff;
     width: 100%;
@@ -649,6 +761,10 @@ body {
     flex-direction: column;
     gap: 6px;
     padding-top: 4px;
+  }
+
+  .navbar-mobile-auth-link {
+    justify-content: center;
   }
 }
 
@@ -862,7 +978,7 @@ body {
   border: none;
   outline: none;
   background: transparent;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 13px;
   color: #111;
   width: 100%;
@@ -876,7 +992,7 @@ body {
   border: 1.5px solid transparent;
   border-radius: 8px;
   padding: 10px 14px;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 13px;
   color: #111;
   outline: none;
@@ -900,7 +1016,7 @@ body {
   padding: 10px 20px;
   background: var(--green);
   color: #fff;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 13px;
   font-weight: 500;
   border: none;
@@ -1557,7 +1673,7 @@ body {
   padding: 13px;
   background: var(--green);
   color: #fff;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 13px;
   font-weight: 500;
   border: none;
@@ -1581,7 +1697,7 @@ body {
   padding: 12px;
   background: transparent;
   color: var(--green);
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 13px;
   font-weight: 500;
   border: 1.5px solid var(--green);
@@ -1801,7 +1917,7 @@ body {
   padding: 9px 18px;
   background: var(--green);
   color: #fff;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 12.5px;
   font-weight: 500;
   border: none;
@@ -1821,7 +1937,7 @@ body {
   padding: 9px 18px;
   background: transparent;
   color: #e05252;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 12.5px;
   font-weight: 500;
   border: 1.5px solid #f5c6c6;
@@ -1879,7 +1995,7 @@ body {
 
 .profile-tab {
   padding: 12px 20px;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 13px;
   font-weight: 400;
   color: #aaa;
@@ -2121,7 +2237,7 @@ body {
   border: 1.5px solid transparent;
   border-radius: 8px;
   padding: 10px 14px;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 13px;
   color: #111;
   outline: none;
@@ -2181,7 +2297,7 @@ body {
   align-items: center;
   padding: 5px 13px;
   border-radius: 100px;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 12px;
   font-weight: 400;
   cursor: pointer;
@@ -2214,7 +2330,7 @@ body {
 
 .profile-modal-cancel {
   padding: 9px 18px;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 13px;
   color: #888;
   background: none;
@@ -2229,7 +2345,7 @@ body {
   padding: 9px 22px;
   background: var(--green);
   color: #fff;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 13px;
   font-weight: 500;
   border: none;
@@ -2346,7 +2462,7 @@ body {
 
 .crop-cancel {
   padding: 9px 16px;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 13px;
   color: #666;
   background: none;
@@ -2361,7 +2477,7 @@ body {
   padding: 9px 20px;
   background: var(--green);
   color: #fff;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 13px;
   font-weight: 500;
   border: none;
@@ -2495,7 +2611,7 @@ body {
   border: none;
   outline: none;
   background: transparent;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 13px;
   color: #111;
   width: 100%;
@@ -2585,7 +2701,7 @@ body {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 5px;
-}
+} 
 
 .result-place-cost {
   font-size: 11.5px;
@@ -2830,7 +2946,7 @@ body {
   padding: 14px;
   background: var(--green);
   color: #fff;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 13.5px;
   font-weight: 600;
   border: none;
@@ -2857,7 +2973,7 @@ body {
   background: none;
   border: none;
   color: #888;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 13px;
   cursor: pointer;
   transition: color 0.15s;
@@ -2871,7 +2987,7 @@ body {
   padding: 12px;
   background: transparent;
   color: var(--green);
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 13px;
   font-weight: 500;
   border: 1.5px solid var(--green);
@@ -3095,7 +3211,7 @@ body {
   border: none;
   outline: none;
   background: transparent;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 12.5px;
   color: #fff;
   width: 100%;
@@ -3349,7 +3465,7 @@ body {
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 8px;
   color: rgba(255,255,255,0.4);
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.1em;
@@ -3449,7 +3565,7 @@ body {
 
 .admin-tab-btn {
   padding: 14px 24px;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 13px;
   font-weight: 400;
   color: rgba(255,255,255,0.45);
@@ -3550,7 +3666,7 @@ body {
   padding: 10px 18px;
   background: #116045;
   color: #fff;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 13px;
   font-weight: 500;
   border: none;
@@ -3569,7 +3685,7 @@ body {
   padding: 10px 18px;
   background: rgba(224,82,82,0.15);
   color: #e05252;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 13px;
   font-weight: 500;
   border: 1px solid rgba(224,82,82,0.25);
@@ -3688,7 +3804,7 @@ body {
   border: 1px solid rgba(255,255,255,0.1);
   border-radius: 8px;
   padding: 10px 14px;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 13px;
   color: #fff;
   outline: none;
@@ -3858,7 +3974,7 @@ body {
   padding: 10px 20px;
   background: rgba(255,255,255,0.06);
   color: rgba(255,255,255,0.6);
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 13px;
   font-weight: 500;
   border: 1px solid rgba(255,255,255,0.1);
@@ -3876,7 +3992,7 @@ body {
   padding: 10px 22px;
   background: #116045;
   color: #fff;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 13px;
   font-weight: 500;
   border: none;
@@ -3935,7 +4051,7 @@ body {
   padding: 10px 20px;
   background: #e05252;
   color: #fff;
-  font-family: 'Kanit', sans-serif;
+  font-family: 'Noto Sans Thai', sans-serif;
   font-size: 13px;
   font-weight: 500;
   border: none;

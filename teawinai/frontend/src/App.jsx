@@ -13,6 +13,8 @@ import { Places } from '@/pages/Places'
 import { PlaceDetail } from '@/pages/PlaceDetail'
 import { AddPlace } from '@/pages/AddPlace'
 import { NotFound } from '@/pages/NotFound'
+import About from '@/pages/About'
+import Contact from '@/pages/Contact'
 
 function App() {
   return (
@@ -27,6 +29,8 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/places" element={<Places />} />
           <Route path="/places/:id" element={<PlaceDetail />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
           
           {/* Protected routes */}
           <Route 

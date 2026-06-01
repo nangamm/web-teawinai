@@ -1,0 +1,205 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-01T14:30:00+07:00",
+  "title": "Design System: Teawinai",
+  "extensions": {
+    "colorMeta": {
+      "ubon-green": {
+        "role": "primary",
+        "displayName": "Ubon Green",
+        "canonical": "#116045",
+        "tonalRamp": ["#061b14", "#0a2d21", "#0d4e38", "#116045", "#17805d", "#4ecf9a", "#9ce8c4", "#e7f0ec"]
+      },
+      "public-bg": {
+        "role": "neutral",
+        "displayName": "Public Linen",
+        "canonical": "#f7f6f2",
+        "tonalRamp": ["#1f1e1a", "#403d35", "#676257", "#8f897b", "#b8b1a2", "#dcd6ca", "#f7f6f2", "#ffffff"]
+      },
+      "admin-bg": {
+        "role": "neutral",
+        "displayName": "Admin Night",
+        "canonical": "#0e0e0e",
+        "tonalRamp": ["#050505", "#0e0e0e", "#141414", "#1a1a1a", "#222222", "#555555", "#888888", "#ffffff"]
+      },
+      "danger": {
+        "role": "semantic",
+        "displayName": "Action Red",
+        "canonical": "#e05252",
+        "tonalRamp": ["#2b0b0b", "#5a1717", "#8d2525", "#c0392b", "#e05252", "#f2a0a0", "#fff5f5", "#ffffff"]
+      },
+      "warning": {
+        "role": "semantic",
+        "displayName": "Queue Amber",
+        "canonical": "#f0a500",
+        "tonalRamp": ["#2a1b00", "#5a3b00", "#8f6100", "#c88700", "#f0a500", "#ffd36a", "#fff2cf", "#ffffff"]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Home hero only."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Public page titles and major page headers."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Primary UI copy, cards, fields, and table content."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Short metadata, table headers, filter labels, and status markers."
+      }
+    },
+    "shadows": [
+      {
+        "name": "hero-booking-lift",
+        "value": "0 32px 80px rgba(0,0,0,0.35), 0 4px 20px rgba(0,0,0,0.15)",
+        "purpose": "Large lift for the home planning card over photography."
+      },
+      {
+        "name": "dropdown-lift",
+        "value": "0 8px 32px rgba(0,0,0,0.15)",
+        "purpose": "Small overlay lift for dropdown menus."
+      },
+      {
+        "name": "place-card-hover",
+        "value": "0 16px 40px rgba(0,0,0,0.1)",
+        "purpose": "Soft hover lift for clickable public place cards."
+      },
+      {
+        "name": "modal-lift",
+        "value": "0 32px 80px rgba(0,0,0,0.5)",
+        "purpose": "Focused admin modal elevation."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-fast",
+        "value": "150ms ease",
+        "purpose": "Admin hover, border, and text state changes."
+      },
+      {
+        "name": "state-standard",
+        "value": "200ms ease",
+        "purpose": "Public buttons, inputs, cards, and filter transitions."
+      },
+      {
+        "name": "image-hover",
+        "value": "400ms ease",
+        "purpose": "Image scale feedback on interactive place cards."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "mobile",
+        "value": "600px"
+      },
+      {
+        "name": "tablet",
+        "value": "768px"
+      },
+      {
+        "name": "admin-stack",
+        "value": "1024px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The core Ubon Green action for searches, submits, and approvals.",
+      "html": "<button class=\"ds-btn-primary\">Search places</button>",
+      "css": ".ds-btn-primary { background: #116045; color: #fff; border: none; border-radius: 8px; padding: 10px 20px; font-family: 'Noto Sans Thai', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.2s, transform 0.15s; } .ds-btn-primary:hover { background: #0d4e38; transform: translateY(-1px); } .ds-btn-primary:focus-visible { outline: 3px solid rgba(17,96,69,0.25); outline-offset: 2px; }"
+    },
+    {
+      "name": "Public Input",
+      "kind": "input",
+      "refersTo": "input-public",
+      "description": "Warm filled input used by filters, search, and planning forms.",
+      "html": "<label class=\"ds-field\"><span>Search</span><input class=\"ds-input\" placeholder=\"Search places...\" /></label>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 6px; font-family: 'Noto Sans Thai', sans-serif; } .ds-field span { font-size: 10px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #888; } .ds-input { background: #f4f2ee; border: 1.5px solid transparent; border-radius: 8px; padding: 10px 14px; font-family: inherit; font-size: 13px; color: #111; outline: none; transition: border-color 0.2s, box-shadow 0.2s, background 0.2s; } .ds-input:focus { border-color: #116045; box-shadow: 0 0 0 3px rgba(17,96,69,0.08); background: #fff; }"
+    },
+    {
+      "name": "Filter Chip",
+      "kind": "chip",
+      "refersTo": "chip-filter",
+      "description": "Compact pill for category and trip-size selection.",
+      "html": "<button class=\"ds-chip ds-chip-active\">Nature</button>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 100px; font-family: 'Noto Sans Thai', sans-serif; font-size: 12px; font-weight: 400; color: #555; background: #eeece8; border: 1.5px solid transparent; cursor: pointer; transition: border-color 0.16s, color 0.16s, background 0.16s; } .ds-chip:hover { border-color: #116045; color: #116045; } .ds-chip-active { background: rgba(17,96,69,0.1); border-color: #116045; color: #116045; font-weight: 500; }"
+    },
+    {
+      "name": "Place Card",
+      "kind": "card",
+      "refersTo": "card-public",
+      "description": "Image-led destination card for exploration lists.",
+      "html": "<article class=\"ds-place-card\"><div class=\"ds-place-img\">Photo</div><div class=\"ds-place-body\"><div class=\"ds-place-name\">Wat Phra That Nong Bua</div><div class=\"ds-place-tag\">Temple</div><p>Ubon Ratchathani</p></div></article>",
+      "css": ".ds-place-card { background: #fff; border: 1px solid #eae8e3; border-radius: 14px; overflow: hidden; font-family: 'Noto Sans Thai', sans-serif; color: #111; transition: transform 0.2s, box-shadow 0.2s; } .ds-place-card:hover { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(0,0,0,0.1); } .ds-place-img { height: 150px; background: #e8e6e1; display: flex; align-items: center; justify-content: center; color: #888; font-size: 13px; } .ds-place-body { padding: 16px; } .ds-place-name { font-size: 14px; font-weight: 600; margin-bottom: 8px; } .ds-place-tag { display: inline-flex; padding: 4px 10px; border-radius: 100px; background: rgba(17,96,69,0.08); color: #116045; font-size: 10.5px; font-weight: 500; margin-bottom: 8px; } .ds-place-body p { margin: 0; color: #888; font-size: 12px; }"
+    },
+    {
+      "name": "Admin Panel",
+      "kind": "card",
+      "refersTo": "card-admin",
+      "description": "Dark operational surface used by admin stats, queues, tables, and update cards.",
+      "html": "<section class=\"ds-admin-panel\"><h3>Approval Queue</h3><p>Business owner submissions awaiting review.</p></section>",
+      "css": ".ds-admin-panel { background: #141414; border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 22px; font-family: 'Noto Sans Thai', sans-serif; color: #fff; } .ds-admin-panel h3 { margin: 0 0 10px; font-size: 15px; font-weight: 700; } .ds-admin-panel p { margin: 0; color: rgba(255,255,255,0.45); font-size: 12px; line-height: 1.6; }"
+    },
+    {
+      "name": "Navbar Link",
+      "kind": "nav",
+      "refersTo": "nav-link",
+      "description": "Compact top navigation link on the fixed green navbar.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-link ds-nav-link-active\">Explore</a><a class=\"ds-nav-link\">About</a></nav>",
+      "css": ".ds-nav { display: inline-flex; align-items: center; gap: 2px; background: #116045; padding: 12px; font-family: 'Noto Sans Thai', sans-serif; } .ds-nav-link { color: rgba(255,255,255,0.8); text-decoration: none; font-size: 13px; font-weight: 400; padding: 5px 12px; border-radius: 6px; cursor: pointer; transition: color 0.15s, background 0.15s; } .ds-nav-link:hover { color: #fff; background: rgba(255,255,255,0.1); } .ds-nav-link-active { color: #fff; font-weight: 500; box-shadow: inset 0 -2px 0 #fff; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Local Guide Console",
+    "overview": "Teawinai is a product UI for turning local travel knowledge into useful trip decisions. The design should feel simple, trustworthy, and modern: a calm console for finding places, planning around budget and location, and keeping place data accurate.",
+    "keyCharacteristics": [
+      "Thai-first sans typography with a compact product scale.",
+      "Ubon Green as the single brand and action accent.",
+      "Flat surfaces by default, with soft lift only on interactive or image-led cards.",
+      "Clear state language for filters, approval queues, forms, tables, and errors.",
+      "Public pages stay approachable; admin pages stay dense and task-focused."
+    ],
+    "rules": [
+      {
+        "name": "The One Accent Rule",
+        "body": "Ubon Green is the only brand accent. Do not add a competing blue, purple, or booking-app orange for primary UI.",
+        "section": "colors"
+      },
+      {
+        "name": "The Surface Split Rule",
+        "body": "Public discovery screens use light warm surfaces. Admin and review workflows use dark operational surfaces. Do not mix both moods inside the same task area.",
+        "section": "colors"
+      },
+      {
+        "name": "The Product Scale Rule",
+        "body": "Keep typography fixed and compact on task screens. Fluid type belongs only to hero and page-level display moments.",
+        "section": "typography"
+      },
+      {
+        "name": "The Resting Flat Rule",
+        "body": "Cards are bordered and flat at rest. Lift appears in response to hover, overlay context, or hero layering.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do use Ubon Green for primary actions, active filters, progress, and approval state.",
+      "Do keep public discovery surfaces light, readable, and image-led.",
+      "Do keep admin surfaces dense, dark, and operational.",
+      "Do use Noto Sans Thai across the interface for consistent Thai rendering."
+    ],
+    "donts": [
+      "Don't make Teawinai look or feel like a hotel-booking app.",
+      "Don't use room-search patterns, deal badges, reservation pressure, luxury-travel polish, or generic travel marketplace templates.",
+      "Don't make local recommendations feel like advertisements instead of useful community knowledge.",
+      "Don't add competing primary colors for core actions. The Tailwind blue scale is not the product identity."
+    ]
+  }
+}
