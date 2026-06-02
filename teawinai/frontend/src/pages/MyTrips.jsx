@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Calendar, DollarSign, MapPin, Trash2, Plus, Eye, Map, TrendingUp, Users } from 'lucide-react'
+import { Calendar, MapPin, Trash2, Plus, Eye, Map } from 'lucide-react'
 import { tripsAPI } from '@/services/api'
 import { isAuthenticated } from '@/utils/auth'
 

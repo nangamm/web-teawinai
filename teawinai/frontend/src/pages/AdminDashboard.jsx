@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Users, MapPin, DollarSign, Clock, CheckCircle, XCircle, Settings, TrendingUp, Search, Star, Edit, Trash2, AlertCircle, LayoutDashboard, Navigation, Banknote } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { CheckCircle, XCircle, TrendingUp, Search, Star, Edit, Trash2, AlertCircle, LayoutDashboard, Banknote } from 'lucide-react'
 import { placesAPI, priceUpdatesAPI, authAPI, categoriesAPI } from '@/services/api'
 import { isAdmin } from '@/utils/auth'
 import toast from 'react-hot-toast'

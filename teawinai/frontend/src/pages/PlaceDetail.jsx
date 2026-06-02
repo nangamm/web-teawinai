@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import {
   MapPin,
@@ -19,9 +19,7 @@ export function PlaceDetail() {
   const [place, setPlace] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => { fetchPlace() }, [])
-
-  const fetchPlace = async () => {
+  const fetchPlace = useCallback(async () => {
     setLoading(true)
     try {
       const response = await placesAPI.getPlace(id)
@@ -33,7 +31,9 @@ export function PlaceDetail() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [id])
+
+  useEffect(() => { fetchPlace() }, [fetchPlace])
 
   const handleNavigate = () => {
     if (place.map_link) {

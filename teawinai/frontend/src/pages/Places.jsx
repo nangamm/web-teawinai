@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { MapPin, Star, Search, Filter } from 'lucide-react'
 import { placesAPI, categoriesAPI } from '@/services/api'
@@ -36,7 +36,6 @@ export function Places() {
   })
 
   useEffect(() => { fetchCategories() }, [])
-  useEffect(() => { fetchPlaces() }, [filters])
 
   const fetchCategories = async () => {
     try {
@@ -47,7 +46,7 @@ export function Places() {
     }
   }
 
-  const fetchPlaces = async () => {
+  const fetchPlaces = useCallback(async () => {
     setLoading(true)
     try {
       const params = {}
@@ -61,7 +60,9 @@ export function Places() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [filters])
+
+  useEffect(() => { fetchPlaces() }, [fetchPlaces])
 
   const handleFilterChange = (key, value) => {
     const newFilters = { ...filters, [key]: value }

@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Calendar, ChevronDown, AlertCircle, Loader2 } from 'lucide-react'
+import { AlertCircle, Loader2 } from 'lucide-react'
 import { categoriesAPI, tripsAPI } from '@/services/api'
+import { DEFAULT_PROVINCE, getDistrictsByProvince, getSubdistrictsByDistrict, provinces } from '@/data/ubonLocations'
+import { isAuthenticated } from '@/utils/auth'
 import toast from 'react-hot-toast'
 
 const CAT_EMOJI = {
@@ -16,162 +18,30 @@ const CAT_EMOJI = {
 
 export function Home() {
   const navigate = useNavigate()
-  const [formData, setFormData] = useState({ budget: '', categories: [], maxPlaces: '5', province: '', district: '', subdistrict: '' })
+  const [formData, setFormData] = useState({
+    budget: '',
+    categories: [],
+    maxPlaces: '5',
+    province: DEFAULT_PROVINCE,
+    district: '',
+    subdistrict: ''
+  })
   const [categories, setCategories] = useState([])
+  const [categoriesLoading, setCategoriesLoading] = useState(true)
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
   
-  // Thailand provinces and districts data (from AddPlace.jsx)
-  const provinces = [
-    'อุบลราชธานี'
-  ]
-
-  const districtsByProvince = {
-    'อุบลราชธานี': [
-      'เมืองอุบลราชธานี',
-      'กุดข้าวปุ้น',
-      'โขงเจียม',
-      'เขื่องใน',
-      'เขมราฐ',
-      'เดชอุดม',
-      'ตระการพืชผล',
-      'ตาลสุม',
-      'ทุ่งศรีอุดม',
-      'นาจะหลวย',
-      'นาตาล',
-      'นาเยีย',
-      'น้ำขุ่น',
-      'น้ำยืน',
-      'บุณฑริก',
-      'พิบูลมังสาหาร',
-      'โพธิ์ไทร',
-      'ม่วงสามสิบ',
-      'วารินชำราบ',
-      'ศรีเมืองใหม่',
-      'สว่างวีระวงศ์',
-      'สำโรง',
-      'สิรินธร',
-      'ดอนมดแดง',
-      'เหล่าเสือโก้ก'
-    ]
-  }
-
-  const subdistrictsByDistrict = {
-    'อุบลราชธานี': {
-      'เมืองอุบลราชธานี': [
-        'ในเมือง', 'จระเข้', 'ไร่น้อย', 'กระโสบ', 'กุดลาด',
-        'ขามใหญ่', 'แจระแม', 'หนองขอน', 'ปทุม', 'หนองบ่อ',
-        'หัวเรือ', 'หนองฮอ', 'ดอนมดแดง', 'เหล่าเสือโก้ก',
-        'หนองไห', 'ขามป้อม', 'บ้านเป็ด', 'พะลาน', 'กาดิน'
-      ],
-      'กุดข้าวปุ้น': [
-        'ข้าวปุ้น', 'กาบิน', 'แก้งเหนือ', 'โนนสวาง', 'หนองทันน้ำ'
-      ],
-      'โขงเจียม': [
-        'โขงเจียม', 'ห้วยไผ่', 'นาโพธิ์กลาง', 'หนองแสงน้อย', 'ห้วยยาง'
-      ],
-      'เขื่องใน': [
-        'เขื่องใน', 'สร้างถ่อ', 'ค้อทอง', 'ก่อเอ้', 'หัวดอน',
-        'ชีทวน', 'ท่าไห', 'นาคำใหญ่', 'แดงหม้อ', 'ธาตุน้อย',
-        'บ้านไทย', 'บ้านกอก', 'สหธาตุ', 'หนองเมือง'
-      ],
-      'เขมราฐ': [
-        'เขมราฐ', 'แก้งเหนือ', 'หนองผือ', 'นาแวง', 'เจียด',
-        'หนองนกทา', 'หนองสิม', 'ขามป้อม', 'พะลาน'
-      ],
-      'เดชอุดม': [
-        'เดชอุดม', 'นาส่วง', 'นาเจริญ', 'ทุ่งเทิง', 'สมสะอาด',
-        'กลาง', 'แก้ง', 'ท่าโพธิ์ศรี', 'บัวงาม', 'คำครั่ง',
-        'โนนสมบูรณ์', 'นาเกษม', 'กุดประทาย', 'ตบหู'
-      ],
-      'ตระการพืชผล': [
-        'ขุหลุ', 'กระเดียน', 'เกษม', 'กุดเรือ', 'คอนสาย',
-        'คำเจริญ', 'ถ้ำแข้', 'ท่าหลวง', 'บ้านแดง', 'บึงเจ็บ',
-        'เซเป็ด', 'สะพือ', 'หนองเต่า', 'ขามเปี้ย', 'ตระการ',
-        'ตากแดด', 'ไหล่ทุ่ง', 'นาสะไม', 'นาพิน'
-      ],
-      'ตาลสุม': [
-        'ตาลสุม', 'สำโรง', 'จิกเทิง', 'หนองกุง', 'นาคาย', 'คำหว้า'
-      ],
-      'ทุ่งศรีอุดม': [
-        'โนนโพธิ์', 'หนองอ้ม', 'นาเกษม', 'กุดเรือ', 'นาห่อม'
-      ],
-      'นาจะหลวย': [
-        'นาจะหลวย', 'โนนสมบูรณ์', 'พรสวรรค์', 'บ้านตูม', 'โสกแสง', 'โนนใหญ่'
-      ],
-      'นาตาล': [
-        'นาตาล', 'นาถ่อน', 'พะลาน', 'พังเคน'
-      ],
-      'นาเยีย': [
-        'นาเยีย', 'นาดี', 'นาเรือง'
-      ],
-      'น้ำขุ่น': [
-        'ขี้เหล็ก', 'โซง', 'ตาเกา', 'ไพบูลย์'
-      ],
-      'น้ำยืน': [
-        'โซง', 'ยาง', 'เก่าขาม', 'ไพบูลย์', 'สีวิเชียร',
-        'ยางใหญ่', 'บุเปือย'
-      ],
-      'บุณฑริก': [
-        'โพนงาม', 'ห้วยข่า', 'คอแลน', 'นาโพธิ์', 'หนองสะโน',
-        'โนนค้อ', 'บัวงาม', 'บ้านแมด'
-      ],
-      'พิบูลมังสาหาร': [
-        'พิบูล', 'กุดชมภู', 'ดอนจิก', 'ทรายมูล', 'นาโพธิ์',
-        'โนนกลาง', 'บ้านแขม', 'โพธิ์ไทร', 'ระเว', 'หนองบัวฮี',
-        'อ่างศิลา', 'โนนกาหลง', 'นาจาน', 'ไร่ใต้', 'หนองบัว'
-      ],
-      'โพธิ์ไทร': [
-        'โพธิ์ไทร', 'ม่วงใหญ่', 'สำโรง', 'สองคอน', 'สารภี', 'เหล่างาม'
-      ],
-      'ม่วงสามสิบ': [
-        'ม่วงสามสิบ', 'เหล่าบก', 'ดุมใหญ่', 'หนองช้างใหญ่', 'หนองเมือง',
-        'เตย', 'หนองไข่นก', 'หนองเหล่า', 'หนองฮาง', 'ยางสักกระโพหลุ่ม'
-      ],
-      'วารินชำราบ': [
-        'วารินชำราบ', 'ธาตุ', 'ท่าลาด', 'โนนผึ้ง', 'หนองกินเพล',
-        'โนนโหนน', 'ห้วยขะยุง', 'บุ่งหวาย', 'คำน้ำแซบ', 'บุ่งไหม',
-        'สระสมิง', 'คำขวาง', 'โพธิ์ใหญ่', 'แสนสุข', 'หนองไห', 'เมืองศรีไค'
-      ],
-      'ศรีเมืองใหม่': [
-        'นาคำ', 'แก้งกอก', 'เอือดใหญ่', 'วาริน', 'ลาดควาย',
-        'สงยาง', 'ตะบ่าย', 'คำเขื่อนแก้ว', 'หนามแท่ง', 'อ่างสุวรรณ'
-      ],
-      'สว่างวีระวงศ์': [
-        'สว่าง', 'บุ่งมะแลง', 'แก้งโนนน้อย', 'ท่าช้าง'
-      ],
-      'สำโรง': [
-        'สำโรง', 'โนนกาเล็น', 'หนองไฮ', 'ขามป้อม', 'ห้วยเดื่อ',
-        'ค้อน้อย', 'บอน', 'โคกก่อง'
-      ],
-      'สิรินธร': [
-        'นิคมสร้างตนเอง', 'นาแวง', 'คันไร่', 'ช่องเม็ก', 'โนนก่อ'
-      ],
-      'ดอนมดแดง': [
-        'ดอนมดแดง', 'เหล่าแดง', 'ท่าเมือง', 'คำไฮใหญ่'
-      ],
-      'เหล่าเสือโก้ก': [
-        'เหล่าเสือโก้ก', 'โพนเมือง', 'แพงใหญ่', 'หนองเมือง'
-      ]
-    }
-  }
-
-  const getDistrictsByProvince = (province) => {
-    return districtsByProvince[province] || []
-  }
-
-  const getSubdistrictsByDistrict = (province, district) => {
-    return subdistrictsByDistrict[province]?.[district] || []
-  }
-
   useEffect(() => { fetchCategories() }, [])
 
   const fetchCategories = async () => {
+    setCategoriesLoading(true)
     try {
       const res = await categoriesAPI.getCategories()
       setCategories(res.data.data || res.data || [])
     } catch {
       toast.error('ไม่สามารถดึงข้อมูลหมวดหมู่ได้')
+    } finally {
+      setCategoriesLoading(false)
     }
   }
 
@@ -194,8 +64,25 @@ export function Home() {
     return !Object.keys(e).length
   }
 
+  const resetPlanner = () => {
+    setFormData({
+      budget: '',
+      categories: [],
+      maxPlaces: '5',
+      province: DEFAULT_PROVINCE,
+      district: '',
+      subdistrict: ''
+    })
+    setErrors({})
+  }
+
   const handleSubmit = async (ev) => {
     ev.preventDefault()
+    if (!isAuthenticated()) {
+      toast.error('กรุณาเข้าสู่ระบบก่อนวางแผนเที่ยว')
+      navigate('/login', { state: { from: '/' } })
+      return
+    }
     if (!validate()) return
     setLoading(true)
     try {
@@ -231,95 +118,108 @@ export function Home() {
       <div className="hero-bg-overlay" />
 
       <div className="hero-content">
-        {/* Eyebrow */}
-        <div className="eyebrow">
-          <span className="eyebrow-pill">Ubon Ratchathani</span>
+        <div className="hero-copy">
+          <div className="eyebrow">Ubon Ratchathani Heritage</div>
+          <h1 className="hero-title">
+            The Emerald<br />of Isan.
+          </h1>
+          <p className="hero-helper">
+            วางแผนเที่ยวอุบลจากงบ ความสนใจ และพื้นที่ที่คุณอยากไป
+          </p>
         </div>
 
-        {/* Headline */}
-        <h1 className="hero-title">
-          The Emerald<br />of Isan.
-        </h1>
-
-        {/* Booking Card */}
-        <form onSubmit={handleSubmit}>
+        {/* Planner Card */}
+        <form onSubmit={handleSubmit} className="planner-form">
           <div className="booking-card">
+            <div className="booking-card-header">
+              <div className="booking-kicker">Your journey</div>
+              <button type="button" className="reset-btn" onClick={resetPlanner}>
+                ล้างค่า
+              </button>
+            </div>
 
-            {/* Row: Province + District + Subdistrict */}
-            <div className="card-row-3">
-              <div className="field-group">
-                <div className="field-label">จังหวัด</div>
-                <div className={`input-box${errors.province ? ' has-error' : ''}`}>
-                  <select
-                    className="bare-input"
-                    value={formData.province}
-                    onChange={e => {
-                      setFormData(p => ({ ...p, province: e.target.value, district: '', subdistrict: '' }))
-                      if (errors.province) setErrors(p => ({ ...p, province: '' }))
-                    }}
-                  >
-                    <option value="">เลือกจังหวัด</option>
-                    {provinces.map(prov => (
-                      <option key={prov} value={prov}>{prov}</option>
-                    ))}
-                  </select>
+            {/* Location details */}
+            <div className="location-details" id="location-details">
+              <div className="card-row-3">
+                <div className="field-group">
+                  <label className="field-label" htmlFor="province">จังหวัด</label>
+                  <div className={`input-box${errors.province ? ' has-error' : ''}`}>
+                    <select
+                      id="province"
+                      className="bare-input"
+                      value={formData.province}
+                      onChange={e => {
+                        setFormData(p => ({ ...p, province: e.target.value, district: '', subdistrict: '' }))
+                        if (errors.province) setErrors(p => ({ ...p, province: '' }))
+                      }}
+                    >
+                      <option value="">เลือกจังหวัด</option>
+                      {provinces.map(prov => (
+                        <option key={prov} value={prov}>{prov}</option>
+                      ))}
+                    </select>
+                  </div>
+                  {errors.province && (
+                    <div className="field-error"><AlertCircle size={11} />{errors.province}</div>
+                  )}
                 </div>
-                {errors.province && (
-                  <div className="field-error"><AlertCircle size={11} />{errors.province}</div>
-                )}
-              </div>
 
-              <div className="field-group">
-                <div className="field-label">อำเภอ</div>
-                <div className="input-box">
-                  <select
-                    className="bare-input"
-                    value={formData.district}
-                    onChange={e => {
-                      setFormData(p => ({ ...p, district: e.target.value, subdistrict: '' }))
-                    }}
-                    disabled={!formData.province}
-                  >
-                    <option value="">เลือกอำเภอ</option>
-                    {getDistrictsByProvince(formData.province).map(dist => (
-                      <option key={dist} value={dist}>{dist}</option>
-                    ))}
-                  </select>
+                <div className="field-group">
+                  <label className="field-label" htmlFor="district">อำเภอ</label>
+                  <div className="input-box">
+                    <select
+                      id="district"
+                      className="bare-input"
+                      value={formData.district}
+                      onChange={e => {
+                        setFormData(p => ({ ...p, district: e.target.value, subdistrict: '' }))
+                      }}
+                      disabled={!formData.province}
+                    >
+                      <option value="">เลือกอำเภอ</option>
+                      {getDistrictsByProvince(formData.province).map(dist => (
+                        <option key={dist} value={dist}>{dist}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-              </div>
 
-              <div className="field-group">
-                <div className="field-label">ตำบล</div>
-                <div className="input-box">
-                  <select
-                    className="bare-input"
-                    value={formData.subdistrict}
-                    onChange={e => {
-                      setFormData(p => ({ ...p, subdistrict: e.target.value }))
-                    }}
-                    disabled={!formData.district}
-                  >
-                    <option value="">เลือกตำบล</option>
-                    {getSubdistrictsByDistrict(formData.province, formData.district).map(sub => (
-                      <option key={sub} value={sub}>{sub}</option>
-                    ))}
-                  </select>
+                <div className="field-group">
+                  <label className="field-label" htmlFor="subdistrict">ตำบล</label>
+                  <div className="input-box">
+                    <select
+                      id="subdistrict"
+                      className="bare-input"
+                      value={formData.subdistrict}
+                      onChange={e => {
+                        setFormData(p => ({ ...p, subdistrict: e.target.value }))
+                      }}
+                      disabled={!formData.district}
+                    >
+                      <option value="">เลือกตำบล</option>
+                      {getSubdistrictsByDistrict(formData.province, formData.district).map(sub => (
+                        <option key={sub} value={sub}>{sub}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Budget field */}
+            {/* Budget */}
             <div className="card-row">
               <div className="field-group">
-                <div className="field-label">งบประมาณ</div>
+                <label className="field-label" htmlFor="budget">งบประมาณ</label>
                 <div className={`input-box${errors.budget ? ' has-error' : ''}`}>
                   <div className="b-icon">฿</div>
                   <input
+                    id="budget"
                     className="bare-input"
                     type="number"
-                    placeholder="งบประมาณ"
+                    placeholder="เช่น 1500"
                     value={formData.budget}
                     min="1"
+                    inputMode="numeric"
                     onChange={e => {
                       setFormData(p => ({ ...p, budget: e.target.value }))
                       if (errors.budget) setErrors(p => ({ ...p, budget: '' }))
@@ -334,9 +234,16 @@ export function Home() {
 
             {/* Categories */}
             <div className="chips-section">
-              <div className="chips-label">หมวดหมู่</div>
+              <div className="field-group">
+              <label className="field-label" htmlFor="categories">หมวดหมู่</label>
               <div className="chips-row">
-                {categories.map(cat => (
+                {categoriesLoading && (
+                  <div className="chips-empty" role="status" aria-live="polite">กำลังโหลดหมวดหมู่...</div>
+                )}
+                {!categoriesLoading && categories.length === 0 && (
+                  <div className="chips-empty" role="status">ยังไม่มีหมวดหมู่ให้เลือก ลองใหม่อีกครั้งภายหลัง</div>
+                )}
+                {!categoriesLoading && categories.map(cat => (
                   <button
                     type="button"
                     key={cat._id}
@@ -355,26 +262,10 @@ export function Home() {
                   <AlertCircle size={11} />{errors.categories}
                 </div>
               )}
+              </div>
             </div>
 
             <div className="card-divider" />
-
-            {/* Number of places */}
-            <div className="chips-section" style={{ marginBottom: 14 }}>
-              <div className="chips-label">จำนวนสถานที่</div>
-              <div className="chips-row">
-                {['3', '5', '7'].map(n => (
-                  <button
-                    type="button"
-                    key={n}
-                    className={`chip${formData.maxPlaces === n ? ' active' : ''}`}
-                    onClick={() => setFormData(p => ({ ...p, maxPlaces: n }))}
-                  >
-                    {n} สถานที่
-                  </button>
-                ))}
-              </div>
-            </div>
 
             {/* Submit error */}
             {errors.submit && (
@@ -386,9 +277,11 @@ export function Home() {
             {/* CTA */}
             <button type="submit" className="cta-btn" disabled={loading}>
               {loading
-                ? <><Loader2 size={16} className="spin" /> กำลังวางแผน...</>
+                ? <><Loader2 size={16} className="spin" /> กำลังหาเส้นทางที่เหมาะ...</>
                 : 'Plan My Heritage Trip'}
             </button>
+
+            
 
           </div>
         </form>

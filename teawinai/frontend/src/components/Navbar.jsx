@@ -61,7 +61,7 @@ export function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
-    toast.success('Signed out')
+    toast.success('ออกจากระบบแล้ว')
     navigate('/')
   }
 
@@ -81,25 +81,25 @@ export function Navbar() {
             to="/"
             className={`navbar-link${isActive('/') ? ' active' : ''}`}
           >
-            Plan trip
+            วางแผนเที่ยว
           </Link>
           <Link
             to="/places"
             className={`navbar-link${isActive('/places') ? ' active' : ''}`}
           >
-            Explore places
+            สำรวจสถานที่
           </Link>
           <Link
             to="/about"
             className={`navbar-link${isActive('/about') ? ' active' : ''}`}
           >
-            About
+            เกี่ยวกับเรา
           </Link>
           <Link
             to="/contact"
             className={`navbar-link${isActive('/contact') ? ' active' : ''}`}
           >
-            Contact
+            ติดต่อ
           </Link>
         </div>
 
@@ -113,7 +113,7 @@ export function Navbar() {
             <input
               type="text"
               className="navbar-search-input"
-              placeholder="Search places..."
+              placeholder="ค้นหาสถานที่..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
             />
@@ -121,7 +121,7 @@ export function Navbar() {
 
           {isAuthenticated ? (
             <>
-              <Link to="/profile" className="navbar-icon-btn" title="Profile" aria-label="Profile">
+              <Link to="/profile" className="navbar-icon-btn" title="โปรไฟล์" aria-label="โปรไฟล์">
                 <User />
               </Link>
               {/* Account menu */}
@@ -130,7 +130,7 @@ export function Navbar() {
                   type="button"
                   className="navbar-icon-btn"
                   onClick={() => setDropdownOpen(v => !v)}
-                  aria-label={dropdownOpen ? 'Close account menu' : 'Open account menu'}
+                  aria-label={dropdownOpen ? 'ปิดเมนูบัญชี' : 'เปิดเมนูบัญชี'}
                   aria-controls="navbar-account-menu"
                   aria-expanded={dropdownOpen}
                   aria-haspopup="menu"
@@ -142,8 +142,16 @@ export function Navbar() {
                     id="navbar-account-menu"
                     className="navbar-dropdown-menu"
                     role="menu"
-                    aria-label="Account menu"
+                    aria-label="เมนูบัญชี"
                   >
+                    <Link
+                      to="/my-trips"
+                      className="navbar-dropdown-item"
+                      onClick={() => setDropdownOpen(false)}
+                      role="menuitem"
+                    >
+                      ทริปของฉัน
+                    </Link>
                     {canAddPlace && (
                       <Link
                         to="/places/add"
@@ -151,7 +159,7 @@ export function Navbar() {
                         onClick={() => setDropdownOpen(false)}
                         role="menuitem"
                       >
-                        Add place
+                        เพิ่มสถานที่
                       </Link>
                     )}
                     {isAdminUser && (
@@ -161,7 +169,7 @@ export function Navbar() {
                         onClick={() => setDropdownOpen(false)}
                         role="menuitem"
                       >
-                        Admin console
+                        แผงผู้ดูแล
                       </Link>
                     )}
                     <button
@@ -173,22 +181,19 @@ export function Navbar() {
                       className="navbar-dropdown-item navbar-menu-button logout"
                       role="menuitem"
                     >
-                      Sign out
+                      ออกจากระบบ
                     </button>
                   </div>
                 )}
               </div>
-              <Link to="/my-trips" className="navbar-cta">
-                My trips
-              </Link>
             </>
           ) : (
             <>
               <Link to="/login" className="navbar-cta-ghost">
-                Sign in
+                เข้าสู่ระบบ
               </Link>
               <Link to="/register" className="navbar-cta">
-                Create account
+                ลงทะเบียน
               </Link>
             </>
           )}
@@ -197,7 +202,7 @@ export function Navbar() {
           <button
             className="navbar-icon-btn navbar-mobile"
             onClick={() => setMobileOpen(v => !v)}
-            aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+            aria-label={mobileOpen ? 'ปิดเมนู' : 'เปิดเมนู'}
           >
             {mobileOpen ? <X /> : <Menu />}
           </button>
@@ -212,7 +217,7 @@ export function Navbar() {
             <Search />
             <input
               type="text"
-              placeholder="Search places..."
+              placeholder="ค้นหาสถานที่..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
             />
@@ -221,20 +226,20 @@ export function Navbar() {
           <div className="navbar-mobile-divider" />
 
           {/* Mobile links */}
-          <Link to="/" {...mobileLinkProps('/')}>Plan trip</Link>
-          <Link to="/places" {...mobileLinkProps('/places')}>Explore places</Link>
-          <Link to="/about" {...mobileLinkProps('/about')}>About</Link>
-          <Link to="/contact" {...mobileLinkProps('/contact')}>Contact</Link>
+          <Link to="/" {...mobileLinkProps('/')}>วางแผนเที่ยว</Link>
+          <Link to="/places" {...mobileLinkProps('/places')}>สำรวจสถานที่</Link>
+          <Link to="/about" {...mobileLinkProps('/about')}>เกี่ยวกับเรา</Link>
+          <Link to="/login" {...mobileLinkProps('/login')}>เข้าสู่ระบบผู้ดูแล</Link>
           {isAuthenticated && (
-            <Link to="/my-trips" {...mobileLinkProps('/my-trips')}>My trips</Link>
+            <Link to="/my-trips" {...mobileLinkProps('/my-trips')}>ทริปของฉัน</Link>
           )}
           {canAddPlace && (
-            <Link to="/places/add" {...mobileLinkProps('/places/add')}>Add place</Link>
+            <Link to="/places/add" {...mobileLinkProps('/places/add')}>เพิ่มสถานที่</Link>
           )}
           {isAdminUser && (
             <Link to="/admin" {...mobileLinkProps('/admin')}>
               <Settings size={13} className="navbar-mobile-link-icon" />
-              Admin
+              ผู้ดูแล
             </Link>
           )}
 
@@ -246,23 +251,23 @@ export function Navbar() {
               <>
                 <Link to="/profile" {...mobileLinkProps('/profile')}>
                   <User size={13} className="navbar-mobile-link-icon" />
-                  Profile
+                  โปรไฟล์
                 </Link>
                 <button
                   onClick={handleLogout}
                   className="navbar-mobile-link navbar-mobile-button"
                 >
                   <LogOut size={13} className="navbar-mobile-link-icon" />
-                  Sign out
+                  ออกจากระบบ
                 </button>
               </>
             ) : (
               <>
                 <Link to="/login" className="navbar-cta-ghost navbar-mobile-auth-link">
-                  Sign in
+                  เข้าสู่ระบบ
                 </Link>
                 <Link to="/register" className="navbar-cta navbar-mobile-auth-link">
-                  Create account
+                  เริ่มวางแผน
                 </Link>
               </>
             )}

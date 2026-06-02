@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react'
-import { User, MapPin, Star, Settings, LogOut, Camera, Upload, Crop, ZoomIn, ZoomOut, Move } from 'lucide-react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { MapPin, Star, Settings, LogOut, Camera, Upload, Crop, ZoomIn, ZoomOut, Move } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { authAPI } from '../services/api'
@@ -24,14 +24,7 @@ export function Profile() {
   const imageRef = useRef(null)
   const navigate = useNavigate()
 
-  useEffect(() => { fetchUserData() }, [navigate])
-
-  useEffect(() => {
-    if (activeTab === 'places' && user) fetchUserPlaces()
-    else if (activeTab === 'reviews' && user) fetchUserReviews()
-  }, [activeTab, user])
-
-  const fetchUserData = async () => {
+  const fetchUserData = useCallback(async () => {
     try {
       const token = localStorage.getItem('token')
       if (!token) { navigate('/login'); return }
@@ -44,7 +37,14 @@ export function Profile() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [navigate])
+
+  useEffect(() => { fetchUserData() }, [fetchUserData])
+
+  useEffect(() => {
+    if (activeTab === 'places' && user) fetchUserPlaces()
+    else if (activeTab === 'reviews' && user) fetchUserReviews()
+  }, [activeTab, user])
 
   const fetchUserPlaces = async () => {
     try {
@@ -141,12 +141,10 @@ export function Profile() {
     setDragStart({ x: e.clientX - cropData.positionX, y: e.clientY - cropData.positionY })
   }
 
-  const handleMouseMove = (e) => {
+  const handleMouseMove = useCallback((e) => {
     if (!isDragging) return
     setCropData(prev => ({ ...prev, positionX: e.clientX - dragStart.x, positionY: e.clientY - dragStart.y }))
-  }
-
-  const handleMouseUp = () => setIsDragging(false)
+  }, [dragStart.x, dragStart.y, isDragging])
 
   const handleZoom = (delta) => {
     setCropData(prev => ({ ...prev, scale: Math.max(0.5, Math.min(3, prev.scale + delta)) }))
@@ -208,7 +206,7 @@ export function Profile() {
       document.removeEventListener('mouseup', handleGlobalMouseUp)
       document.removeEventListener('mousemove', handleGlobalMouseMove)
     }
-  }, [isDragging, dragStart])
+  }, [isDragging, dragStart, handleMouseMove])
 
   const getCategoryIcon = (category) => {
     const icons = { temple: '🏛️', beach: '🏖️', mountain: '⛰️', city: '🏙️', museum: '🏛️', park: '🌳', market: '🛍️', restaurant: '🍜', other: '📍' }

@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, User, Lock, AlertCircle } from 'lucide-react'
 import { authAPI } from '@/services/api'
 import { saveToken } from '@/utils/auth'
-import toast from 'react-hot-toast'
 
 export function Login() {
   const [formData, setFormData] = useState({

@@ -1,5 +1,3 @@
-import { MapPin, Users, Award, Globe } from 'lucide-react'
-
 export default function About() {
   return (
     <div className="page">

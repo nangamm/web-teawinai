@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { MapPin, Clock, DollarSign, Star, Save, RotateCcw, Edit3, UtensilsCrossed, Bus, ShoppingBag, Ticket } from 'lucide-react'
+import { MapPin, Clock, Star, Save, RotateCcw, Edit3 } from 'lucide-react'
 import { tripsAPI } from '@/services/api'
 import { isAuthenticated } from '@/utils/auth'
 
