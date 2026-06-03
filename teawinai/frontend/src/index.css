@@ -2055,6 +2055,40 @@ body {
   margin-bottom: 18px;
 }
 
+.detail-result-back {
+  min-height: 38px;
+  margin-bottom: 14px;
+  border: 1px solid #d8d3cc;
+  border-radius: 7px;
+  background: #fff;
+  color: #111;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 13px;
+  font-family: 'Noto Sans Thai', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.detail-result-back:hover {
+  color: var(--green);
+  border-color: var(--green);
+  background: #f3f8f5;
+}
+
+.detail-result-back:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 2px;
+}
+
+.detail-result-back svg {
+  width: 15px;
+  height: 15px;
+}
+
 .detail-breadcrumb a {
   color: #8a8580;
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useLocation, useNavigate } from 'react-router-dom'
 import {
+  ArrowLeft,
   Bookmark,
   Camera,
   Clock,
@@ -25,6 +26,8 @@ const defaultTags = ['อาหารไทย', 'อาหารจานเด
 
 export function PlaceDetail() {
   const { id } = useParams()
+  const location = useLocation()
+  const navigate = useNavigate()
   const [place, setPlace] = useState(null)
   const [loading, setLoading] = useState(true)
   const [showReviewForm, setShowReviewForm] = useState(false)
@@ -48,6 +51,21 @@ export function PlaceDetail() {
   }, [id])
 
   useEffect(() => { fetchPlace() }, [fetchPlace])
+
+  const resultReturnState = location.state?.fromResult
+    ? {
+        tripPlan: location.state.tripPlan,
+        tripName: location.state.tripName,
+      }
+    : null
+
+  const handleBackToResult = () => {
+    navigate('/result', { state: resultReturnState })
+  }
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+  }, [id])
 
   const handleNavigate = () => {
     if (place?.map_link) {
@@ -245,6 +263,13 @@ export function PlaceDetail() {
   return (
     <div className="detail-page">
       <div className="detail-inner">
+        {resultReturnState && (
+          <button type="button" className="detail-result-back" onClick={handleBackToResult}>
+            <ArrowLeft />
+            กลับไปหน้า Result
+          </button>
+        )}
+
         <nav className="detail-breadcrumb" aria-label="breadcrumb">
           <Link to="/">หน้าแรก</Link>
           <span className="detail-breadcrumb-sep">/</span>

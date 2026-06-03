@@ -18,7 +18,7 @@ export function Result() {
       const defaultName = `ทริป ${new Date().toLocaleDateString('th-TH', {
         day: 'numeric', month: 'short', year: 'numeric'
       })}`
-      setTripName(defaultName)
+      setTripName(location.state.tripName || defaultName)
     }
     setLoading(false)
   }, [location])
@@ -45,7 +45,15 @@ export function Result() {
     }
   }
 
-  const handlePlaceDetail = (placeId) => navigate(`/places/${placeId}`)
+  const handlePlaceDetail = (placeId) => {
+    navigate(`/places/${placeId}`, {
+      state: {
+        fromResult: true,
+        tripPlan,
+        tripName,
+      },
+    })
+  }
 
   const getBudgetPercentage = () => {
     if (!tripPlan) return 0
