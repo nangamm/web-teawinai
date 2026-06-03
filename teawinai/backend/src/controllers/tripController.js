@@ -18,6 +18,14 @@ exports.planTrip = async (req, res) => {
             });
         }
 
+        const parsedMaxPlaces = Number(maxPlaces);
+        if (!Number.isInteger(parsedMaxPlaces) || parsedMaxPlaces < 1 || parsedMaxPlaces > 20) {
+            return res.status(400).json({
+                success: false,
+                message: 'กรุณาระบุจำนวนสถานที่ 1-20 แห่ง'
+            });
+        }
+
         // Build location filter
         const locationFilter = { status: 'active' };
         if (province) locationFilter.province = province;
@@ -30,7 +38,7 @@ exports.planTrip = async (req, res) => {
             .lean();
 
         // Use budget algorithm to select places
-        const result = selectPlacesByBudget(places, budget, { categories, maxPlaces });
+        const result = selectPlacesByBudget(places, budget, { categories, maxPlaces: parsedMaxPlaces });
 
         res.json({
             success: true,

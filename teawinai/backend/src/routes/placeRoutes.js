@@ -34,6 +34,8 @@ const router = express.Router();
 // Public routes
 router.get('/', placeController.getPlaces);
 router.get('/:id', placeController.getPlace);
+router.post('/:id/reviews', verifyToken, requireRole('user', 'owner', 'admin'), placeController.createReview);
+router.post('/:id/reviews/:reviewId/replies', verifyToken, requireRole('user', 'owner', 'admin'), placeController.createReviewReply);
 
 // Admin and Owner routes
 router.post('/', verifyToken, requireRole('admin', 'owner'), upload.array('images', 5), placeController.createPlace);

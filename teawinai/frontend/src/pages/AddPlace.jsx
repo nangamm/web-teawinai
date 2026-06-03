@@ -1,6 +1,16 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Camera, Save, X } from 'lucide-react'
+import {
+  Clock,
+  Image as ImageIcon,
+  Info,
+  Link as LinkIcon,
+  Map,
+  MapPin,
+  Save,
+  UploadCloud,
+  X
+} from 'lucide-react'
 import toast from 'react-hot-toast'
 import { placesAPI, categoriesAPI } from '@/services/api'
 import { getDistrictsByProvince, getSubdistrictsByDistrict, provinces } from '@/data/ubonLocations'
@@ -228,368 +238,330 @@ export function AddPlace() {
 
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">เพิ่มสถานที่ท่องเที่ยว</h1>
-        <p className="text-gray-600 mt-2">แชร์สถานที่ท่องเที่ยวที่น่าสนใจกับชุมชนของเรา</p>
-      </div>
+    <main className="add-place-page">
+      <div className="add-place-shell">
+        <header className="add-place-hero">
+          <h1>แชร์สถานที่ใหม่</h1>
+          <p>แบ่งปันประสบการณ์การเดินทางที่มีประโยชน์ให้ชุมชนเที่ยวไหนด้วยกัน</p>
+        </header>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Basic Information */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">ข้อมูลพื้นฐาน</h2>
+        <form onSubmit={handleSubmit} className="add-place-form">
+          <section className="add-place-card">
+            <h2 className="add-place-section-title">
+              <Info />
+              ข้อมูลพื้นฐาน
+            </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                ชื่อสถานที่ *
+            <div className="add-place-stack">
+              <label className="add-place-field add-place-field-full">
+                <span>ชื่อสถานที่ *</span>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  placeholder="ระบุชื่อสถานที่ท่องเที่ยวของคุณ"
+                  required
+                />
               </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="input"
-                placeholder="กรอกชื่อสถานที่"
-                required
-              />
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                หมวดหมู่ *
-              </label>
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                className="input"
-                required
-              >
-                <option value="">เลือกหมวดหมู่</option>
-                {categories.map((category) => (
-                  <option key={category._id} value={category._id}>
-                    {category.icon} {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                ประเภทสถานที่
-              </label>
-              <select
-                name="is_free"
-                value={formData.is_free || 'false'}
-                onChange={handleChange}
-                className="input"
-              >
-                <option value="false">เสียค่าใช้จ่าย</option>
-                <option value="true">ไม่เสียค่าใช้จ่าย</option>
-              </select>
-              <p className="text-xs text-gray-500 mt-1">
-                {formData.is_free === 'true' ? 'สถานที่ที่ไม่เสียค่าใช้จ่าย' : 'กรุณาระบุช่วงราคาสำหรับสถานที่ท่องเที่ยวทั่วไป'}
-              </p>
-            </div>
-            <hr/>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                ราคาต่ำสุด *
-              </label>
-              <input
-                type="number"
-                name="price_min"
-                value={formData.price_min}
-                onChange={handleChange}
-                className="input"
-                placeholder="0"
-                min="0"
-                step="0.01"
-                required
-                disabled={formData.is_free === 'true'}
-              />
-            </div>
+              <div className="add-place-grid add-place-grid-2">
+                <label className="add-place-field">
+                  <span>หมวดหมู่ *</span>
+                  <select
+                    name="category"
+                    value={formData.category}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">เลือกหมวดหมู่</option>
+                    {categories.map((category) => (
+                      <option key={category._id} value={category._id}>
+                        {category.icon} {category.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                ราคาสูงสุด *
-              </label>
-              <input
-                type="number"
-                name="price_max"
-                value={formData.price_max}
-                onChange={handleChange}
-                className="input"
-                placeholder="0"
-                min="0"
-                step="0.01"
-                required
-                disabled={formData.is_free === 'true'}
-              />
-            </div>
-
-          </div>
-        </div>
-
-        {/* Location */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">ที่ตั้ง</h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                จังหวัด *
-              </label>
-              <select
-                name="province"
-                value={formData.province || ''}
-                onChange={handleProvinceChange}
-                className="input mb-4"
-                required
-              >
-                <option value="">เลือกจังหวัด</option>
-                {provinces.map((province) => (
-                  <option key={province} value={province}>
-                    {province}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                อำเภอ *
-              </label>
-              <select
-                name="district"
-                value={formData.district || ''}
-                onChange={handleChange}
-                className="input mb-4"
-                required
-                disabled={!formData.province}
-              >
-                <option value="">เลือกอำเภอ</option>
-                {getDistrictsByProvince(formData.province).map((district) => (
-                  <option key={district} value={district}>
-                    {district}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                ตำบล *
-              </label>
-              <select
-                name="subdistrict"
-                value={formData.subdistrict || ''}
-                onChange={handleChange}
-                className="input"
-                required
-                disabled={!formData.district}
-              >
-                <option value="">เลือกตำบล</option>
-                {getSubdistrictsByDistrict(formData.province, formData.district).map((subdistrict) => (
-                  <option key={subdistrict} value={subdistrict}>
-                    {subdistrict}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                ที่อยู่เพิ่มเติม
-              </label>
-              <input
-                type="text"
-                name="detailed_address"
-                value={formData.detailed_address || ''}
-                onChange={handleChange}
-                className="input"
-                placeholder="เช่น: 100 หมู่ 3, ตรงข้ามวัด, ใกล้ปั๊มน้ำ..."
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                ระบุรายละเอียดเพิ่มเติมเกี่ยวกับที่อยู่เพื่อความสะดวกในการค้นหา
-              </p>
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                ลิงค์แผนที่ *
-              </label>
-              <input
-                type="url"
-                name="map_link"
-                value={formData.map_link}
-                onChange={handleChange}
-                className="input"
-                placeholder="https://maps.google.com/?q=สถานที่ท่องเที่ยว"
-                required
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                คัดลอกลิงค์แผนที่หรือใส่ URL ที่ใช้ระบุตำแหน่ง
-              </p>
-            </div>
-
-          </div>
-        </div>
-
-
-        {/* Opening Hours */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">เวลาเปิด-ปิด</h2>
-
-          <div className="space-y-4">
-            {Object.entries(formData.opening_hours).map(([day, hours]) => (
-              <div key={day} className="flex items-center space-x-4 p-4 border rounded-lg">
-                <div className="w-16">
-                  <span className="text-sm font-medium text-gray-700">{day}</span>
-                </div>
-
-                {!hours.closed && (
-                  <div className="flex items-center space-x-4 flex-1">
-                    <div className="flex-1">
-                      <label className="block text-xs text-gray-500 mb-1">เปิด</label>
-                      <input
-                        type="text"
-                        value={hours.open}
-                        onChange={(e) => {
-                          // Only allow numbers and format as HH:MM
-                          let value = e.target.value.replace(/[^\d]/g, '')
-                          if (value.length >= 3) {
-                            value = value.slice(0, 2) + ':' + value.slice(2, 4)
-                          }
-                          handleOpeningHoursChange(day, 'open', value)
-                        }}
-                        className="input text-sm"
-                        placeholder="08:00"
-                        maxLength="5"
-                      />
-                      <p className="text-xs text-gray-400 mt-1">รูปแบบ: 08:00 (08:00)</p>
-                    </div>
-
-                    <span className="text-gray-500 mt-4">-</span>
-
-                    <div className="flex-1">
-                      <label className="block text-xs text-gray-500 mb-1">ปิด</label>
-                      <input
-                        type="text"
-                        value={hours.close}
-                        onChange={(e) => {
-                          // Only allow numbers and format as HH:MM
-                          let value = e.target.value.replace(/[^\d]/g, '')
-                          if (value.length >= 3) {
-                            value = value.slice(0, 2) + ':' + value.slice(2, 4)
-                          }
-                          handleOpeningHoursChange(day, 'close', value)
-                        }}
-                        className="input text-sm"
-                        placeholder="20:00"
-                        maxLength="5"
-                      />
-                      <p className="text-xs text-gray-400 mt-1">รูปแบบ: 20:00 (20:00)</p>
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={hours.closed}
-                    onChange={() => handleClosedDayToggle(day)}
-                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                  />
-                  <div style={{ display: 'flex' }}>
-                    <span className="text-sm font-medium text-gray-700">หยุด</span>
+                <div className="add-place-field">
+                  <span>ประเภทสถานที่</span>
+                  <div className="add-place-segment" role="group" aria-label="ประเภทสถานที่">
+                    <button
+                      type="button"
+                      className={formData.is_free === 'true' ? 'is-active' : ''}
+                      onClick={() => setFormData(prev => ({ ...prev, is_free: 'true', price_min: 0, price_max: 0 }))}
+                    >
+                      ไม่เสียค่าใช้จ่าย
+                    </button>
+                    <button
+                      type="button"
+                      className={formData.is_free !== 'true' ? 'is-active' : ''}
+                      onClick={() => setFormData(prev => ({ ...prev, is_free: 'false' }))}
+                    >
+                      เสียค่าใช้จ่าย
+                    </button>
                   </div>
                 </div>
-
-                {hours.closed && (
-                  <div className="flex-1 text-sm text-gray-500">
-                    หยุดทั้งวัน
-                  </div>
-                )}
               </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Images */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">รูปภาพ</h2>
+              <p className="add-place-note">
+                กรุณาระบุช่วงราคาที่เหมาะสมต่อหนึ่งคนในหน่วยบาท
+              </p>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              อัปโหลดรูปภาพ (สูงสุด 5 รูป)
-            </label>
+              <div className="add-place-grid add-place-grid-2">
+                <label className="add-place-field">
+                  <span>ราคาต่ำสุด *</span>
+                  <input
+                    type="number"
+                    name="price_min"
+                    value={formData.price_min}
+                    onChange={handleChange}
+                    placeholder="0"
+                    min="0"
+                    step="0.01"
+                    required
+                    disabled={formData.is_free === 'true'}
+                  />
+                </label>
 
-            {/* Upload Area */}
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                <label className="add-place-field">
+                  <span>ราคาสูงสุด *</span>
+                  <input
+                    type="number"
+                    name="price_max"
+                    value={formData.price_max}
+                    onChange={handleChange}
+                    placeholder="500"
+                    min="0"
+                    step="0.01"
+                    required
+                    disabled={formData.is_free === 'true'}
+                  />
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <section className="add-place-card">
+            <h2 className="add-place-section-title">
+              <MapPin />
+              ที่ตั้ง
+            </h2>
+
+            <div className="add-place-stack">
+              <div className="add-place-grid add-place-grid-3">
+                <label className="add-place-field">
+                  <span>จังหวัด *</span>
+                  <select
+                    name="province"
+                    value={formData.province || ''}
+                    onChange={handleProvinceChange}
+                    required
+                  >
+                    <option value="">เลือกจังหวัด</option>
+                    {provinces.map((province) => (
+                      <option key={province} value={province}>
+                        {province}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="add-place-field">
+                  <span>อำเภอ *</span>
+                  <select
+                    name="district"
+                    value={formData.district || ''}
+                    onChange={handleChange}
+                    required
+                    disabled={!formData.province}
+                  >
+                    <option value="">เลือกอำเภอ</option>
+                    {getDistrictsByProvince(formData.province).map((district) => (
+                      <option key={district} value={district}>
+                        {district}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="add-place-field">
+                  <span>ตำบล *</span>
+                  <select
+                    name="subdistrict"
+                    value={formData.subdistrict || ''}
+                    onChange={handleChange}
+                    required
+                    disabled={!formData.district}
+                  >
+                    <option value="">เลือกตำบล</option>
+                    {getSubdistrictsByDistrict(formData.province, formData.district).map((subdistrict) => (
+                      <option key={subdistrict} value={subdistrict}>
+                        {subdistrict}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
+              <label className="add-place-field add-place-field-full">
+                <span>ที่อยู่เพิ่มเติม</span>
+                <textarea
+                  name="detailed_address"
+                  value={formData.detailed_address || ''}
+                  onChange={handleChange}
+                  placeholder="ระบุรายละเอียดเพิ่มเติม เช่น เลขที่ หมู่บ้าน จุดสังเกต หรือทางเข้า"
+                  rows={4}
+                />
+              </label>
+
+              <label className="add-place-field add-place-field-full">
+                <span>ลิงค์แผนที่ *</span>
+                <div className="add-place-map-row">
+                  <div className="add-place-input-icon">
+                    <LinkIcon />
+                    <input
+                      type="url"
+                      name="map_link"
+                      value={formData.map_link}
+                      onChange={handleChange}
+                      placeholder="คัดลอกลิงค์แผนที่หรือใส่ URL ที่ใช้ระบุตำแหน่ง"
+                      required
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className="add-place-map-btn"
+                    onClick={() => formData.map_link && window.open(formData.map_link, '_blank', 'noopener,noreferrer')}
+                    aria-label="เปิดแผนที่"
+                  >
+                    <Map />
+                  </button>
+                </div>
+              </label>
+            </div>
+          </section>
+
+          <section className="add-place-card">
+            <h2 className="add-place-section-title">
+              <Clock />
+              เวลาเปิด-ปิด
+            </h2>
+
+            <div className="add-place-hours">
+              {Object.entries(formData.opening_hours).map(([day, hours]) => (
+                <div key={day} className="add-place-hour-row">
+                  <span className="add-place-hour-day">{day}</span>
+                  <div className="add-place-hour-inputs">
+                    <input
+                      type="text"
+                      value={hours.open}
+                      onChange={(e) => {
+                        let value = e.target.value.replace(/[^\d]/g, '')
+                        if (value.length >= 3) {
+                          value = value.slice(0, 2) + ':' + value.slice(2, 4)
+                        }
+                        handleOpeningHoursChange(day, 'open', value)
+                      }}
+                      placeholder="08:00"
+                      maxLength="5"
+                      disabled={hours.closed}
+                      aria-label={`${day} เวลาเปิด`}
+                    />
+                    <span>-</span>
+                    <input
+                      type="text"
+                      value={hours.close}
+                      onChange={(e) => {
+                        let value = e.target.value.replace(/[^\d]/g, '')
+                        if (value.length >= 3) {
+                          value = value.slice(0, 2) + ':' + value.slice(2, 4)
+                        }
+                        handleOpeningHoursChange(day, 'close', value)
+                      }}
+                      placeholder="20:00"
+                      maxLength="5"
+                      disabled={hours.closed}
+                      aria-label={`${day} เวลาปิด`}
+                    />
+                  </div>
+                  <label className="add-place-closed">
+                    <input
+                      type="checkbox"
+                      checked={hours.closed}
+                      onChange={() => handleClosedDayToggle(day)}
+                    />
+                    <span>หยุด</span>
+                  </label>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="add-place-card">
+            <h2 className="add-place-section-title">
+              <ImageIcon />
+              รูปภาพ
+            </h2>
+
+            <div className="add-place-upload">
               <input
                 type="file"
                 multiple
                 accept="image/*"
                 onChange={handleImageUpload}
-                className="hidden"
                 id="image-upload"
               />
-              <label htmlFor="image-upload" className="cursor-pointer">
-                <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 mb-2">คลิกเพื่ออัปโหลดรูปภาพ</p>
-                <p className="text-sm text-gray-500">หรือลากไฟล์มาวางที่นี่</p>
-                <p className="text-xs text-gray-400 mt-2">รองรับ JPG, PNG, GIF สูงสุด 5 รูป</p>
+              <label htmlFor="image-upload" className="add-place-upload-label">
+                <span className="add-place-upload-icon">
+                  <UploadCloud />
+                </span>
+                <strong>อัปโหลดรูปภาพ (สูงสุด 5 รูป)</strong>
+                <span>ลากและวางรูปภาพที่นี่ หรือคลิกเพื่อเลือกไฟล์</span>
+                <small>รองรับ JPG, PNG, GIF ขนาดไฟล์ไม่เกิน 5MB ต่อรูป</small>
               </label>
             </div>
 
-            {/* Image Preview */}
             {formData.images && formData.images.length > 0 && (
-              <div className="mt-4">
-                <h4 className="text-sm font-medium text-gray-700 mb-2">รูปภาพที่อัปโหลด ({formData.images.length}/5)</h4>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              <div className="add-place-preview">
+                <h3>รูปภาพที่อัปโหลด ({formData.images.length}/5)</h3>
+                <div className="add-place-preview-grid">
                   {formData.images.map((image, index) => (
-                    <div key={index} className="relative group">
-                      <img
-                        src={image.preview}
-                        alt={`รูปที่ ${index + 1}`}
-                        className="w-full h-24 object-cover rounded-lg"
-                      />
+                    <div key={index} className="add-place-preview-item">
+                      <img src={image.preview} alt={`รูปที่ ${index + 1}`} />
                       <button
                         type="button"
                         onClick={() => removeImage(index)}
-                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        aria-label={`ลบรูปที่ ${index + 1}`}
                       >
-                        <X className="h-3 w-3" />
+                        <X />
                       </button>
                     </div>
                   ))}
                 </div>
               </div>
             )}
-          </div>
-        </div>
+          </section>
 
-        {/* Submit Button */}
-        <div className="flex justify-end space-x-4">
-          <button
-            type="button"
-            onClick={() => navigate('/places')}
-            className="btn btn-secondary"
-          >
-            ยกเลิก
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn btn-primary flex items-center"
-          >
-            <Save className="h-4 w-4 mr-2" />
-            {loading ? 'กำลังบันทึก...' : 'บันทึกสถานที่'}
-          </button>
-        </div>
-      </form>
-    </div>
+          <div className="add-place-actions">
+            <button
+              type="button"
+              onClick={() => navigate('/places')}
+              className="add-place-btn add-place-btn-secondary"
+            >
+              ยกเลิก
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="add-place-btn add-place-btn-primary"
+            >
+              <Save />
+              {loading ? 'กำลังบันทึก...' : 'บันทึกสถานที่'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </main>
   )
 }

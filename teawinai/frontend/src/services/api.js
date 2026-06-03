@@ -90,6 +90,8 @@ export const placesAPI = {
     return api.put(`/places/${id}`, placeData)
   },
   deletePlace: (id) => api.delete(`/places/${id}`),
+  addReview: (id, reviewData) => api.post(`/places/${id}/reviews`, reviewData),
+  addReviewReply: (id, reviewId, replyData) => api.post(`/places/${id}/reviews/${reviewId}/replies`, replyData),
 }
 
 // Trips API

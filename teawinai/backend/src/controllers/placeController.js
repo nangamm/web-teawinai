@@ -1,5 +1,44 @@
 const Place = require('../models/Place');
 const Category = require('../models/Category');
+const Review = require('../models/Review');
+const User = require('../models/User');
+const { hasInappropriateContent } = require('../utils/contentModeration');
+
+const populatePlace = (query) => query
+    .populate('category', 'name icon')
+    .populate('submitted_by', 'name email');
+
+const attachReviews = async (place) => {
+    if (!place) return null;
+
+    const reviews = await Review.find({ place: place._id })
+        .populate('user', 'name username avatar role')
+        .populate('replies.user', 'name username avatar role')
+        .sort({ createdAt: -1 });
+
+    const placeData = place.toObject ? place.toObject() : place;
+    placeData.reviews = reviews;
+    placeData.review_count = reviews.length;
+    placeData.reviews_count = reviews.length;
+    return placeData;
+};
+
+const refreshPlaceRating = async (placeId) => {
+    const result = await Review.aggregate([
+        { $match: { place: placeId } },
+        {
+            $group: {
+                _id: '$place',
+                averageRating: { $avg: '$rating' },
+                reviewCount: { $sum: 1 }
+            }
+        }
+    ]);
+
+    const rating = result.length ? Number(result[0].averageRating.toFixed(1)) : 0;
+    await Place.findByIdAndUpdate(placeId, { rating });
+    return rating;
+};
 
 // @desc    Get all places
 // @route   GET /api/places
@@ -48,9 +87,7 @@ exports.getPlaces = async (req, res) => {
         const total = await Place.countDocuments(query);
         console.log('Total places in database:', total);
 
-        const places = await Place.find(query)
-            .populate('category', 'name icon')
-            .populate('submitted_by', 'name email')
+        const places = await populatePlace(Place.find(query))
             .limit(limit * 1)
             .skip((page - 1) * limit)
             .sort({ rating: -1 });
@@ -81,9 +118,7 @@ exports.getPlaces = async (req, res) => {
 // @access   Public
 exports.getPlace = async (req, res) => {
     try {
-        const place = await Place.findById(req.params.id)
-            .populate('category', 'name icon')
-            .populate('submitted_by', 'name email');
+        const place = await populatePlace(Place.findById(req.params.id));
 
         if (!place) {
             return res.status(404).json({
@@ -94,13 +129,155 @@ exports.getPlace = async (req, res) => {
 
         res.json({
             success: true,
-            data: place
+            data: await attachReviews(place)
         });
     } catch (error) {
         console.error('Get place error:', error);
         res.status(500).json({
             success: false,
             message: 'เกิดข้อผิดพลาดในการดึงข้อมูลสถานที่'
+        });
+    }
+};
+
+// @desc    Add or update a place review
+// @route   POST /api/places/:id/reviews
+// @access   User, Owner, Admin
+exports.createReview = async (req, res) => {
+    try {
+        const { rating, comment } = req.body;
+        const place = await Place.findById(req.params.id);
+
+        if (!place) {
+            return res.status(404).json({
+                success: false,
+                message: 'ไม่พบสถานที่ที่ต้องการ'
+            });
+        }
+
+        const parsedRating = Number(rating);
+        if (!Number.isFinite(parsedRating) || parsedRating < 1 || parsedRating > 5) {
+            return res.status(400).json({
+                success: false,
+                message: 'กรุณาให้คะแนนตั้งแต่ 1 ถึง 5'
+            });
+        }
+
+        if (!comment || comment.trim().length < 2) {
+            return res.status(400).json({
+                success: false,
+                message: 'กรุณาเขียนความคิดเห็นอย่างน้อย 2 ตัวอักษร'
+            });
+        }
+
+        if (hasInappropriateContent(comment)) {
+            return res.status(400).json({
+                success: false,
+                message: 'ความคิดเห็นมีคำไม่สุภาพ ไม่เหมาะสม หรือสื่อไปทางเพศ กรุณาแก้ไขข้อความ'
+            });
+        }
+
+        const existingReview = await Review.findOne({ place: place._id, user: req.user.id });
+        const review = await Review.findOneAndUpdate(
+            { place: place._id, user: req.user.id },
+            {
+                $set: {
+                    rating: parsedRating,
+                    comment: comment.trim()
+                },
+                $setOnInsert: {
+                    place: place._id,
+                    user: req.user.id
+                }
+            },
+            {
+                new: true,
+                upsert: true,
+                runValidators: true,
+                setDefaultsOnInsert: true
+            }
+        );
+
+        if (!existingReview) {
+            await User.findByIdAndUpdate(req.user.id, { $inc: { 'stats.reviews': 1 } });
+        }
+
+        await refreshPlaceRating(place._id);
+
+        const updatedPlace = await populatePlace(Place.findById(place._id));
+        const placeWithReviews = await attachReviews(updatedPlace);
+
+        res.status(existingReview ? 200 : 201).json({
+            success: true,
+            data: placeWithReviews,
+            review,
+            message: existingReview ? 'อัปเดตความคิดเห็นสำเร็จ' : 'เพิ่มความคิดเห็นสำเร็จ'
+        });
+    } catch (error) {
+        console.error('Create review error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'เกิดข้อผิดพลาดในการบันทึกความคิดเห็น'
+        });
+    }
+};
+
+// @desc    Reply to a place review
+// @route   POST /api/places/:id/reviews/:reviewId/replies
+// @access   User, Owner, Admin
+exports.createReviewReply = async (req, res) => {
+    try {
+        const { comment } = req.body;
+        const place = await Place.findById(req.params.id);
+
+        if (!place) {
+            return res.status(404).json({
+                success: false,
+                message: 'ไม่พบสถานที่ที่ต้องการ'
+            });
+        }
+
+        const review = await Review.findOne({ _id: req.params.reviewId, place: place._id });
+        if (!review) {
+            return res.status(404).json({
+                success: false,
+                message: 'ไม่พบความคิดเห็นที่ต้องการตอบกลับ'
+            });
+        }
+
+        if (!comment || comment.trim().length < 2) {
+            return res.status(400).json({
+                success: false,
+                message: 'กรุณาเขียนคำตอบกลับอย่างน้อย 2 ตัวอักษร'
+            });
+        }
+
+        if (hasInappropriateContent(comment)) {
+            return res.status(400).json({
+                success: false,
+                message: 'คำตอบกลับมีคำไม่สุภาพ ไม่เหมาะสม หรือสื่อไปทางเพศ กรุณาแก้ไขข้อความ'
+            });
+        }
+
+        review.replies.push({
+            user: req.user.id,
+            comment: comment.trim()
+        });
+        await review.save();
+
+        const updatedPlace = await populatePlace(Place.findById(place._id));
+        const placeWithReviews = await attachReviews(updatedPlace);
+
+        res.status(201).json({
+            success: true,
+            data: placeWithReviews,
+            message: 'เพิ่มคำตอบกลับสำเร็จ'
+        });
+    } catch (error) {
+        console.error('Create review reply error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'เกิดข้อผิดพลาดในการบันทึกคำตอบกลับ'
         });
     }
 };

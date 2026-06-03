@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Place = require('../models/Place');
+const Review = require('../models/Review');
 const generateToken = require('../utils/generateToken');
 
 // @desc    Register user
@@ -295,10 +296,20 @@ const getUserPlaces = async (req, res) => {
 // @access   Private
 const getUserReviews = async (req, res) => {
     try {
-        // TODO: Implement review fetching logic
+        const reviews = await Review.find({ user: req.user.id })
+            .populate('place', 'name images rating')
+            .sort({ createdAt: -1 });
+
         res.json({
             success: true,
-            reviews: []
+            reviews: reviews.map(review => ({
+                _id: review._id,
+                placeId: review.place?._id,
+                placeName: review.place?.name || 'สถานที่',
+                rating: review.rating,
+                comment: review.comment,
+                createdAt: review.createdAt
+            }))
         });
     } catch (error) {
         console.error('Get user reviews error:', error);

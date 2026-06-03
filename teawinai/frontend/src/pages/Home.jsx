@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AlertCircle, Loader2 } from 'lucide-react'
+import { AlertCircle, Loader2, MapPin } from 'lucide-react'
 import { categoriesAPI, tripsAPI } from '@/services/api'
 import { DEFAULT_PROVINCE, getDistrictsByProvince, getSubdistrictsByDistrict, provinces } from '@/data/ubonLocations'
 import { isAuthenticated } from '@/utils/auth'
@@ -58,6 +58,7 @@ export function Home() {
   const validate = () => {
     const e = {}
     if (!formData.budget || formData.budget <= 0) e.budget = 'กรุณากรอกงบประมาณที่มากกว่า 0'
+    if (!formData.maxPlaces || formData.maxPlaces < 1 || formData.maxPlaces > 20) e.maxPlaces = 'กรุณาระบุจำนวนสถานที่ 1-20 แห่ง'
     if (!formData.categories.length) e.categories = 'กรุณาเลือกอย่างน้อย 1 หมวดหมู่'
     if (!formData.province) e.province = 'กรุณาเลือกจังหวัด'
     setErrors(e)
@@ -228,6 +229,30 @@ export function Home() {
                 </div>
                 {errors.budget && (
                   <div className="field-error"><AlertCircle size={11} />{errors.budget}</div>
+                )}
+              </div>
+
+              <div className="field-group">
+                <label className="field-label" htmlFor="maxPlaces">จำนวนสถานที่ที่จะไป</label>
+                <div className={`input-box${errors.maxPlaces ? ' has-error' : ''}`}>
+                  <MapPin />
+                  <input
+                    id="maxPlaces"
+                    className="bare-input"
+                    type="number"
+                    placeholder="เช่น 5"
+                    value={formData.maxPlaces}
+                    min="1"
+                    max="20"
+                    inputMode="numeric"
+                    onChange={e => {
+                      setFormData(p => ({ ...p, maxPlaces: e.target.value }))
+                      if (errors.maxPlaces) setErrors(p => ({ ...p, maxPlaces: '' }))
+                    }}
+                  />
+                </div>
+                {errors.maxPlaces && (
+                  <div className="field-error"><AlertCircle size={11} />{errors.maxPlaces}</div>
                 )}
               </div>
             </div>
