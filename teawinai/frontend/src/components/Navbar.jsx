@@ -1,24 +1,85 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Search, User, LogOut, MapPin, Settings, Menu, X } from 'lucide-react'
+import { Search, User, LogOut, MapPin, Settings, Menu, X, Bell } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { isAdmin, hasRole } from '@/utils/auth'
+import { notificationsAPI } from '@/services/api'
 import toast from 'react-hot-toast'
 
 export function Navbar() {
   const [searchQuery, setSearchQuery] = useState('')
   const [mobileOpen, setMobileOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  const [notificationOpen, setNotificationOpen] = useState(false)
+  const [notificationCount, setNotificationCount] = useState(0)
+  const [notifications, setNotifications] = useState([])
   const dropdownRef = useRef(null)
+  const notificationRef = useRef(null)
   const navigate = useNavigate()
   const location = useLocation()
 
   const isAuthenticated = localStorage.getItem('token')
   const isAdminUser = isAdmin()
   const canAddPlace = hasRole(['admin', 'owner'])
+  const visibleNotificationCount = notificationCount > 99 ? '99+' : notificationCount
 
   // Close mobile menu on route change
   useEffect(() => { setMobileOpen(false) }, [location.pathname])
   useEffect(() => { setDropdownOpen(false) }, [location.pathname])
+  useEffect(() => { setNotificationOpen(false) }, [location.pathname])
+
+  useEffect(() => {
+    const readLocalNotificationCount = () => {
+      const directCount = Number(localStorage.getItem('teawinai_notification_count'))
+
+      if (Number.isFinite(directCount) && directCount > 0) {
+        setNotificationCount(directCount)
+        return
+      }
+
+      try {
+        const notifications = JSON.parse(localStorage.getItem('teawinai_notifications') || '[]')
+
+        if (Array.isArray(notifications)) {
+          setNotificationCount(notifications.filter(item => item && item.read !== true).length)
+          return
+        }
+      } catch (error) {
+        console.warn('Unable to read notifications:', error)
+      }
+
+      setNotificationCount(0)
+    }
+
+    const fetchNotifications = async () => {
+      if (!isAuthenticated) {
+        setNotificationCount(0)
+        setNotifications([])
+        return
+      }
+
+      try {
+        const response = await notificationsAPI.getNotifications({ limit: 8 })
+        const nextNotifications = response.data.notifications || []
+        setNotifications(nextNotifications)
+        setNotificationCount(response.data.unreadCount || 0)
+      } catch (error) {
+        console.error('Unable to fetch notifications:', error)
+        readLocalNotificationCount()
+      }
+    }
+
+    fetchNotifications()
+    const intervalId = window.setInterval(fetchNotifications, 30000)
+
+    window.addEventListener('storage', readLocalNotificationCount)
+    window.addEventListener('teawinai:notifications-updated', fetchNotifications)
+
+    return () => {
+      window.clearInterval(intervalId)
+      window.removeEventListener('storage', readLocalNotificationCount)
+      window.removeEventListener('teawinai:notifications-updated', fetchNotifications)
+    }
+  }, [isAuthenticated])
 
   useEffect(() => {
     if (!dropdownOpen) return
@@ -44,6 +105,30 @@ export function Navbar() {
     }
   }, [dropdownOpen])
 
+  useEffect(() => {
+    if (!notificationOpen) return
+
+    const handlePointerDown = (event) => {
+      if (!notificationRef.current?.contains(event.target)) {
+        setNotificationOpen(false)
+      }
+    }
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setNotificationOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [notificationOpen])
+
   const isActive = (path) => location.pathname === path
   const mobileLinkProps = (path) => ({
     className: `navbar-mobile-link${isActive(path) ? ' active' : ''}`,
@@ -56,6 +141,55 @@ export function Navbar() {
       navigate(`/places?search=${encodeURIComponent(searchQuery)}`)
       setMobileOpen(false)
     }
+  }
+
+  const handleNotificationToggle = () => {
+    setNotificationOpen(value => !value)
+    setDropdownOpen(false)
+  }
+
+  const handleMarkAllNotificationsRead = async () => {
+    try {
+      await notificationsAPI.markRead()
+      setNotificationCount(0)
+      setNotifications(items => items.map(item => ({ ...item, read: true })))
+    } catch (error) {
+      console.error('Unable to mark notifications as read:', error)
+      toast.error('ไม่สามารถอัปเดตการแจ้งเตือนได้')
+    }
+  }
+
+  const handleNotificationClick = (notification) => {
+    setNotificationOpen(false)
+
+    if (!notification || notification.read) return
+
+    setNotificationCount(count => Math.max(0, count - 1))
+    setNotifications(items => items.map(item => (
+      item._id === notification._id ? { ...item, read: true } : item
+    )))
+
+    notificationsAPI.markRead([notification._id]).catch(error => {
+      console.error('Unable to mark notification as read:', error)
+    })
+  }
+
+  const notificationHref = (notification) => {
+    if (notification?.place?._id || notification?.place) {
+      const placeId = notification.place._id || notification.place
+      return `/places/${placeId}`
+    }
+
+    return '/places'
+  }
+
+  const formatNotificationDate = (value) => {
+    if (!value) return ''
+    return new Date(value).toLocaleDateString('th-TH', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    })
   }
 
   const handleLogout = () => {
@@ -121,6 +255,64 @@ export function Navbar() {
 
           {isAuthenticated ? (
             <>
+              <div className="navbar-notification-container" ref={notificationRef}>
+                <button
+                  type="button"
+                  className="navbar-icon-btn navbar-notification-btn"
+                  title="การแจ้งเตือน"
+                  aria-label={`การแจ้งเตือน${notificationCount > 0 ? ` ${notificationCount} รายการที่ยังไม่ได้อ่าน` : ''}`}
+                  aria-controls="navbar-notification-menu"
+                  aria-expanded={notificationOpen}
+                  aria-haspopup="menu"
+                  onClick={handleNotificationToggle}
+                >
+                  <Bell />
+                  {notificationCount > 0 && (
+                    <span className="navbar-notification-badge" aria-hidden="true">
+                      {visibleNotificationCount}
+                    </span>
+                  )}
+                </button>
+                {notificationOpen && (
+                  <div
+                    id="navbar-notification-menu"
+                    className="navbar-notification-menu"
+                    role="menu"
+                    aria-label="การแจ้งเตือน"
+                  >
+                    <div className="navbar-notification-head">
+                      <span>การแจ้งเตือน</span>
+                      {notificationCount > 0 && (
+                        <button type="button" onClick={handleMarkAllNotificationsRead}>
+                          อ่านทั้งหมด
+                        </button>
+                      )}
+                    </div>
+                    {notifications.length > 0 ? (
+                      <div className="navbar-notification-list">
+                        {notifications.map(notification => (
+                          <Link
+                            key={notification._id}
+                            to={notificationHref(notification)}
+                            className={`navbar-notification-item${notification.read ? '' : ' unread'}`}
+                            role="menuitem"
+                            onClick={() => handleNotificationClick(notification)}
+                          >
+                            <span className="navbar-notification-dot" aria-hidden="true" />
+                            <span className="navbar-notification-copy">
+                              <strong>{notification.title}</strong>
+                              <span>{notification.message}</span>
+                              <time dateTime={notification.createdAt}>{formatNotificationDate(notification.createdAt)}</time>
+                            </span>
+                          </Link>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="navbar-notification-empty">ยังไม่มีการแจ้งเตือน</div>
+                    )}
+                  </div>
+                )}
+              </div>
               <Link to="/profile" className="navbar-icon-btn" title="โปรไฟล์" aria-label="โปรไฟล์">
                 <User />
               </Link>

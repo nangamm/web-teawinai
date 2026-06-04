@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Place = require('../models/Place');
 const Review = require('../models/Review');
+const Notification = require('../models/Notification');
 const generateToken = require('../utils/generateToken');
 
 // @desc    Register user
@@ -320,6 +321,76 @@ const getUserReviews = async (req, res) => {
     }
 };
 
+// @desc    Get user's notifications
+// @route   GET /api/auth/notifications
+// @access   Private
+const getNotifications = async (req, res) => {
+    try {
+        const limit = Math.min(Number(req.query.limit) || 10, 50);
+        const notifications = await Notification.find({ recipient: req.user.id })
+            .populate('actor', 'name username avatar role')
+            .populate('place', 'name')
+            .sort({ createdAt: -1 })
+            .limit(limit);
+        const unreadCount = await Notification.countDocuments({
+            recipient: req.user.id,
+            read: false
+        });
+
+        res.json({
+            success: true,
+            unreadCount,
+            notifications
+        });
+    } catch (error) {
+        console.error('Get notifications error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to fetch notifications'
+        });
+    }
+};
+
+// @desc    Mark user's notifications as read
+// @route   PUT /api/auth/notifications/read
+// @access   Private
+const markNotificationsRead = async (req, res) => {
+    try {
+        const ids = Array.isArray(req.body.ids) ? req.body.ids : [];
+        const query = {
+            recipient: req.user.id,
+            read: false
+        };
+
+        if (ids.length > 0) {
+            query._id = { $in: ids };
+        }
+
+        await Notification.updateMany(query, {
+            $set: {
+                read: true,
+                readAt: new Date()
+            }
+        });
+
+        const unreadCount = await Notification.countDocuments({
+            recipient: req.user.id,
+            read: false
+        });
+
+        res.json({
+            success: true,
+            unreadCount
+        });
+    } catch (error) {
+        console.error('Mark notifications read error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Failed to mark notifications as read'
+        });
+    }
+};
+
 // @desc    Get all users (admin only)
 // @route   GET /api/auth/users
 // @access   Private (Admin only)
@@ -452,6 +523,8 @@ module.exports = {
     upload,
     getUserPlaces,
     getUserReviews,
+    getNotifications,
+    markNotificationsRead,
     getUsers,
     getDashboardStats,
     createUser

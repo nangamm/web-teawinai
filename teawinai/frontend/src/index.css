@@ -848,6 +848,144 @@ body {
   height: 15px;
 }
 
+.navbar-notification-btn {
+  position: relative;
+  overflow: visible;
+}
+
+.navbar-notification-container {
+  position: relative;
+}
+
+.navbar-notification-badge {
+  position: absolute;
+  top: 1px;
+  right: 0;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 100px;
+  background: #e05252;
+  border: 2px solid var(--editorial-sky);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+}
+
+.navbar-notification-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: min(340px, calc(100vw - 32px));
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  border: 1px solid #eae8e3;
+  padding: 8px;
+  z-index: 100;
+}
+
+.navbar-notification-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 8px 10px;
+  color: #111;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.navbar-notification-head button {
+  border: none;
+  background: transparent;
+  color: #116045;
+  cursor: pointer;
+  font-family: 'Noto Sans Thai', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 0;
+}
+
+.navbar-notification-head button:hover {
+  color: #0d4e38;
+}
+
+.navbar-notification-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.navbar-notification-item {
+  display: grid;
+  grid-template-columns: 8px 1fr;
+  gap: 10px;
+  padding: 10px 8px;
+  border-radius: 8px;
+  color: #333;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.navbar-notification-item:hover,
+.navbar-notification-item:focus-visible {
+  background: #f4f2ee;
+  outline: none;
+}
+
+.navbar-notification-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: transparent;
+  margin-top: 7px;
+}
+
+.navbar-notification-item.unread .navbar-notification-dot {
+  background: #116045;
+}
+
+.navbar-notification-copy {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.navbar-notification-copy strong {
+  color: #111;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.navbar-notification-copy span {
+  color: #555;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.navbar-notification-copy time {
+  color: #888;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.navbar-notification-empty {
+  padding: 18px 10px;
+  color: #777;
+  font-size: 13px;
+  text-align: center;
+}
+
 /* Account CTA */
 .navbar-cta {
   display: inline-flex;

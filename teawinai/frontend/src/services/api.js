@@ -115,4 +115,10 @@ export const priceUpdatesAPI = {
   rejectPriceUpdate: (id, data) => api.put(`/price-updates/${id}/reject`, data),
 }
 
+// Notifications API
+export const notificationsAPI = {
+  getNotifications: (params) => api.get('/auth/notifications', { params }),
+  markRead: (ids) => api.put('/auth/notifications/read', ids?.length ? { ids } : {}),
+}
+
 export default api

@@ -13,6 +13,8 @@ router.get('/me', verifyToken, authController.getMe);
 router.put('/profile', verifyToken, authController.upload.single('avatar'), authController.updateProfile);
 router.get('/places', verifyToken, authController.getUserPlaces);
 router.get('/reviews', verifyToken, authController.getUserReviews);
+router.get('/notifications', verifyToken, authController.getNotifications);
+router.put('/notifications/read', verifyToken, authController.markNotificationsRead);
 
 // Admin only routes
 router.get('/users', verifyToken, requireRole('admin'), authController.getUsers);

@@ -2,6 +2,7 @@ const Place = require('../models/Place');
 const Category = require('../models/Category');
 const Review = require('../models/Review');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 const { hasInappropriateContent } = require('../utils/contentModeration');
 
 const populatePlace = (query) => query
@@ -38,6 +39,23 @@ const refreshPlaceRating = async (placeId) => {
     const rating = result.length ? Number(result[0].averageRating.toFixed(1)) : 0;
     await Place.findByIdAndUpdate(placeId, { rating });
     return rating;
+};
+
+const sameId = (a, b) => String(a || '') === String(b || '');
+
+const createNotification = async ({ recipient, actor, type, title, message, place, review, replyId }) => {
+    if (!recipient || sameId(recipient, actor)) return;
+
+    await Notification.create({
+        recipient,
+        actor,
+        type,
+        title,
+        message,
+        place,
+        review,
+        replyId
+    });
 };
 
 // @desc    Get all places
@@ -200,6 +218,15 @@ exports.createReview = async (req, res) => {
 
         if (!existingReview) {
             await User.findByIdAndUpdate(req.user.id, { $inc: { 'stats.reviews': 1 } });
+            await createNotification({
+                recipient: place.submitted_by,
+                actor: req.user.id,
+                type: 'place_review',
+                title: 'มีความคิดเห็นใหม่',
+                message: `มีคนแสดงความคิดเห็นที่ ${place.name}`,
+                place: place._id,
+                review: review._id
+            });
         }
 
         await refreshPlaceRating(place._id);
@@ -263,7 +290,23 @@ exports.createReviewReply = async (req, res) => {
             user: req.user.id,
             comment: comment.trim()
         });
+        const newReply = review.replies[review.replies.length - 1];
         await review.save();
+
+        const recipients = [review.user, place.submitted_by]
+            .filter(Boolean)
+            .filter((recipient, index, list) => list.findIndex(item => sameId(item, recipient)) === index);
+
+        await Promise.all(recipients.map(recipient => createNotification({
+            recipient,
+            actor: req.user.id,
+            type: 'review_reply',
+            title: 'มีการตอบกลับความคิดเห็น',
+            message: `มีคนตอบกลับความคิดเห็นที่ ${place.name}`,
+            place: place._id,
+            review: review._id,
+            replyId: newReply?._id
+        })));
 
         const updatedPlace = await populatePlace(Place.findById(place._id));
         const placeWithReviews = await attachReviews(updatedPlace);
