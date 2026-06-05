@@ -2,8 +2,19 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Search, User, LogOut, MapPin, Settings, Menu, X, Bell } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { isAdmin, hasRole } from '@/utils/auth'
-import { notificationsAPI } from '@/services/api'
+import { authAPI, notificationsAPI } from '@/services/api'
 import toast from 'react-hot-toast'
+
+const API_ORIGIN = (import.meta.env.VITE_API_URL || 'http://localhost:5001/api').replace(/\/api\/?$/, '')
+
+const readStoredUser = () => {
+  try {
+    return JSON.parse(localStorage.getItem('user') || 'null')
+  } catch (error) {
+    console.warn('Unable to read user:', error)
+    return null
+  }
+}
 
 export function Navbar() {
   const [searchQuery, setSearchQuery] = useState('')
@@ -12,6 +23,7 @@ export function Navbar() {
   const [notificationOpen, setNotificationOpen] = useState(false)
   const [notificationCount, setNotificationCount] = useState(0)
   const [notifications, setNotifications] = useState([])
+  const [currentUser, setCurrentUser] = useState(() => readStoredUser())
   const dropdownRef = useRef(null)
   const notificationRef = useRef(null)
   const navigate = useNavigate()
@@ -21,11 +33,48 @@ export function Navbar() {
   const isAdminUser = isAdmin()
   const canAddPlace = hasRole(['admin', 'owner'])
   const visibleNotificationCount = notificationCount > 99 ? '99+' : notificationCount
+  const avatarSrc = currentUser?.avatar
+    ? (currentUser.avatar.startsWith('http') ? currentUser.avatar : `${API_ORIGIN}${currentUser.avatar}`)
+    : ''
+  const fallbackAvatarSrc = currentUser
+    ? `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.username || currentUser.name || 'User')}&background=116045&color=fff&size=80`
+    : ''
 
   // Close mobile menu on route change
   useEffect(() => { setMobileOpen(false) }, [location.pathname])
   useEffect(() => { setDropdownOpen(false) }, [location.pathname])
   useEffect(() => { setNotificationOpen(false) }, [location.pathname])
+
+  useEffect(() => {
+    const syncStoredUser = () => setCurrentUser(readStoredUser())
+
+    const fetchCurrentUser = async () => {
+      if (!isAuthenticated) {
+        setCurrentUser(null)
+        return
+      }
+
+      syncStoredUser()
+
+      try {
+        const response = await authAPI.getMe()
+        const nextUser = response.data.user
+        setCurrentUser(nextUser)
+        localStorage.setItem('user', JSON.stringify(nextUser))
+      } catch (error) {
+        console.error('Unable to fetch navbar user:', error)
+      }
+    }
+
+    fetchCurrentUser()
+    window.addEventListener('storage', syncStoredUser)
+    window.addEventListener('teawinai:user-updated', syncStoredUser)
+
+    return () => {
+      window.removeEventListener('storage', syncStoredUser)
+      window.removeEventListener('teawinai:user-updated', syncStoredUser)
+    }
+  }, [isAuthenticated])
 
   useEffect(() => {
     const readLocalNotificationCount = () => {
@@ -314,7 +363,18 @@ export function Navbar() {
                 )}
               </div>
               <Link to="/profile" className="navbar-icon-btn" title="โปรไฟล์" aria-label="โปรไฟล์">
-                <User />
+                {avatarSrc ? (
+                  <img
+                    src={avatarSrc}
+                    alt=""
+                    className="navbar-avatar"
+                    onError={e => {
+                      e.currentTarget.src = fallbackAvatarSrc
+                    }}
+                  />
+                ) : (
+                  <User />
+                )}
               </Link>
               {/* Account menu */}
               <div className="navbar-dropdown-container" ref={dropdownRef}>
@@ -442,7 +502,18 @@ export function Navbar() {
             {isAuthenticated ? (
               <>
                 <Link to="/profile" {...mobileLinkProps('/profile')}>
-                  <User size={13} className="navbar-mobile-link-icon" />
+                  {avatarSrc ? (
+                    <img
+                      src={avatarSrc}
+                      alt=""
+                      className="navbar-mobile-avatar"
+                      onError={e => {
+                        e.currentTarget.src = fallbackAvatarSrc
+                      }}
+                    />
+                  ) : (
+                    <User size={13} className="navbar-mobile-link-icon" />
+                  )}
                   โปรไฟล์
                 </Link>
                 <button

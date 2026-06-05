@@ -68,7 +68,21 @@ export function Profile() {
 
   const handleEditProfile = () => {
     setEditForm({ username: user.username || '', bio: user.bio || '', avatar: user.avatar || '', preferences: user.preferences || [] })
+    setAvatarFile(null)
+    setAvatarPreview('')
+    setIsCropping(false)
+    if (fileInputRef.current) fileInputRef.current.value = ''
     setIsEditing(true)
+  }
+
+  const handleAvatarButtonClick = () => {
+    if (!isEditing) {
+      handleEditProfile()
+      setTimeout(() => fileInputRef.current?.click(), 0)
+      return
+    }
+
+    fileInputRef.current?.click()
   }
 
   const handleSaveProfile = async () => {
@@ -84,6 +98,8 @@ export function Profile() {
       }
       const response = await authAPI.updateProfile(formData)
       setUser(response.data.user)
+      localStorage.setItem('user', JSON.stringify(response.data.user))
+      window.dispatchEvent(new Event('teawinai:user-updated'))
       setIsEditing(false)
       toast.success('อัพเดทโปรไฟล์สำเร็จ')
     } catch (error) {
@@ -156,25 +172,39 @@ export function Profile() {
   }
 
   const handleCrop = () => {
-    if (!canvasRef.current || !avatarPreview) return
+    if (!canvasRef.current || !avatarPreview || !cropContainerRef.current) return
     const canvas = canvasRef.current
     const ctx = canvas.getContext('2d')
     const img = new Image()
     img.onload = () => {
       const size = 200
+      const cropRect = cropContainerRef.current.getBoundingClientRect()
+      const displaySize = cropRect.width || 240
+      const coverScale = Math.max(displaySize / img.width, displaySize / img.height)
+      const previewWidth = img.width * coverScale * cropData.scale
+      const previewHeight = img.height * coverScale * cropData.scale
+      const outputScale = size / displaySize
+
       canvas.width = size
       canvas.height = size
       ctx.save()
+      ctx.clearRect(0, 0, size, size)
       ctx.beginPath()
       ctx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2)
       ctx.closePath()
       ctx.clip()
-      ctx.clearRect(0, 0, size, size)
-      const imgWidth = img.width * cropData.scale
-      const imgHeight = img.height * cropData.scale
-      ctx.translate(size / 2 + cropData.positionX, size / 2 + cropData.positionY)
+      ctx.translate(
+        size / 2 + cropData.positionX * outputScale,
+        size / 2 + cropData.positionY * outputScale
+      )
       ctx.rotate((cropData.rotation * Math.PI) / 180)
-      ctx.drawImage(img, -imgWidth / 2, -imgHeight / 2, imgWidth, imgHeight)
+      ctx.drawImage(
+        img,
+        -(previewWidth * outputScale) / 2,
+        -(previewHeight * outputScale) / 2,
+        previewWidth * outputScale,
+        previewHeight * outputScale
+      )
       ctx.restore()
       canvas.toBlob((blob) => {
         if (blob) {
@@ -263,7 +293,7 @@ export function Profile() {
                 className="profile-avatar"
                 onError={e => { e.target.src = `https://ui-avatars.com/api/?name=${user.username}&background=116045&color=fff&size=100` }}
               />
-              <button className="profile-avatar-cam" onClick={() => fileInputRef.current?.click()}>
+              <button className="profile-avatar-cam" onClick={handleAvatarButtonClick}>
                 <Camera />
               </button>
             </div>
