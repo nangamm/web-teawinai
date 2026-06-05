@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import {
   BadgeCheck,
@@ -60,17 +61,23 @@ const audiences = [
   {
     title: 'Travelers',
     text: 'ค้นหาสถานที่และวางแผนเที่ยวโดยใช้ข้อมูลที่เข้าใจง่าย',
+    image: '/images/fa6dec2785180e3f6486b6bf762d5292.jpg',
+    alt: 'นักเดินทางกำลังสำรวจสถานที่ท้องถิ่น',
     imagePosition: 'center'
   },
   {
     title: 'Locals',
     text: 'ช่วยเพิ่มสถานที่น่าสนใจและแบ่งปันความรู้จากพื้นที่จริง',
-    imagePosition: 'left center'
+    image: '/images/bc0c4b82549bcdcfb63eafe24b7a08c7.jpg',
+    alt: 'คนท้องถิ่นแบ่งปันข้อมูลสถานที่',
+    imagePosition: 'center'
   },
   {
     title: 'Admins/Owners',
     text: 'ดูแลข้อมูลและตรวจสอบรายการ เพื่อให้ฐานข้อมูลยังน่าเชื่อถือ',
-    imagePosition: 'right center'
+    image: '/images/49718c4af729ec6367bfa7cde38abd99.jpg',
+    alt: 'ผู้ดูแลตรวจสอบข้อมูลสถานที่บนแดชบอร์ด',
+    imagePosition: 'center'
   }
 ]
 
@@ -89,10 +96,61 @@ const trustItems = [
   }
 ]
 
+const trustVisuals = [
+  {
+    type: 'label',
+    label: 'ชื่อที่ถูกต้อง'
+  },
+  {
+    image: '/images/about-trust-map.svg',
+    alt: 'แผนที่สถานที่ที่ตรวจสอบพิกัดแล้ว'
+  },
+  {
+    image: '/images/about-trust-review.svg',
+    alt: 'การตรวจสอบข้อมูลและรีวิวจากชุมชน'
+  },
+  {
+    image: '/images/about-trust-water.svg',
+    alt: 'ภาพสถานที่ท่องเที่ยวที่ข้อมูลพร้อมใช้งาน'
+  }
+]
+
 export default function About() {
+  const pageRef = useRef(null)
+
+  useEffect(() => {
+    const page = pageRef.current
+    if (!page) return undefined
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const revealItems = Array.from(page.querySelectorAll('.about-reveal'))
+
+    if (prefersReducedMotion || !('IntersectionObserver' in window)) {
+      revealItems.forEach(item => item.classList.add('is-visible'))
+      return undefined
+    }
+
+    page.classList.add('about-reveal-ready')
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return
+        entry.target.classList.add('is-visible')
+        observer.unobserve(entry.target)
+      })
+    }, {
+      threshold: 0.18,
+      rootMargin: '0px 0px -12% 0px'
+    })
+
+    revealItems.forEach(item => observer.observe(item))
+
+    return () => observer.disconnect()
+  }, [])
+
   return (
-    <main className="about-ref-page">
-      <section className="about-ref-hero">
+    <main className="about-ref-page" ref={pageRef}>
+      <section className="about-ref-hero about-reveal">
         <img
           src="/images/pexels-nsu-mon-1803488-3759941.jpg"
           alt="บรรยากาศแหล่งท่องเที่ยวท้องถิ่นในอีสาน"
@@ -114,7 +172,7 @@ export default function About() {
         </div>
       </section>
 
-      <section className="about-ref-console-section">
+      <section className="about-ref-console-section about-reveal">
         <div className="about-ref-console-card">
           <div className="about-ref-console-head">
             <span className="about-ref-console-icon"><MapPinned /></span>
@@ -151,7 +209,7 @@ export default function About() {
         </div>
       </section>
 
-      <section className="about-ref-mission">
+      <section className="about-ref-mission about-reveal">
         <div className="about-ref-section-head">
           <h2>จุดมุ่งหมายของเรา</h2>
           <p>
@@ -173,7 +231,7 @@ export default function About() {
         </div>
       </section>
 
-      <section className="about-ref-steps">
+      <section className="about-ref-steps about-reveal">
         <div className="about-ref-steps-pattern" aria-hidden="true" />
         <h2>ใช้งานง่ายใน 3 ขั้นตอน</h2>
         <div className="about-ref-step-grid">
@@ -187,7 +245,7 @@ export default function About() {
         </div>
       </section>
 
-      <section className="about-ref-audience">
+      <section className="about-ref-audience about-reveal">
         <div className="about-ref-section-head">
           <h2>แพลตฟอร์มเพื่อทุกคน</h2>
         </div>
@@ -195,8 +253,8 @@ export default function About() {
           {audiences.map(item => (
             <article className="about-ref-audience-card" key={item.title}>
               <img
-                src="public/images/fa6dec2785180e3f6486b6bf762d5292.jpg"
-                alt=""
+                src={item.image}
+                alt={item.alt}
                 style={{ objectPosition: item.imagePosition }}
               />
               <h3>{item.title}</h3>
@@ -206,7 +264,7 @@ export default function About() {
         </div>
       </section>
 
-      <section className="about-ref-trust-wrap">
+      <section className="about-ref-trust-wrap about-reveal">
         <div className="about-ref-trust-panel">
           <div className="about-ref-trust-copy">
             <h2>ความน่าเชื่อถือหัวใจของเรา</h2>
@@ -222,16 +280,23 @@ export default function About() {
               ))}
             </div>
           </div>
-          <div className="about-ref-collage" aria-hidden="true">
-            <div className="about-ref-collage-tile text-tile">ชื่อที่ถูกต้อง</div>
-            <div className="about-ref-collage-tile image-tile one" />
-            <div className="about-ref-collage-tile image-tile two" />
-            <div className="about-ref-collage-tile image-tile three" />
+          <div className="about-ref-collage">
+            {trustVisuals.map((item, index) => (
+              item.type === 'label' ? (
+                <div className="about-ref-collage-tile text-tile" key={item.label}>
+                  {item.label}
+                </div>
+              ) : (
+                <div className="about-ref-collage-tile image-tile" key={item.image}>
+                  <img src={item.image} alt={item.alt} loading={index > 1 ? 'lazy' : undefined} />
+                </div>
+              )
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="about-ref-final-cta">
+      <section className="about-ref-final-cta about-reveal">
         <h2>มีสถานที่ที่ควรอยู่ใน Teawinai หรืออยากคุยกับทีม?</h2>
         <p>ร่วมเป็นส่วนหนึ่งของฐานข้อมูลท้องถิ่นที่ช่วยให้นักเดินทางและคนในชุมชนใช้งานได้จริง</p>
         <div className="about-ref-actions center">
