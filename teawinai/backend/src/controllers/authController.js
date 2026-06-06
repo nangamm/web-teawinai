@@ -307,6 +307,7 @@ const getUserReviews = async (req, res) => {
                 _id: review._id,
                 placeId: review.place?._id,
                 placeName: review.place?.name || 'สถานที่',
+                placeImage: review.place?.images?.[0] || '',
                 rating: review.rating,
                 comment: review.comment,
                 createdAt: review.createdAt

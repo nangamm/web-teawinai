@@ -3643,6 +3643,12 @@ body {
   background: #f3f8f5;
 }
 
+.detail-action-btn:focus-visible {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(17, 96, 69, 0.08);
+  outline: none;
+}
+
 .detail-action-save {
   border-color: var(--green);
   background: var(--green);
@@ -3652,6 +3658,15 @@ body {
 .detail-action-save:hover {
   background: var(--green-dark);
   color: #fff;
+}
+
+.detail-action-save.is-saved {
+  background: var(--green-dark);
+  border-color: var(--green-dark);
+}
+
+.detail-action-save.is-saved svg {
+  fill: currentColor;
 }
 
 .detail-gallery {
@@ -4147,7 +4162,8 @@ body {
   width: 38px;
   height: 38px;
   border-radius: 9px;
-  background: #e9dcb5;
+  object-fit: cover;
+  flex-shrink: 0;
   color: #4b3b17;
   display: flex;
   align-items: center;
@@ -4240,6 +4256,8 @@ body {
   height: 30px;
   border-radius: 7px;
   background: #e7f0ec;
+  object-fit: cover;
+  flex-shrink: 0;
   color: var(--green-dark);
   display: flex;
   align-items: center;
@@ -5422,24 +5440,80 @@ body {
 
 /* ── Reviews ── */
 .profile-review-card {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  gap: 16px;
+  align-items: stretch;
   background: #fff;
   border-radius: 14px;
   border: 1px solid #eae8e3;
-  padding: 20px;
+  padding: 12px;
   margin-bottom: 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.profile-review-card:hover:not(:disabled) {
+  border-color: rgba(17, 96, 69, 0.35);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.profile-review-card:focus-visible {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(17, 96, 69, 0.08);
+  outline: none;
+}
+
+.profile-review-card:disabled {
+  cursor: default;
+}
+
+.profile-review-img,
+.profile-review-img-placeholder {
+  width: 100%;
+  height: 118px;
+  border-radius: 10px;
+  background: #eeece8;
+}
+
+.profile-review-img {
+  object-fit: cover;
+}
+
+.profile-review-img-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-review-img-placeholder svg {
+  width: 28px;
+  height: 28px;
+  color: #bbb;
+}
+
+.profile-review-body {
+  min-width: 0;
+  padding: 4px 4px 2px 0;
 }
 
 .profile-review-top {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  gap: 14px;
   margin-bottom: 10px;
 }
 
 .profile-review-place {
+  min-width: 0;
   font-size: 14px;
   font-weight: 600;
   color: #0e0e0e;
+  line-height: 1.35;
 }
 
 .profile-review-rating {
@@ -5461,9 +5535,22 @@ body {
   margin-bottom: 8px;
 }
 
+.profile-review-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .profile-review-date {
   font-size: 11px;
-  color: #bbb;
+  color: #888;
+}
+
+.profile-review-link {
+  color: var(--green);
+  font-size: 12px;
+  font-weight: 600;
 }
 
 /* ── Preferences ── */
@@ -5494,6 +5581,191 @@ body {
   font-weight: 400;
   color: var(--green);
   margin: 4px;
+}
+
+.profile-pref-chip-row {
+  min-height: 36px;
+  margin-bottom: 24px;
+}
+
+.profile-pref-muted {
+  color: #777;
+  font-size: 13px;
+}
+
+.profile-saved-section {
+  border-top: 1px solid #f0eee9;
+  padding-top: 22px;
+}
+
+.profile-saved-section.no-divider {
+  border-top: none;
+  padding-top: 0;
+}
+
+.profile-saved-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+
+.profile-saved-head .profile-prefs-title {
+  margin-bottom: 4px;
+}
+
+.profile-saved-head p {
+  margin: 0;
+  color: #777;
+  font-size: 12px;
+}
+
+.profile-saved-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 260px));
+  justify-content: start;
+  gap: 14px;
+}
+
+.profile-saved-card {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #eae8e3;
+  border-radius: 12px;
+  background: #fff;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.profile-saved-card:hover {
+  border-color: rgba(17, 96, 69, 0.35);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.profile-saved-card:focus-visible {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(17, 96, 69, 0.08);
+  outline: none;
+}
+
+.profile-saved-img,
+.profile-saved-img-placeholder {
+  width: 100%;
+  height: 116px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eeece8;
+}
+
+.profile-saved-img {
+  object-fit: cover;
+}
+
+.profile-saved-img-placeholder svg {
+  width: 28px;
+  height: 28px;
+  color: #bbb;
+}
+
+.profile-saved-body {
+  padding: 12px;
+}
+
+.profile-saved-name {
+  color: #111;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+  margin-bottom: 8px;
+}
+
+.profile-saved-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  color: #666;
+  font-size: 11px;
+}
+
+.profile-saved-meta span {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.profile-saved-meta span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-saved-meta svg {
+  width: 12px;
+  height: 12px;
+  color: #f5a623;
+  fill: #f5a623;
+  flex-shrink: 0;
+}
+
+.profile-saved-empty {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px dashed #d8d3cc;
+  border-radius: 12px;
+  background: #faf9f6;
+  padding: 16px;
+}
+
+.profile-saved-empty svg {
+  width: 24px;
+  height: 24px;
+  color: var(--green);
+  flex-shrink: 0;
+}
+
+.profile-saved-empty strong,
+.profile-saved-empty span {
+  display: block;
+}
+
+.profile-saved-empty strong {
+  color: #333;
+  font-size: 13px;
+  margin-bottom: 3px;
+}
+
+.profile-saved-empty span {
+  color: #777;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media (max-width: 560px) {
+  .profile-saved-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-review-card {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-review-img,
+  .profile-review-img-placeholder {
+    height: 150px;
+  }
+
+  .profile-review-body {
+    padding: 0;
+  }
 }
 
 /* ── Empty state ── */

@@ -24,6 +24,53 @@ const thaiDays = ['จันทร์', 'อังคาร', 'พุธ', 'พ�
 const thaiDayKeys = ['วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์', 'วันอาทิตย์']
 const defaultTags = ['อาหารไทย', 'อาหารจานเดียว', 'ต้มยำ', 'ราคาดี', 'อาหารเช้า']
 
+const getDisplayName = (user, fallback = 'นักเดินทาง') => (
+  user?.username || user?.name || fallback
+)
+
+const getAvatarSrc = (user, displayName) => {
+  if (user?.avatar) {
+    return user.avatar.startsWith('http') ? user.avatar : `${API_BASE}${user.avatar}`
+  }
+
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=116045&color=fff&size=96`
+}
+
+const getReviewerMeta = (review) => {
+  const displayName = getDisplayName(review.user, review.name || 'นักเดินทาง')
+
+  return {
+    name: displayName,
+    avatarSrc: getAvatarSrc(review.user, displayName),
+  }
+}
+
+const getReplyMeta = (reply) => {
+  const displayName = getDisplayName(reply.user, 'ผู้ตอบกลับ')
+
+  return {
+    name: displayName,
+    avatarSrc: getAvatarSrc(reply.user, displayName),
+  }
+}
+
+const getSavedPlacesKey = (user) => {
+  const userId = user?.id || user?._id || 'guest'
+  return `teawinai:saved-places:${userId}`
+}
+
+const readSavedPlaces = (user) => {
+  try {
+    return JSON.parse(localStorage.getItem(getSavedPlacesKey(user)) || '[]')
+  } catch {
+    return []
+  }
+}
+
+const writeSavedPlaces = (user, places) => {
+  localStorage.setItem(getSavedPlacesKey(user), JSON.stringify(places))
+}
+
 export function PlaceDetail() {
   const { id } = useParams()
   const location = useLocation()
@@ -36,6 +83,7 @@ export function PlaceDetail() {
   const [activeReplyReviewId, setActiveReplyReviewId] = useState(null)
   const [replyComment, setReplyComment] = useState('')
   const [submittingReply, setSubmittingReply] = useState(false)
+  const [isSaved, setIsSaved] = useState(false)
 
   const fetchPlace = useCallback(async () => {
     setLoading(true)
@@ -51,6 +99,12 @@ export function PlaceDetail() {
   }, [id])
 
   useEffect(() => { fetchPlace() }, [fetchPlace])
+
+  useEffect(() => {
+    const user = getUser()
+    const savedPlaces = readSavedPlaces(user)
+    setIsSaved(savedPlaces.some(item => String(item.id) === String(id)))
+  }, [id])
 
   const resultReturnState = location.state?.fromResult
     ? {
@@ -76,12 +130,61 @@ export function PlaceDetail() {
   }
 
   const handleShare = async () => {
+    const shareData = {
+      title: place?.name || 'Teawinai',
+      text: place?.name ? `ดูสถานที่นี้ใน Teawinai: ${place.name}` : 'ดูสถานที่นี้ใน Teawinai',
+      url: window.location.href,
+    }
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData)
+        return
+      } catch (error) {
+        if (error.name === 'AbortError') return
+      }
+    }
+
     try {
       await navigator.clipboard.writeText(window.location.href)
       toast.success('คัดลอกลิงก์สถานที่เรียบร้อยแล้ว')
     } catch {
       toast.error('ไม่สามารถคัดลอกลิงก์ได้')
     }
+  }
+
+  const handleSavePlace = () => {
+    if (!isAuthenticated()) {
+      toast.error('กรุณาเข้าสู่ระบบก่อนบันทึกสถานที่')
+      return
+    }
+
+    const user = getUser()
+    const savedPlaces = readSavedPlaces(user)
+    const placeId = place._id || place.id || id
+    const alreadySaved = savedPlaces.some(item => String(item.id) === String(placeId))
+
+    if (alreadySaved) {
+      writeSavedPlaces(user, savedPlaces.filter(item => String(item.id) !== String(placeId)))
+      setIsSaved(false)
+      toast.success('ยกเลิกบันทึกสถานที่แล้ว')
+      return
+    }
+
+    writeSavedPlaces(user, [
+      {
+        id: placeId,
+        name: place.name,
+        category: getCategoryName(place.category),
+        image: Array.isArray(place.images) ? place.images[0] : '',
+        address: place.address || '',
+        rating: Number(place.rating || 0),
+        savedAt: new Date().toISOString(),
+      },
+      ...savedPlaces,
+    ])
+    setIsSaved(true)
+    toast.success('บันทึกสถานที่แล้ว')
   }
 
   const handleReviewSubmit = async (event) => {
@@ -303,9 +406,15 @@ export function PlaceDetail() {
               <Share2 />
               แชร์
             </button>
-            <button type="button" className="detail-action-btn detail-action-save">
+            <button
+              type="button"
+              className={`detail-action-btn detail-action-save${isSaved ? ' is-saved' : ''}`}
+              onClick={handleSavePlace}
+              aria-pressed={isSaved}
+              title={isSaved ? 'ยกเลิกบันทึกสถานที่' : 'บันทึกสถานที่'}
+            >
               <Bookmark />
-              บันทึก
+              {isSaved ? 'บันทึกแล้ว' : 'บันทึก'}
             </button>
           </div>
         </header>
@@ -465,87 +574,105 @@ export function PlaceDetail() {
               )}
 
               <div className="detail-review-list">
-                {reviews.length > 0 ? reviews.slice(0, 3).map(review => (
-                  <article key={review.id || review._id || review.createdAt} className="detail-review-card">
-                    <div className="detail-review-top">
-                      <div className="detail-review-user">
-                        <div className="detail-review-avatar">{review.user?.name?.[0] || review.name?.[0] || 'น'}</div>
-                        <div>
-                          <strong>{review.user?.name || review.name || 'นักเดินทาง'}</strong>
-                          <span>{review.createdAt ? new Date(review.createdAt).toLocaleDateString('th-TH') : 'ไม่นานมานี้'}</span>
-                        </div>
-                      </div>
-                      <span className="detail-review-score"><Star /> {Number(review.rating || 0).toFixed(1)}</span>
-                    </div>
-                    <p>{review.comment || review.content || 'ผู้ใช้ยังไม่ได้เพิ่มข้อความรีวิว'}</p>
-                    <div className="detail-review-card-actions">
-                      {canReview ? (
-                        <button
-                          type="button"
-                          className="detail-reply-toggle"
-                          onClick={() => {
-                            const reviewId = review._id || review.id
-                            setActiveReplyReviewId(value => value === reviewId ? null : reviewId)
-                            setReplyComment('')
-                          }}
-                        >
-                          ตอบกลับ
-                        </button>
-                      ) : (
-                        <Link to="/login" className="detail-reply-login">เข้าสู่ระบบเพื่อตอบกลับ</Link>
-                      )}
-                    </div>
+                {reviews.length > 0 ? reviews.slice(0, 3).map(review => {
+                  const reviewer = getReviewerMeta(review)
 
-                    {Array.isArray(review.replies) && review.replies.length > 0 && (
-                      <div className="detail-reply-list">
-                        {review.replies.map(reply => (
-                          <div key={reply._id || reply.createdAt} className="detail-reply-item">
-                            <div className="detail-reply-avatar">{reply.user?.name?.[0] || 'ต'}</div>
-                            <div className="detail-reply-body">
-                              <div className="detail-reply-meta">
-                                <strong>{reply.user?.name || 'ผู้ตอบกลับ'}</strong>
-                                <span>{reply.createdAt ? new Date(reply.createdAt).toLocaleDateString('th-TH') : 'ไม่นานมานี้'}</span>
+                  return (
+                    <article key={review.id || review._id || review.createdAt} className="detail-review-card">
+                      <div className="detail-review-top">
+                        <div className="detail-review-user">
+                          <img
+                            src={reviewer.avatarSrc}
+                            alt={reviewer.name}
+                            className="detail-review-avatar"
+                            loading="lazy"
+                          />
+                          <div>
+                            <strong>{reviewer.name}</strong>
+                            <span>{review.createdAt ? new Date(review.createdAt).toLocaleDateString('th-TH') : 'ไม่นานมานี้'}</span>
+                          </div>
+                        </div>
+                        <span className="detail-review-score"><Star /> {Number(review.rating || 0).toFixed(1)}</span>
+                      </div>
+                      <p>{review.comment || review.content || 'ผู้ใช้ยังไม่ได้เพิ่มข้อความรีวิว'}</p>
+                      <div className="detail-review-card-actions">
+                        {canReview ? (
+                          <button
+                            type="button"
+                            className="detail-reply-toggle"
+                            onClick={() => {
+                              const reviewId = review._id || review.id
+                              setActiveReplyReviewId(value => value === reviewId ? null : reviewId)
+                              setReplyComment('')
+                            }}
+                          >
+                            ตอบกลับ
+                          </button>
+                        ) : (
+                          <Link to="/login" className="detail-reply-login">เข้าสู่ระบบเพื่อตอบกลับ</Link>
+                        )}
+                      </div>
+
+                      {Array.isArray(review.replies) && review.replies.length > 0 && (
+                        <div className="detail-reply-list">
+                          {review.replies.map(reply => {
+                            const replyAuthor = getReplyMeta(reply)
+
+                            return (
+                              <div key={reply._id || reply.createdAt} className="detail-reply-item">
+                                <img
+                                  src={replyAuthor.avatarSrc}
+                                  alt={replyAuthor.name}
+                                  className="detail-reply-avatar"
+                                  loading="lazy"
+                                />
+                                <div className="detail-reply-body">
+                                  <div className="detail-reply-meta">
+                                    <strong>{replyAuthor.name}</strong>
+                                    <span>{reply.createdAt ? new Date(reply.createdAt).toLocaleDateString('th-TH') : 'ไม่นานมานี้'}</span>
+                                  </div>
+                                  <p>{reply.comment}</p>
+                                </div>
                               </div>
-                              <p>{reply.comment}</p>
+                            )
+                          })}
+                        </div>
+                      )}
+
+                      {activeReplyReviewId === (review._id || review.id) && (
+                        <form className="detail-reply-form" onSubmit={event => handleReplySubmit(event, review._id || review.id)}>
+                          <textarea
+                            value={replyComment}
+                            onChange={event => setReplyComment(event.target.value)}
+                            placeholder="เขียนคำตอบกลับความคิดเห็นนี้"
+                            rows={3}
+                            maxLength={1000}
+                            required
+                          />
+                          <div className="detail-reply-form-actions">
+                            <span>{replyComment.length}/1000</span>
+                            <div>
+                              <button
+                                type="button"
+                                className="detail-review-cancel"
+                                onClick={() => {
+                                  setActiveReplyReviewId(null)
+                                  setReplyComment('')
+                                }}
+                                disabled={submittingReply}
+                              >
+                                ยกเลิก
+                              </button>
+                              <button type="submit" className="detail-review-submit" disabled={submittingReply}>
+                                {submittingReply ? 'กำลังบันทึก...' : 'ตอบกลับ'}
+                              </button>
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {activeReplyReviewId === (review._id || review.id) && (
-                      <form className="detail-reply-form" onSubmit={event => handleReplySubmit(event, review._id || review.id)}>
-                        <textarea
-                          value={replyComment}
-                          onChange={event => setReplyComment(event.target.value)}
-                          placeholder="เขียนคำตอบกลับความคิดเห็นนี้"
-                          rows={3}
-                          maxLength={1000}
-                          required
-                        />
-                        <div className="detail-reply-form-actions">
-                          <span>{replyComment.length}/1000</span>
-                          <div>
-                            <button
-                              type="button"
-                              className="detail-review-cancel"
-                              onClick={() => {
-                                setActiveReplyReviewId(null)
-                                setReplyComment('')
-                              }}
-                              disabled={submittingReply}
-                            >
-                              ยกเลิก
-                            </button>
-                            <button type="submit" className="detail-review-submit" disabled={submittingReply}>
-                              {submittingReply ? 'กำลังบันทึก...' : 'ตอบกลับ'}
-                            </button>
-                          </div>
-                        </div>
-                      </form>
-                    )}
-                  </article>
-                )) : (
+                        </form>
+                      )}
+                    </article>
+                  )
+                }) : (
                   <div className="detail-empty-review">
                     <MessageCircle />
                     <p>ยังไม่มีความคิดเห็นสำหรับสถานที่นี้</p>

@@ -1,13 +1,29 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { MapPin, Star, Settings, LogOut, Camera, Upload, Crop, ZoomIn, ZoomOut, Move } from 'lucide-react'
+import { MapPin, Star, Settings, LogOut, Camera, Upload, Crop, ZoomIn, ZoomOut, Move, Bookmark } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { authAPI } from '../services/api'
+
+const API_BASE = 'http://localhost:5001'
+
+const getSavedPlacesKey = (user) => {
+  const userId = user?.id || user?._id || 'guest'
+  return `teawinai:saved-places:${userId}`
+}
+
+const readSavedPlaces = (user) => {
+  try {
+    return JSON.parse(localStorage.getItem(getSavedPlacesKey(user)) || '[]')
+  } catch {
+    return []
+  }
+}
 
 export function Profile() {
   const [user, setUser] = useState(null)
   const [userPlaces, setUserPlaces] = useState([])
   const [userReviews, setUserReviews] = useState([])
+  const [savedPlaces, setSavedPlaces] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState('places')
   const [isEditing, setIsEditing] = useState(false)
@@ -42,9 +58,24 @@ export function Profile() {
   useEffect(() => { fetchUserData() }, [fetchUserData])
 
   useEffect(() => {
-    if (activeTab === 'places' && user) fetchUserPlaces()
-    else if (activeTab === 'reviews' && user) fetchUserReviews()
-  }, [activeTab, user])
+    if (!user) return
+    fetchUserPlaces()
+    fetchUserReviews()
+  }, [user])
+
+  useEffect(() => {
+    if (!user) return undefined
+
+    const syncSavedPlaces = () => setSavedPlaces(readSavedPlaces(user))
+    syncSavedPlaces()
+    window.addEventListener('focus', syncSavedPlaces)
+    window.addEventListener('storage', syncSavedPlaces)
+
+    return () => {
+      window.removeEventListener('focus', syncSavedPlaces)
+      window.removeEventListener('storage', syncSavedPlaces)
+    }
+  }, [user])
 
   const fetchUserPlaces = async () => {
     try {
@@ -243,6 +274,11 @@ export function Profile() {
     return icons[category] || '📍'
   }
 
+  const getPlaceImage = (image) => {
+    if (!image) return ''
+    return image.startsWith('http') ? image : `${API_BASE}${image}`
+  }
+
   const avatarSrc = user
     ? (user.avatar
         ? (user.avatar.startsWith('http') ? user.avatar : `http://localhost:5001${user.avatar}`)
@@ -341,7 +377,7 @@ export function Profile() {
           {[
             { key: 'places', label: `สถานที่ที่เพิ่ม (${userPlaces.length})` },
             { key: 'reviews', label: `รีวิว (${userReviews.length})` },
-            { key: 'preferences', label: 'ความสนใจ' },
+            { key: 'preferences', label: `สถานที่ที่บันทึกไว้ (${savedPlaces.length})` },
           ].map(t => (
             <button
               key={t.key}
@@ -406,17 +442,40 @@ export function Profile() {
           userReviews.length > 0 ? (
             <div>
               {userReviews.map(review => (
-                <div key={review._id} className="profile-review-card">
-                  <div className="profile-review-top">
-                    <span className="profile-review-place">{review.placeName}</span>
-                    <div className="profile-review-rating">
-                      <Star />
-                      {review.rating}
+                <button
+                  key={review._id}
+                  type="button"
+                  className="profile-review-card"
+                  onClick={() => review.placeId && navigate(`/places/${review.placeId}`)}
+                  disabled={!review.placeId}
+                >
+                  {review.placeImage ? (
+                    <img
+                      src={getPlaceImage(review.placeImage)}
+                      alt={review.placeName}
+                      className="profile-review-img"
+                      onError={e => { e.currentTarget.style.display = 'none' }}
+                    />
+                  ) : (
+                    <div className="profile-review-img-placeholder">
+                      <MapPin />
+                    </div>
+                  )}
+                  <div className="profile-review-body">
+                    <div className="profile-review-top">
+                      <span className="profile-review-place">{review.placeName}</span>
+                      <div className="profile-review-rating">
+                        <Star />
+                        {Number(review.rating || 0).toFixed(1)}
+                      </div>
+                    </div>
+                    <div className="profile-review-comment">{review.comment || 'ไม่มีข้อความรีวิว'}</div>
+                    <div className="profile-review-footer">
+                      <span className="profile-review-date">{new Date(review.createdAt).toLocaleDateString('th-TH')}</span>
+                      {review.placeId && <span className="profile-review-link">ดูสถานที่</span>}
                     </div>
                   </div>
-                  <div className="profile-review-comment">{review.comment}</div>
-                  <div className="profile-review-date">{new Date(review.createdAt).toLocaleDateString('th-TH')}</div>
-                </div>
+                </button>
               ))}
             </div>
           ) : (
@@ -431,11 +490,57 @@ export function Profile() {
         {/* ── Tab: Preferences ── */}
         {activeTab === 'preferences' && (
           <div className="profile-prefs-card">
-            <div className="profile-prefs-title">ความสนใจ</div>
-            <div>
-              {user.preferences.map((pref, i) => (
-                <span key={i} className="profile-pref-chip">{pref}</span>
-              ))}
+            <div className="profile-saved-section no-divider">
+              <div className="profile-saved-head">
+                <div>
+                  <div className="profile-prefs-title">สถานที่ที่บันทึกไว้</div>
+                  <p>{savedPlaces.length} สถานที่</p>
+                </div>
+              </div>
+
+              {savedPlaces.length > 0 ? (
+                <div className="profile-saved-grid">
+                  {savedPlaces.map(place => (
+                    <button
+                      type="button"
+                      key={place.id}
+                      className="profile-saved-card"
+                      onClick={() => navigate(`/places/${place.id}`)}
+                    >
+                      {place.image ? (
+                        <img
+                          src={getPlaceImage(place.image)}
+                          alt={place.name}
+                          className="profile-saved-img"
+                          onError={e => { e.currentTarget.style.display = 'none' }}
+                        />
+                      ) : (
+                        <div className="profile-saved-img-placeholder">
+                          <Bookmark />
+                        </div>
+                      )}
+                      <div className="profile-saved-body">
+                        <div className="profile-saved-name">{place.name}</div>
+                        <div className="profile-saved-meta">
+                          <span>{place.category || 'สถานที่'}</span>
+                          <span>
+                            <Star />
+                            {Number(place.rating || 0).toFixed(1)}
+                          </span>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="profile-saved-empty">
+                  <Bookmark />
+                  <div>
+                    <strong>ยังไม่มีสถานที่ที่บันทึกไว้</strong>
+                    <span>กดบันทึกจากหน้ารายละเอียดสถานที่เพื่อเก็บไว้กลับมาดูภายหลัง</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
