@@ -255,7 +255,7 @@ export function Navbar() {
         {/* Logo */}
         <Link to="/" className="navbar-logo">
           <MapPin className="navbar-logo-icon" />
-          <span className="navbar-logo-text">Teawinai</span>
+          <img src="/images/Gemini_Generated_Image_a4isqwa4isqwa4is-removebg-preview.png" alt="Teawinai Logo" />
         </Link>
 
         {/* Desktop links */}
