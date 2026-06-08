@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import { Navbar } from '@/components/Navbar'
 import { Footer } from '@/components/Footer'
 import ProtectedRoute from '@/components/ProtectedRoute'
@@ -17,9 +17,12 @@ import About from '@/pages/About'
 import Contact from '@/pages/Contact'
 
 function App() {
+  const location = useLocation()
+  const hideAppChrome = location.pathname === '/login'
+
   return (
     <div className="min-h-screen flex flex-col">
-      <Navbar />
+      {!hideAppChrome && <Navbar />}
       <main className="flex-grow">
         <Routes>
           {/* Public routes */}
@@ -88,7 +91,7 @@ function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
-      <Footer />
+      {!hideAppChrome && <Footer />}
     </div>
   )
 }
