@@ -3,13 +3,10 @@ import { Link, useNavigate } from 'react-router-dom'
 import {
   AlertCircle,
   ArrowLeft,
-  Compass,
+  Facebook,
   Eye,
   EyeOff,
   Loader2,
-  MapPin,
-  Route,
-  Star,
 } from 'lucide-react'
 import { authAPI } from '@/services/api'
 import { saveToken } from '@/utils/auth'
@@ -47,11 +44,11 @@ export function Login() {
         localStorage.setItem('user', JSON.stringify(response.data.user))
         navigate('/')
       } else {
-        setError('Login failed. Please try again.')
+        setError('เข้าสู่ระบบไม่สำเร็จ กรุณาลองอีกครั้ง')
       }
     } catch (error) {
       console.error('Login error:', error)
-      setError('Invalid email or password')
+      setError('อีเมลหรือรหัสผ่านไม่ถูกต้อง')
     } finally {
       setLoading(false)
     }
@@ -61,23 +58,37 @@ export function Login() {
     <div className="login-page">
       <section className="login-shell" aria-labelledby="login-title">
         <div className="login-card">
-          <div className="login-form-panel">
-            <div className="login-topbar">
-              <Link to="/" className="login-home-link">
-                <ArrowLeft />
-                Back home
+          <aside className="login-art-panel" aria-label="การท่องเที่ยวท้องถิ่น Teawinai">
+            <div className="login-art-top">
+              <Link to="/" className="login-brand">
+                <span className="login-brand-mark" aria-hidden="true">
+                  <ArrowLeft />
+                </span>
+                <span>กลับหน้าหลัก</span>
               </Link>
             </div>
 
+            <div className="login-art-copy">
+              <h2>ค้นหาที่เที่ยวที่ใช่</h2>
+              <p>บันทึกสถานที่น่าไป วางแผนเส้นทาง และจัดทริปท้องถิ่นได้ในไม่กี่คลิก</p>
+              <div className="login-art-dots" aria-hidden="true">
+                <span />
+                <span />
+                <span />
+              </div>
+            </div>
+          </aside>
+
+          <div className="login-form-panel">
             <div className="login-form-wrap">
               <div className="login-heading">
-                <h1 id="login-title">Welcome Back</h1>
-                <p>Sign in to plan trips, save places, and manage your local recommendations.</p>
+                <h1 id="login-title">ยินดีต้อนรับกลับสู่ Teawinai!</h1>
+                <p>เข้าสู่ระบบบัญชีของคุณ</p>
               </div>
 
               <form className="login-form" onSubmit={handleSubmit}>
                 <div className="login-field">
-                  <label htmlFor="email">Email</label>
+                  <label htmlFor="email">อีเมลของคุณ</label>
                   <input
                     id="email"
                     name="email"
@@ -87,12 +98,12 @@ export function Login() {
                     value={formData.email}
                     onChange={handleChange}
                     className={error ? 'has-error' : ''}
-                    placeholder="you@example.com"
+                    placeholder="name@example.com"
                   />
                 </div>
 
                 <div className="login-field">
-                  <label htmlFor="password">Password</label>
+                  <label htmlFor="password">รหัสผ่าน</label>
                   <div className={`login-password-control${error ? ' has-error' : ''}`}>
                     <input
                       id="password"
@@ -102,12 +113,12 @@ export function Login() {
                       required
                       value={formData.password}
                       onChange={handleChange}
-                      placeholder="Enter your password"
+                      placeholder="กรอกรหัสผ่าน"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      aria-label={showPassword ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}
                     >
                       {showPassword ? <EyeOff /> : <Eye />}
                     </button>
@@ -124,97 +135,43 @@ export function Login() {
                 <div className="login-options">
                   <label className="login-remember">
                     <input id="remember-me" name="remember-me" type="checkbox" />
-                    <span>Remember me</span>
+                    <span>จดจำฉันไว้</span>
                   </label>
-                  <a href="#">Forgot your password?</a>
+                  <a href="#">ลืมรหัสผ่าน?</a>
                 </div>
 
                 <button type="submit" className="login-submit" disabled={loading}>
                   {loading ? (
                     <>
                       <Loader2 className="login-spin" />
-                      Signing in...
+                      กำลังเข้าสู่ระบบ...
                     </>
                   ) : (
-                    'Log In'
+                    'เข้าสู่ระบบ'
                   )}
                 </button>
 
                 <div className="login-divider">
-                  <span>Or login with</span>
+                  <span>เข้าสู่ระบบอย่างรวดเร็ว</span>
                 </div>
 
-                <div className="login-social-grid" aria-label="Social login options">
+                <div className="login-social-grid" aria-label="ตัวเลือกเข้าสู่ระบบด้วยโซเชียล">
                   <button type="button">
                     <span className="login-google-mark" aria-hidden="true">G</span>
-                    Google
+                    เข้าสู่ระบบด้วย Google
                   </button>
                   <button type="button">
-                    <span aria-hidden="true">Apple</span>
+                    <Facebook aria-hidden="true" />
+                    เข้าสู่ระบบด้วย Facebook
                   </button>
                 </div>
               </form>
 
               <p className="login-register">
-                Do not have an account? <Link to="/register">Register now.</Link>
+                ยังไม่มีบัญชี? <Link to="/register">สมัครสมาชิก</Link>
               </p>
             </div>
-
-            <div className="login-footer-note">
-              <span>Copyright (c) 2026 Teawinai</span>
-              <Link to="/contact">Contact</Link>
-            </div>
           </div>
-
-          <aside className="login-art-panel" aria-label="Teawinai trip planning overview">
-            <div className="login-art-pattern" aria-hidden="true" />
-            <div className="login-art-copy">
-              <h2>Plan local trips with trusted recommendations.</h2>
-              <p>Access your saved places, trip ideas, and contributor tools in one calm workspace.</p>
-            </div>
-
-            <div className="login-preview">
-              <div className="login-preview-card login-preview-summary">
-                <div>
-                  <span>Saved places</span>
-                  <strong>24</strong>
-                </div>
-                <MapPin />
-              </div>
-              <div className="login-preview-card login-preview-route">
-                <div>
-                  <span>Next plan</span>
-                  <strong>Ubon day route</strong>
-                </div>
-                <Route />
-              </div>
-              <div className="login-preview-card login-preview-rating">
-                <div>
-                  <span>Community rating</span>
-                  <strong>4.8</strong>
-                </div>
-                <Star />
-              </div>
-              <div className="login-preview-table">
-                <div className="login-preview-row head">
-                  <span>Place</span>
-                  <span>Budget</span>
-                  <span>Status</span>
-                </div>
-                {[
-                  ['Wat Phra That Nong Bua', 'Free', 'Saved'],
-                  ['Huai Wang Nong', 'Low', 'Planned'],
-                  ['Local cafe route', 'Medium', 'Draft'],
-                ].map(([place, budget, status]) => (
-                  <div className="login-preview-row" key={place}>
-                    <span>{place}</span>
-                    <span>{budget}</span>
-                    <span>{status}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </aside>
         </div>
       </section>
     </div>

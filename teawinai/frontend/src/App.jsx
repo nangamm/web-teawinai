@@ -18,7 +18,7 @@ import Contact from '@/pages/Contact'
 
 function App() {
   const location = useLocation()
-  const hideAppChrome = location.pathname === '/login'
+  const hideAppChrome = ['/login', '/register'].includes(location.pathname)
 
   return (
     <div className="min-h-screen flex flex-col">

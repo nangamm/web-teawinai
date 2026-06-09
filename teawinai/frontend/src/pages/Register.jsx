@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, User, Lock, AlertCircle } from 'lucide-react'
+import { AlertCircle, ArrowLeft, CheckCircle2, Eye, EyeOff, Facebook, Loader2 } from 'lucide-react'
 import { authAPI } from '@/services/api'
 
 export function Register() {
@@ -35,25 +35,21 @@ export function Register() {
   const validateForm = () => {
     const newErrors = {}
 
-    // Name validation
     if (!formData.name.trim()) {
-      newErrors.name = 'Name is required'
+      newErrors.name = 'กรุณากรอกชื่อ'
     }
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email'
+      newErrors.email = 'กรุณากรอกอีเมลให้ถูกต้อง'
     }
 
-    // Password validation
     if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters'
+      newErrors.password = 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร'
     }
 
-    // Confirm password validation
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match'
+      newErrors.confirmPassword = 'รหัสผ่านไม่ตรงกัน'
     }
 
     setErrors(newErrors)
@@ -77,49 +73,57 @@ export function Register() {
       })
 
       if (response.data.success) {
-        setSuccess('Registration successful! Please login.')
+        setSuccess('สมัครสมาชิกสำเร็จ กรุณาเข้าสู่ระบบ')
         setTimeout(() => {
-          navigate('/login', { state: { message: 'Registration successful! Please login.' } })
+          navigate('/login', { state: { message: 'สมัครสมาชิกสำเร็จ กรุณาเข้าสู่ระบบ' } })
         }, 2000)
       } else {
-        setErrors({ submit: 'Registration failed. Please try again.' })
+        setErrors({ submit: 'สมัครสมาชิกไม่สำเร็จ กรุณาลองอีกครั้ง' })
       }
     } catch (error) {
       console.error('Registration error:', error)
-      setErrors({ submit: 'Registration failed. Please try again.' })
+      setErrors({ submit: 'สมัครสมาชิกไม่สำเร็จ กรุณาลองอีกครั้ง' })
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-blue-600">
-            <User className="h-6 w-6 text-white" />
-          </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Create your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Or{' '}
-            <Link
-              to="/login"
-              className="font-medium text-blue-600 hover:text-blue-500"
-            >
-              sign in to your existing account
-            </Link>
-          </p>
-        </div>
-        
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Name
-              </label>
-              <div className="mt-1">
+    <div className="register-page">
+      <section className="register-shell" aria-labelledby="register-title">
+        <div className="register-card">
+          <aside className="register-art-panel" aria-label="การท่องเที่ยวท้องถิ่น Teawinai">
+            <div className="register-art-top">
+              <Link to="/" className="register-brand">
+                <span className="register-brand-mark" aria-hidden="true">
+                  <ArrowLeft />
+                </span>
+                <span>กลับหน้าหลัก</span>
+              </Link>
+            </div>
+
+            <div className="register-art-copy">
+              <h2>เริ่มต้นทริปท้องถิ่นของคุณ</h2>
+              <p>สมัครบัญชีเพื่อบันทึกสถานที่ วางแผนเส้นทาง และเก็บไอเดียทริปไว้ในที่เดียว</p>
+              <div className="register-art-dots" aria-hidden="true">
+                <span />
+                <span />
+                <span />
+              </div>
+            </div>
+          </aside>
+
+          <div className="register-form-panel">
+            <div className="register-form-wrap">
+              <div className="register-heading">
+                <h1 id="register-title">สมัครบัญชี Teawinai</h1>
+                <p>เริ่มวางแผนทริปจากคำแนะนำของคนท้องถิ่น</p>
+              </div>
+
+              <form className="register-form" onSubmit={handleSubmit}>
+                <div className="register-field">
+                  <label htmlFor="name">ชื่อของคุณ</label>
+                  <div>
                 <input
                   id="name"
                   name="name"
@@ -127,20 +131,18 @@ export function Register() {
                   required
                   value={formData.name}
                   onChange={handleChange}
-                  className={`input ${errors.name ? 'border-red-500' : ''}`}
-                  placeholder="Enter your name"
+                        className={errors.name ? 'has-error' : ''}
+                        placeholder="กรอกชื่อของคุณ"
                 />
                 {errors.name && (
-                  <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+                      <p className="register-field-error">{errors.name}</p>
                 )}
               </div>
             </div>
 
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Email address
-              </label>
-              <div className="mt-1">
+                <div className="register-field">
+                  <label htmlFor="email">อีเมลของคุณ</label>
+                  <div>
                 <input
                   id="email"
                   name="email"
@@ -149,20 +151,18 @@ export function Register() {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className={`input ${errors.email ? 'border-red-500' : ''}`}
-                  placeholder="Enter your email"
+                        className={errors.email ? 'has-error' : ''}
+                        placeholder="name@example.com"
                 />
                 {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                      <p className="register-field-error">{errors.email}</p>
                 )}
               </div>
             </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <div className="mt-1 relative">
+                <div className="register-field">
+                  <label htmlFor="password">รหัสผ่าน</label>
+                  <div className={`register-password-control${errors.password ? ' has-error' : ''}`}>
                 <input
                   id="password"
                   name="password"
@@ -170,33 +170,25 @@ export function Register() {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className={`input pr-10 ${errors.password ? 'border-red-500' : ''}`}
-                  placeholder="Enter your password"
+                  placeholder="กรอกรหัสผ่าน"
                   minLength="6"
                 />
-                <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
+                        aria-label={showPassword ? 'ซ่อนรหัสผ่าน' : 'แสดงรหัสผ่าน'}
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5" />
-                  ) : (
-                    <Eye className="h-5 w-5" />
-                  )}
+                        {showPassword ? <EyeOff /> : <Eye />}
                 </button>
               </div>
               {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                    <p className="register-field-error">{errors.password}</p>
               )}
             </div>
 
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Confirm Password
-              </label>
-              <div className="mt-1 relative">
+                <div className="register-field">
+                  <label htmlFor="confirmPassword">ยืนยันรหัสผ่าน</label>
+                  <div className={`register-password-control${errors.confirmPassword ? ' has-error' : ''}`}>
                 <input
                   id="confirmPassword"
                   name="confirmPassword"
@@ -204,109 +196,86 @@ export function Register() {
                   required
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className={`input pr-10 ${errors.confirmPassword ? 'border-red-500' : ''}`}
-                  placeholder="Confirm your password"
+                  placeholder="ยืนยันรหัสผ่าน"
                   minLength="6"
                 />
-                <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
+                        aria-label={showConfirmPassword ? 'ซ่อนรหัสผ่านยืนยัน' : 'แสดงรหัสผ่านยืนยัน'}
                 >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-5 w-5" />
-                  ) : (
-                    <Eye className="h-5 w-5" />
-                  )}
+                        {showConfirmPassword ? <EyeOff /> : <Eye />}
                 </button>
               </div>
               {errors.confirmPassword && (
-                <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+                    <p className="register-field-error">{errors.confirmPassword}</p>
               )}
             </div>
-          </div>
 
-          {/* Success Message */}
           {success && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <div className="flex items-center text-green-600">
-                <AlertCircle className="h-5 w-5 mr-2" />
+                  <div className="register-success" role="status">
+                    <CheckCircle2 />
                 {success}
-              </div>
             </div>
           )}
 
-          {/* Error Message */}
           {errors.submit && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <div className="flex items-center text-red-600">
-                <AlertCircle className="h-5 w-5 mr-2" />
+                  <div className="register-error" role="alert">
+                    <AlertCircle />
                 {errors.submit}
-              </div>
             </div>
           )}
 
-          <div className="flex items-center">
+                <label className="register-terms">
             <input
               id="agree-terms"
               name="agree-terms"
               type="checkbox"
               required
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
-            <label htmlFor="agree-terms" className="ml-2 block text-sm text-gray-900">
-              I agree to the{' '}
-              <a href="#" className="text-blue-600 hover:text-blue-500">
-                Terms of Service
-              </a>{' '}
-              and{' '}
-              <a href="#" className="text-blue-600 hover:text-blue-500">
-                Privacy Policy
-              </a>
+                  <span>
+                    ฉันยอมรับ <a href="#">ข้อกำหนดการใช้บริการ</a> และ <a href="#">นโยบายความเป็นส่วนตัว</a>
+                  </span>
             </label>
-          </div>
 
-          <div>
             <button
               type="submit"
               disabled={loading}
-              className="btn btn-primary w-full py-3 text-base disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="register-submit"
             >
-              {loading ? 'Creating account...' : 'Create account'}
+                  {loading ? (
+                    <>
+                      <Loader2 className="register-spin" />
+                      กำลังสร้างบัญชี...
+                    </>
+                  ) : (
+                    'สมัครสมาชิก'
+                  )}
             </button>
-          </div>
 
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
+                <div className="register-divider">
+                  <span>สมัครอย่างรวดเร็ว</span>
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-gray-50 text-gray-500">Or sign up with</span>
+
+                <div className="register-social-grid" aria-label="ตัวเลือกสมัครด้วยโซเชียล">
+                  <button type="button">
+                    <span className="register-google-mark" aria-hidden="true">G</span>
+                    สมัครด้วย Google
+                  </button>
+                  <button type="button">
+                    <Facebook aria-hidden="true" />
+                    สมัครด้วย Facebook
+                  </button>
               </div>
-            </div>
 
-            <div className="mt-6 grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-              >
-                <span className="sr-only">Sign up with Facebook</span>
-                Facebook
-              </button>
-
-              <button
-                type="button"
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-              >
-                <span className="sr-only">Sign up with Google</span>
-                Google
-              </button>
+                <p className="register-login">
+                  มีบัญชีอยู่แล้ว? <Link to="/login">เข้าสู่ระบบ</Link>
+                </p>
+              </form>
             </div>
           </div>
-        </form>
-      </div>
+        </div>
+      </section>
     </div>
   )
 }
