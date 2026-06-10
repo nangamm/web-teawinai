@@ -727,8 +727,10 @@ body {
   margin: 0;
   padding: 54px 62px 88px;
   border-radius: 0;
+  background-color: #0d1a14;
   background:
-    linear-gradient(180deg, rgba(13, 26, 20, 0.1) 0%, rgba(13, 26, 20, 0.08) 44%, rgba(13, 26, 20, 0.72) 100%),
+    linear-gradient(180deg, rgba(8, 18, 13, 0.18) 0%, rgba(8, 18, 13, 0.08) 38%, rgba(8, 18, 13, 0.68) 100%),
+    linear-gradient(90deg, rgba(8, 18, 13, 0.5) 0%, rgba(8, 18, 13, 0.12) 52%, rgba(8, 18, 13, 0.04) 100%),
     url('/images/pexels-nsu-mon-1803488-3759941.jpg') center / cover no-repeat;
   color: #fff;
   isolation: auto;
@@ -1031,7 +1033,10 @@ body {
   .login-art-panel {
     min-height: 360px;
     padding: 24px 20px 34px;
-    background-position: center top;
+    background:
+      linear-gradient(180deg, rgba(8, 18, 13, 0.2) 0%, rgba(8, 18, 13, 0.1) 34%, rgba(8, 18, 13, 0.72) 100%),
+      linear-gradient(90deg, rgba(8, 18, 13, 0.46) 0%, rgba(8, 18, 13, 0.1) 58%, rgba(8, 18, 13, 0.04) 100%),
+      url('/images/pexels-nsu-mon-1803488-3759941.jpg') center / cover no-repeat;
   }
 
   .login-brand {
