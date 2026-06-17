@@ -91,8 +91,8 @@ const placeSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['active', 'inactive'],
-    default: 'active'
+    enum: ['pending', 'active', 'inactive', 'rejected'],
+    default: 'pending'
   },
   submitted_by: {
     type: mongoose.Schema.Types.ObjectId,

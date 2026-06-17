@@ -225,7 +225,7 @@ export function AddPlace() {
       const response = await placesAPI.createPlace(formDataToSend)
       console.log('Place created successfully:', response.data)
 
-      toast.success('เพิ่มสถานที่สำเร็จ!')
+      toast.success(response.data?.message || 'ส่งสถานที่แล้ว รอ Admin อนุมัติก่อนแสดงบนหน้าเว็บ')
       navigate('/places')
     } catch (error) {
       console.error('Error creating place:', error)

@@ -64,6 +64,7 @@ export const authAPI = {
 // Places API
 export const placesAPI = {
   getPlaces: (params) => api.get('/places', { params }),
+  getAdminPlaces: (params) => api.get('/places/admin/all', { params }),
   getPlace: (id) => api.get(`/places/${id}`),
   createPlace: (placeData) => {
   // Check if it's FormData (for file uploads)
@@ -90,6 +91,8 @@ export const placesAPI = {
     return api.put(`/places/${id}`, placeData)
   },
   deletePlace: (id) => api.delete(`/places/${id}`),
+  approvePlace: (id) => api.put(`/places/${id}/approve`),
+  rejectPlace: (id) => api.put(`/places/${id}/reject`),
   addReview: (id, reviewData) => api.post(`/places/${id}/reviews`, reviewData),
   addReviewReply: (id, reviewId, replyData) => api.post(`/places/${id}/reviews/${reviewId}/replies`, replyData),
 }

@@ -279,6 +279,7 @@ const getUserPlaces = async (req, res) => {
                 address: place.address,
                 price_min: place.price_min,
                 price_max: place.price_max,
+                status: place.status,
                 open_time: place.open_time,
                 close_time: place.close_time
             }))
@@ -434,15 +435,17 @@ const getDashboardStats = async (req, res) => {
         const totalUsers = await User.countDocuments();
         const totalPlaces = await Place.countDocuments();
         
-        // Get pending price updates count
-        const pendingUpdates = await require('../models/PriceUpdate').countDocuments({ status: 'pending' });
+        const PriceUpdate = require('../models/PriceUpdate');
+        const pendingUpdates = await PriceUpdate.countDocuments({ approval_status: 'pending' });
+        const pendingPlaces = await Place.countDocuments({ status: 'pending' });
 
         res.json({
             success: true,
             stats: {
                 totalUsers,
                 totalPlaces,
-                pendingUpdates
+                pendingUpdates,
+                pendingPlaces
             }
         });
     } catch (error) {

@@ -63,7 +63,8 @@ const createNotification = async ({ recipient, actor, type, title, message, plac
 // @access   Public
 exports.getPlaces = async (req, res) => {
     try {
-        const { category, status = 'active', page = 1, limit = 50, search, province, district, subdistrict } = req.query;
+        const { category, page = 1, limit = 50, search, province, district, subdistrict } = req.query;
+        const status = 'active';
         
         console.log('Get places query params:', { category, status, page, limit, search, province, district, subdistrict });
         
@@ -138,7 +139,7 @@ exports.getPlace = async (req, res) => {
     try {
         const place = await populatePlace(Place.findById(req.params.id));
 
-        if (!place) {
+        if (!place || place.status !== 'active') {
             return res.status(404).json({
                 success: false,
                 message: 'ไม่พบสถานที่ที่ต้องการ'
@@ -166,7 +167,7 @@ exports.createReview = async (req, res) => {
         const { rating, comment } = req.body;
         const place = await Place.findById(req.params.id);
 
-        if (!place) {
+        if (!place || place.status !== 'active') {
             return res.status(404).json({
                 success: false,
                 message: 'ไม่พบสถานที่ที่ต้องการ'
@@ -249,6 +250,42 @@ exports.createReview = async (req, res) => {
     }
 };
 
+// @desc    Get all places for admin review
+// @route   GET /api/places/admin/all
+// @access   Admin only
+exports.getAdminPlaces = async (req, res) => {
+    try {
+        const { status, page = 1, limit = 100, search } = req.query;
+        const query = {};
+
+        if (status) query.status = status;
+        if (search) query.name = { $regex: search, $options: 'i' };
+
+        const total = await Place.countDocuments(query);
+        const places = await populatePlace(Place.find(query))
+            .limit(limit * 1)
+            .skip((page - 1) * limit)
+            .sort({ createdAt: -1 });
+
+        res.json({
+            success: true,
+            data: places,
+            pagination: {
+                page: parseInt(page),
+                limit: parseInt(limit),
+                total,
+                pages: Math.ceil(total / limit)
+            }
+        });
+    } catch (error) {
+        console.error('Get admin places error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'ไม่สามารถดึงข้อมูลสถานที่สำหรับผู้ดูแลได้'
+        });
+    }
+};
+
 // @desc    Reply to a place review
 // @route   POST /api/places/:id/reviews/:reviewId/replies
 // @access   User, Owner, Admin
@@ -257,7 +294,7 @@ exports.createReviewReply = async (req, res) => {
         const { comment } = req.body;
         const place = await Place.findById(req.params.id);
 
-        if (!place) {
+        if (!place || place.status !== 'active') {
             return res.status(404).json({
                 success: false,
                 message: 'ไม่พบสถานที่ที่ต้องการ'
@@ -346,7 +383,8 @@ exports.createPlace = async (req, res) => {
         
         const placeData = {
             ...req.body,
-            submitted_by: req.user.id
+            submitted_by: req.user.id,
+            status: req.user.role === 'admin' && req.body.status === 'active' ? 'active' : 'pending'
         };
 
         // Validate required location fields
@@ -442,7 +480,7 @@ exports.createPlace = async (req, res) => {
         res.status(201).json({
             success: true,
             data: populatedPlace,
-            message: 'เพิ่มสถานที่สำเร็จ'
+            message: placeData.status === 'active' ? 'เพิ่มสถานที่สำเร็จ' : 'ส่งสถานที่เพื่อรออนุมัติแล้ว'
         });
     } catch (error) {
         console.error('Create place error:', error);
@@ -480,6 +518,9 @@ exports.updatePlace = async (req, res) => {
 
         // Build update data from req.body (start with a copy)
         const updateData = { ...req.body };
+        if (req.user.role !== 'admin') {
+            delete updateData.status;
+        }
 
         // Handle opening_hours from FormData (parse JSON string)
         if (updateData.opening_hours && typeof updateData.opening_hours === 'string') {
@@ -529,6 +570,70 @@ exports.updatePlace = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'เกิดข้อผิดพลาดในการแก้ไขสถานที่'
+        });
+    }
+};
+
+// @desc    Approve pending place
+// @route   PUT /api/places/:id/approve
+// @access   Admin only
+exports.approvePlace = async (req, res) => {
+    try {
+        const place = await populatePlace(Place.findByIdAndUpdate(
+            req.params.id,
+            { status: 'active' },
+            { new: true, runValidators: true }
+        ));
+
+        if (!place) {
+            return res.status(404).json({
+                success: false,
+                message: 'ไม่พบสถานที่ที่ต้องการ'
+            });
+        }
+
+        res.json({
+            success: true,
+            data: place,
+            message: 'อนุมัติสถานที่สำเร็จ'
+        });
+    } catch (error) {
+        console.error('Approve place error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'ไม่สามารถอนุมัติสถานที่ได้'
+        });
+    }
+};
+
+// @desc    Reject pending place
+// @route   PUT /api/places/:id/reject
+// @access   Admin only
+exports.rejectPlace = async (req, res) => {
+    try {
+        const place = await populatePlace(Place.findByIdAndUpdate(
+            req.params.id,
+            { status: 'rejected' },
+            { new: true, runValidators: true }
+        ));
+
+        if (!place) {
+            return res.status(404).json({
+                success: false,
+                message: 'ไม่พบสถานที่ที่ต้องการ'
+            });
+        }
+
+        res.json({
+            success: true,
+            data: place,
+            message: 'ปฏิเสธสถานที่แล้ว'
+        });
+    } catch (error) {
+        console.error('Reject place error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'ไม่สามารถปฏิเสธสถานที่ได้'
         });
     }
 };

@@ -33,6 +33,9 @@ const router = express.Router();
 
 // Public routes
 router.get('/', placeController.getPlaces);
+router.get('/admin/all', verifyToken, requireRole('admin'), placeController.getAdminPlaces);
+router.put('/:id/approve', verifyToken, requireRole('admin'), placeController.approvePlace);
+router.put('/:id/reject', verifyToken, requireRole('admin'), placeController.rejectPlace);
 router.get('/:id', placeController.getPlace);
 router.post('/:id/reviews', verifyToken, requireRole('user', 'owner', 'admin'), placeController.createReview);
 router.post('/:id/reviews/:reviewId/replies', verifyToken, requireRole('user', 'owner', 'admin'), placeController.createReviewReply);

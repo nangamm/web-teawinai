@@ -16,6 +16,7 @@ const CAT_EMOJI = {
 export function AdminDashboard() {
   const [stats, setStats] = useState({ totalPlaces: 0, totalUsers: 0, pendingUpdates: 0 })
   const [pendingUpdates, setPendingUpdates] = useState([])
+  const [pendingPlaces, setPendingPlaces] = useState([])
   const [places, setPlaces] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(true)
@@ -71,19 +72,27 @@ export function AdminDashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      const [statsResponse, updatesResponse, placesRes, categoriesRes] = await Promise.all([
+      const [statsResponse, updatesResponse, placesRes, pendingPlacesRes, categoriesRes] = await Promise.all([
         authAPI.getDashboardStats(),
         priceUpdatesAPI.getPendingUpdates(),
-        placesAPI.getPlaces({ limit: 100 }),
+        placesAPI.getAdminPlaces({ limit: 100 }),
+        placesAPI.getAdminPlaces({ status: 'pending', limit: 20 }),
         categoriesAPI.getCategories()
       ])
       const statsData = statsResponse.data?.stats || statsResponse.data || {}
       const updates = updatesResponse.data?.data || updatesResponse.data || []
       const placesData = placesRes.data?.data || placesRes.data || []
+      const pendingPlacesData = pendingPlacesRes.data?.data || pendingPlacesRes.data || []
       const categoriesData = categoriesRes.data?.data || categoriesRes.data || []
 
-      setStats({ totalPlaces: statsData.totalPlaces || 0, totalUsers: statsData.totalUsers || 0, pendingUpdates: statsData.pendingUpdates || 0 })
+      setStats({
+        totalPlaces: statsData.totalPlaces || 0,
+        totalUsers: statsData.totalUsers || 0,
+        pendingUpdates: statsData.pendingUpdates || 0,
+        pendingPlaces: statsData.pendingPlaces || pendingPlacesData.length || 0
+      })
       setPendingUpdates(updates)
+      setPendingPlaces(pendingPlacesData)
       setPlaces(placesData)
       setCategories(categoriesData)
     } catch (error) {
@@ -117,6 +126,32 @@ export function AdminDashboard() {
     } catch (error) {
       console.error('Error deleting place:', error)
       toast.error('ไม่สามารถลบสถานที่ได้')
+    }
+  }
+
+  const handleApprovePlace = async (placeId) => {
+    try {
+      await placesAPI.approvePlace(placeId)
+      setPendingPlaces(prev => prev.filter(place => place._id !== placeId))
+      setStats(prev => ({ ...prev, pendingPlaces: Math.max(0, (prev.pendingPlaces || 0) - 1) }))
+      toast.success('อนุมัติสถานที่สำเร็จ')
+      fetchDashboardData()
+    } catch (error) {
+      console.error('Error approving place:', error)
+      toast.error('ไม่สามารถอนุมัติสถานที่ได้')
+    }
+  }
+
+  const handleRejectPlace = async (placeId) => {
+    try {
+      await placesAPI.rejectPlace(placeId)
+      setPendingPlaces(prev => prev.filter(place => place._id !== placeId))
+      setStats(prev => ({ ...prev, pendingPlaces: Math.max(0, (prev.pendingPlaces || 0) - 1) }))
+      toast.success('ปฏิเสธสถานที่แล้ว')
+      fetchDashboardData()
+    } catch (error) {
+      console.error('Error rejecting place:', error)
+      toast.error('ไม่สามารถปฏิเสธสถานที่ได้')
     }
   }
 
@@ -183,6 +218,13 @@ export function AdminDashboard() {
 
   const filteredPlaces = places.filter(p => p.name?.toLowerCase().includes(searchQuery.toLowerCase()))
 
+  const getPlaceStatusMeta = (status) => {
+    if (status === 'active' || status === 'published') return { className: 'published', label: 'ACTIVE' }
+    if (status === 'pending') return { className: 'pending', label: 'PENDING' }
+    if (status === 'rejected') return { className: 'rejected', label: 'REJECTED' }
+    return { className: 'draft', label: 'INACTIVE' }
+  }
+
   const handleFormSubmit = (e) => {
     e.preventDefault()
     const formData = new FormData(e.target)
@@ -234,11 +276,6 @@ export function AdminDashboard() {
     { name: 'The Moon River Resort', sub: 'Warinchamrap', cat: 'Accommodation', rating: 4.5, status: 'draft', emoji: '🏨' },
   ]
 
-  const PLACEHOLDER_QUEUE = [
-    { name: 'Lab Ped Ubon', type: 'Business Submission', emoji: '🍽' },
-    { name: 'Mun River Trails', type: 'Tour Operator', emoji: '🚴' },
-  ]
-
   return (
     <div className="admin-page">
 
@@ -281,9 +318,9 @@ export function AdminDashboard() {
 
             <div className="admin-stat-card">
               <div className="admin-stat-eyebrow">Pending Reviews</div>
-              <div className="admin-stat-num">{stats.pendingUpdates}</div>
-              <div className="admin-stat-desc">Business owner submissions awaiting approval</div>
-              <div className="admin-stat-progress"><div className="admin-stat-progress-fill" style={{ width: `${Math.min(100, stats.pendingUpdates * 4)}%` }} /></div>
+              <div className="admin-stat-num">{(stats.pendingPlaces || 0) + (stats.pendingUpdates || 0)}</div>
+              <div className="admin-stat-desc">Place submissions and price updates awaiting approval</div>
+              <div className="admin-stat-progress"><div className="admin-stat-progress-fill" style={{ width: `${Math.min(100, ((stats.pendingPlaces || 0) + (stats.pendingUpdates || 0)) * 4)}%` }} /></div>
               <button className="admin-stat-link" onClick={() => setActiveTab('priceUpdates')} style={{ background:'none', border:'none', cursor:'pointer', padding:0 }}>
                 Review Queue →
               </button>
@@ -320,6 +357,7 @@ export function AdminDashboard() {
 
                 {(filteredPlaces.length > 0 ? filteredPlaces.slice(0,10) : PLACEHOLDER_PLACES).map((place, i) => {
                   const isReal = !!place._id
+                  const statusMeta = isReal ? getPlaceStatusMeta(place.status) : { className: place.status, label: place.status?.toUpperCase() }
                   return (
                     <div key={place._id || i} className="admin-table-row">
                       <div className="admin-table-place">
@@ -335,8 +373,8 @@ export function AdminDashboard() {
                       <div className="admin-table-cat">{isReal ? (place.category?.name || '—') : place.cat}</div>
                       <div className="admin-table-rating"><Star />{isReal ? (place.rating ?? '—') : `★ ${place.rating}`}</div>
                       <div>
-                        <span className={`admin-status-badge ${isReal ? (place.status === 'published' ? 'published' : place.status === 'pending' ? 'pending' : 'draft') : place.status}`}>
-                          {isReal ? (place.status === 'published' ? 'PUBLISHED' : place.status === 'pending' ? 'PENDING' : 'DRAFT') : place.status?.toUpperCase()}
+                        <span className={`admin-status-badge ${statusMeta.className}`}>
+                          {statusMeta.label}
                         </span>
                       </div>
                       <div className="admin-table-actions">
@@ -353,23 +391,26 @@ export function AdminDashboard() {
             <div className="admin-sidebar">
               <div className="admin-sidebar-card">
                 <div className="admin-sidebar-title">Approval Queue</div>
-                {(pendingUpdates.length > 0 ? pendingUpdates.slice(0,5) : PLACEHOLDER_QUEUE).map((item, i) => {
-                  const isReal = !!item._id
+                {pendingPlaces.length === 0 && (
+                  <div className="admin-queue-empty">No pending place submissions</div>
+                )}
+                {pendingPlaces.slice(0,5).map((item, i) => {
+                  const isRealPlace = !!item._id && item.status === 'pending'
                   return (
                     <div key={item._id || i} className="admin-queue-item">
-                      <div className="admin-queue-icon">{isReal ? (CAT_EMOJI[item.place_id?.category?.name] || '📍') : item.emoji}</div>
+                      <div className="admin-queue-icon">{isRealPlace ? (CAT_EMOJI[item.category?.name] || '📍') : item.emoji}</div>
                       <div className="admin-queue-info">
-                        <div className="admin-queue-name">{isReal ? (item.place_id?.name || 'ไม่ระบุ') : item.name}</div>
-                        <div className="admin-queue-type">{isReal ? (item.owner_id?.name || 'Business Submission') : item.type}</div>
+                        <div className="admin-queue-name">{item.name}</div>
+                        <div className="admin-queue-type">{isRealPlace ? (item.submitted_by?.name || 'Place Submission') : item.type}</div>
                       </div>
                       <div className="admin-queue-btns">
-                        <button className="admin-q-approve" onClick={() => isReal && handleApprovePriceUpdate(item._id)}><CheckCircle /></button>
-                        <button className="admin-q-reject" onClick={() => { if (!isReal) return; const r = prompt('กรุณาระบุเหตุผล:'); if (r) handleRejectPriceUpdate(item._id, r) }}><XCircle /></button>
+                        <button className="admin-q-approve" onClick={() => isRealPlace && handleApprovePlace(item._id)}><CheckCircle /></button>
+                        <button className="admin-q-reject" onClick={() => isRealPlace && handleRejectPlace(item._id)}><XCircle /></button>
                       </div>
                     </div>
                   )
                 })}
-                <button className="admin-queue-view-all" onClick={() => setActiveTab('priceUpdates')}>View All Submissions</button>
+                <button className="admin-queue-view-all" onClick={() => setActiveTab('priceUpdates')}>View Price Updates</button>
               </div>
 
               <div className="admin-sidebar-card">
