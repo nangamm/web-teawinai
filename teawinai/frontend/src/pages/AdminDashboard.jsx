@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { CheckCircle, XCircle, TrendingUp, Search, Star, Edit, Trash2, AlertCircle, LayoutDashboard, Banknote } from 'lucide-react'
 import { placesAPI, priceUpdatesAPI, authAPI, categoriesAPI } from '@/services/api'
 import { isAdmin } from '@/utils/auth'
@@ -298,10 +299,12 @@ export function AdminDashboard() {
           <button className={`admin-tab-btn${activeTab === 'dashboard' ? ' active' : ''}`} onClick={() => setActiveTab('dashboard')}>
             <LayoutDashboard size={16} />Dashboard
           </button>
-          <button className={`admin-tab-btn${activeTab === 'priceUpdates' ? ' active' : ''}`} onClick={() => setActiveTab('priceUpdates')}>
-            <Banknote size={16} />Price Updates
-            {pendingUpdates.length > 0 && <span className="admin-tab-badge">{pendingUpdates.length}</span>}
-          </button>
+          <Link className="admin-tab-btn" to="/admin/approval-queue">
+            <Banknote size={16} />Approval Queue
+            {(pendingPlaces.length + pendingUpdates.length) > 0 && (
+              <span className="admin-tab-badge">{pendingPlaces.length + pendingUpdates.length}</span>
+            )}
+          </Link>
         </nav>
       </div>
 
@@ -321,9 +324,9 @@ export function AdminDashboard() {
               <div className="admin-stat-num">{(stats.pendingPlaces || 0) + (stats.pendingUpdates || 0)}</div>
               <div className="admin-stat-desc">Place submissions and price updates awaiting approval</div>
               <div className="admin-stat-progress"><div className="admin-stat-progress-fill" style={{ width: `${Math.min(100, ((stats.pendingPlaces || 0) + (stats.pendingUpdates || 0)) * 4)}%` }} /></div>
-              <button className="admin-stat-link" onClick={() => setActiveTab('priceUpdates')} style={{ background:'none', border:'none', cursor:'pointer', padding:0 }}>
+              <Link className="admin-stat-link" to="/admin/approval-queue">
                 Review Queue →
-              </button>
+              </Link>
             </div>
 
             <div className="admin-stat-card">
@@ -387,47 +390,6 @@ export function AdminDashboard() {
               </div>
             </div>
 
-            {/* Sidebar */}
-            <div className="admin-sidebar">
-              <div className="admin-sidebar-card">
-                <div className="admin-sidebar-title">Approval Queue</div>
-                {pendingPlaces.length === 0 && (
-                  <div className="admin-queue-empty">No pending place submissions</div>
-                )}
-                {pendingPlaces.slice(0,5).map((item, i) => {
-                  const isRealPlace = !!item._id && item.status === 'pending'
-                  return (
-                    <div key={item._id || i} className="admin-queue-item">
-                      <div className="admin-queue-icon">{isRealPlace ? (CAT_EMOJI[item.category?.name] || '📍') : item.emoji}</div>
-                      <div className="admin-queue-info">
-                        <div className="admin-queue-name">{item.name}</div>
-                        <div className="admin-queue-type">{isRealPlace ? (item.submitted_by?.name || 'Place Submission') : item.type}</div>
-                      </div>
-                      <div className="admin-queue-btns">
-                        <button className="admin-q-approve" onClick={() => isRealPlace && handleApprovePlace(item._id)}><CheckCircle /></button>
-                        <button className="admin-q-reject" onClick={() => isRealPlace && handleRejectPlace(item._id)}><XCircle /></button>
-                      </div>
-                    </div>
-                  )
-                })}
-                <button className="admin-queue-view-all" onClick={() => setActiveTab('priceUpdates')}>View Price Updates</button>
-              </div>
-
-              <div className="admin-sidebar-card">
-                <div className="admin-sidebar-title">Budget Trends</div>
-                {[{ label:'$ Budget', pct:42, cls:'budget' }, { label:'$$ Mid-Range', pct:35, cls:'midrange' }, { label:'$$$ Luxury', pct:23, cls:'luxury' }].map(row => (
-                  <div key={row.label} className="admin-trend-row">
-                    <div className="admin-trend-top">
-                      <span className="admin-trend-label">{row.label}</span>
-                      <span className="admin-trend-pct">{row.pct}%</span>
-                    </div>
-                    <div className="admin-trend-track">
-                      <div className={`admin-trend-fill ${row.cls}`} style={{ width: `${row.pct}%` }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
           </div>
         </>
       )}

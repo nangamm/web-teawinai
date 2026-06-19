@@ -8,6 +8,7 @@ import { Login } from '@/pages/Login'
 import { Register } from '@/pages/Register'
 import { MyTrips } from '@/pages/MyTrips'
 import { AdminDashboard } from '@/pages/AdminDashboard'
+import { ApprovalQueue } from '@/pages/ApprovalQueue'
 import { Profile } from '@/pages/Profile'
 import { Places } from '@/pages/Places'
 import { PlaceDetail } from '@/pages/PlaceDetail'
@@ -70,6 +71,14 @@ function App() {
           />
           
           {/* Admin only routes */}
+          <Route
+            path="/admin/approval-queue"
+            element={
+              <ProtectedRoute requiredRole={['admin']}>
+                <ApprovalQueue />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/admin"
             element={
