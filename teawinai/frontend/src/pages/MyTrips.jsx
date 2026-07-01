@@ -1,15 +1,34 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { Calendar, MapPin, Trash2, Plus, Eye, Map } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { Calendar, Eye, Map, MapPin, Plus, Trash2 } from 'lucide-react'
 import { tripsAPI } from '@/services/api'
 import { isAuthenticated } from '@/utils/auth'
+
+const formatMoney = (value) => {
+  const amount = Number(value || 0)
+  return `฿${amount.toLocaleString('th-TH')}`
+}
+
+const formatTripDate = (date) => {
+  if (!date) return 'ยังไม่ระบุวัน'
+  const parsed = new Date(date)
+  if (Number.isNaN(parsed.getTime())) return 'ยังไม่ระบุวัน'
+
+  return parsed.toLocaleDateString('th-TH', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
+}
 
 export function MyTrips() {
   const [trips, setTrips] = useState([])
   const [loading, setLoading] = useState(true)
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (!isAuthenticated()) {
+      setLoading(false)
       return
     }
     fetchTrips()
@@ -18,7 +37,6 @@ export function MyTrips() {
   const fetchTrips = async () => {
     try {
       const response = await tripsAPI.getMyTrips()
-      console.log('Trips response:', response.data)
       setTrips(response.data.data || [])
     } catch (error) {
       console.error('Error fetching trips:', error)
@@ -34,20 +52,36 @@ export function MyTrips() {
 
     try {
       await tripsAPI.deleteTrip(tripId)
-      setTrips(trips.filter(trip => trip._id !== tripId))
+      setTrips((currentTrips) => currentTrips.filter((trip) => trip._id !== tripId))
     } catch (error) {
       console.error('Error deleting trip:', error)
     }
   }
 
+  const viewTrip = (trip) => {
+    navigate('/result', {
+      state: {
+        tripName: trip.trip_name,
+        tripPlan: {
+          budget_total: trip.budget_total || 0,
+          budget_used: trip.budget_used || 0,
+          selectedPlaces: trip.trip_items?.map((item) => ({
+            ...(item.place_id || {}),
+            selectedCost: item.estimated_cost || 0,
+          })) || [],
+        },
+      },
+    })
+  }
+
   if (loading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-300 rounded w-1/3 mb-6"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[1, 2].map((i) => (
-              <div key={i} className="bg-gray-200 rounded-lg h-48"></div>
+      <div className="my-trips-page">
+        <div className="my-trips-inner">
+          <div className="my-trips-skeleton-head" />
+          <div className="my-trips-skeleton-grid">
+            {[1, 2, 3].map((item) => (
+              <div key={item} className="my-trips-skeleton-card" />
             ))}
           </div>
         </div>
@@ -56,152 +90,118 @@ export function MyTrips() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">ทริปของฉัน</h1>
-              <p className="text-gray-600 text-lg">จัดการแผนการเดินทางของคุณ</p>
-            </div>
-            <Link 
-              to="/" 
-              className="inline-flex items-center px-6 py-3 bg-[#116045] text-white font-medium rounded-lg hover:bg-[#0f4a37] transition-colors shadow-md hover:shadow-lg"
-            >
-              <Plus className="h-5 w-5 mr-2" />
-              สร้างทริปใหม่
-            </Link>
+    <div className="my-trips-page">
+      <div className="my-trips-inner">
+        <header className="my-trips-header">
+          <div className="my-trips-title-block">
+            <span className="my-trips-kicker">Trip planner</span>
+            <h1>ทริปของฉัน</h1>
+            <p>จัดการแผนการเดินทางที่บันทึกไว้และกลับไปดูเส้นทางได้เร็วขึ้น</p>
           </div>
-        </div>
+          <Link to="/" className="my-trips-primary">
+            <Plus />
+            <span>สร้างทริปใหม่</span>
+          </Link>
+        </header>
 
         {trips.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-2xl shadow-sm border border-gray-100">
-            <div className="w-20 h-20 bg-[#116045]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-              <MapPin className="h-10 w-10 text-[#116045]" />
+          <section className="my-trips-empty" aria-labelledby="my-trips-empty-title">
+            <div className="my-trips-empty-icon" aria-hidden="true">
+              <MapPin />
             </div>
-            <h3 className="text-2xl font-semibold text-gray-900 mb-3">ยังไม่มีทริป</h3>
-            <p className="text-gray-600 mb-8 text-lg">เริ่มวางแผนการเดินทางครั้งแรกของคุณ!</p>
-            <Link 
-              to="/" 
-              className="inline-flex items-center px-8 py-3 bg-[#116045] text-white font-medium rounded-lg hover:bg-[#0f4a37] transition-colors shadow-md hover:shadow-lg"
-            >
-              <Plus className="h-5 w-5 mr-2" />
-              สร้างทริปแรกของคุณ
+            <h2 id="my-trips-empty-title">ยังไม่มีทริป</h2>
+            <p>เริ่มวางแผนทริปจากสถานที่แนะนำ แล้วบันทึกไว้กลับมาดูภายหลัง</p>
+            <Link to="/" className="my-trips-primary">
+              <Plus />
+              <span>สร้างทริปแรกของคุณ</span>
             </Link>
-          </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {trips.map((trip) => (
-            <div key={trip._id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300 flex flex-col">
-              {/* Trip Header */}
-              <div className="bg-gradient-to-r from-[#116045] to-[#0f4a37] p-4">
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-bold text-white mb-1">
-                      {trip.trip_name || 'แผนการเดินทาง'}
-                    </h3>
-                    <div className="flex items-center text-white/90 text-sm">
-                      <Calendar className="h-4 w-4 mr-1" />
+          </section>
+        ) : (
+          <section className="my-trips-grid" aria-label="รายการทริปของฉัน">
+            {trips.map((trip) => {
+              const items = trip.trip_items || []
+              const remaining = Number(trip.budget_total || 0) - Number(trip.budget_used || 0)
+
+              return (
+                <article key={trip._id} className="my-trip-card">
+                  <div className="my-trip-card-head">
+                    <div className="my-trip-card-title">
+                      <h2>{trip.trip_name || 'แผนการเดินทาง'}</h2>
                       <span>
-                        {new Date(trip.trip_date).toLocaleDateString('th-TH', { 
-                          year: 'numeric', 
-                          month: 'short', 
-                          day: 'numeric' 
-                        })}
+                        <Calendar />
+                        {formatTripDate(trip.trip_date)}
                       </span>
                     </div>
+                    <span className={`my-trip-status ${trip.status === 'saved' ? 'is-saved' : 'is-draft'}`}>
+                      {trip.status === 'saved' ? 'บันทึก' : 'ร่าง'}
+                    </span>
                   </div>
-                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                    trip.status === 'saved' 
-                      ? 'bg-white/20 text-white backdrop-blur-sm' 
-                      : 'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {trip.status === 'saved' ? 'บันทึก' : 'ร่าง'}
-                  </span>
-                </div>
-              </div>
 
-              {/* Trip Content */}
-              <div className="p-4 flex-1 flex flex-col">
-                {/* Budget Summary */}
-                <div className="grid grid-cols-1 gap-2 mb-4">
-                  <div className="flex justify-between items-center p-2 bg-gray-50 rounded-lg">
-                    <span className="text-sm text-gray-600">งบทั้งหมด</span>
-                    <span className="text-sm font-bold text-gray-900">${trip.budget_total}</span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center p-2 bg-blue-50 rounded-lg">
-                    <span className="text-sm text-blue-600">ใช้ไป</span>
-                    <span className="text-sm font-bold text-blue-600">${trip.budget_used}</span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center p-2 bg-green-50 rounded-lg">
-                    <span className="text-sm text-green-600">คงเหลือ</span>
-                    <span className="text-sm font-bold text-green-600">${trip.budget_total - trip.budget_used}</span>
-                  </div>
-                </div>
+                  <div className="my-trip-card-body">
+                    <div className="my-trip-budget" aria-label="สรุปงบทริป">
+                      <div>
+                        <span>งบทั้งหมด</span>
+                        <strong>{formatMoney(trip.budget_total)}</strong>
+                      </div>
+                      <div>
+                        <span>ใช้ไป</span>
+                        <strong>{formatMoney(trip.budget_used)}</strong>
+                      </div>
+                      <div>
+                        <span>คงเหลือ</span>
+                        <strong>{formatMoney(remaining)}</strong>
+                      </div>
+                    </div>
 
-                {/* Places Section */}
-                <div className="mb-4 flex-1">
-                  <div className="flex items-center mb-2">
-                    <Map className="h-4 w-4 text-[#116045] mr-1" />
-                    <h4 className="font-semibold text-gray-900 text-sm">
-                      สถานที่ ({trip.trip_items?.length || 0})
-                    </h4>
-                  </div>
-                  
-                  {trip.trip_items && trip.trip_items.length > 0 ? (
-                    <div className="space-y-1">
-                      {trip.trip_items.slice(0, 2).map((item, index) => (
-                        <div key={index} className="flex items-center p-2 bg-gray-50 rounded text-xs">
-                          <div className="w-5 h-5 bg-[#116045] text-white rounded-full flex items-center justify-center text-xs font-medium mr-2 flex-shrink-0">
-                            {index + 1}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-gray-900 truncate">
-                              {item.place_id?.name || 'ไม่ทราบชื่อ'}
-                            </p>
-                            <p className="text-gray-600">
-                              ${item.estimated_cost || 0}
-                            </p>
-                          </div>
+                    <div className="my-trip-places">
+                      <div className="my-trip-section-title">
+                        <Map />
+                        <span>สถานที่ ({items.length})</span>
+                      </div>
+
+                      {items.length > 0 ? (
+                        <div className="my-trip-place-list">
+                          {items.slice(0, 3).map((item, index) => (
+                            <div key={`${trip._id}-${index}`} className="my-trip-place-row">
+                              <span className="my-trip-place-index">{index + 1}</span>
+                              <div>
+                                <strong>{item.place_id?.name || 'ไม่ทราบชื่อ'}</strong>
+                                <span>{formatMoney(item.estimated_cost)}</span>
+                              </div>
+                            </div>
+                          ))}
+                          {items.length > 3 && (
+                            <div className="my-trip-more">+{items.length - 3} สถานที่</div>
+                          )}
                         </div>
-                      ))}
-                      {trip.trip_items.length > 2 && (
-                        <div className="text-center p-2 bg-gray-50 rounded text-xs">
-                          <p className="text-gray-600">
-                            +{trip.trip_items.length - 2} สถานที่
-                          </p>
+                      ) : (
+                        <div className="my-trip-no-place">
+                          <MapPin />
+                          <span>ไม่มีสถานที่</span>
                         </div>
                       )}
                     </div>
-                  ) : (
-                    <div className="text-center p-3 bg-gray-50 rounded">
-                      <MapPin className="h-6 w-6 text-gray-400 mx-auto mb-1" />
-                      <p className="text-xs text-gray-600">ไม่มีสถานที่</p>
-                    </div>
-                  )}
-                </div>
 
-                {/* Action Buttons */}
-                <div className="flex gap-2 mt-auto">
-                  <button className="flex-1 flex items-center justify-center px-3 py-2 bg-[#116045] text-white text-sm font-medium rounded-lg hover:bg-[#0f4a37] transition-colors">
-                    <Eye className="h-3 w-3 mr-1" />
-                    ดูรายละเอียด
-                  </button>
-                  <button
-                    onClick={() => deleteTrip(trip._id)}
-                    className="flex items-center justify-center px-3 py-2 bg-red-50 text-red-600 text-sm font-medium rounded-lg hover:bg-red-100 transition-colors"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+                    <div className="my-trip-actions">
+                      <button type="button" className="my-trip-view" onClick={() => viewTrip(trip)}>
+                        <Eye />
+                        <span>ดูรายละเอียด</span>
+                      </button>
+                      <button
+                        type="button"
+                        className="my-trip-delete"
+                        onClick={() => deleteTrip(trip._id)}
+                        aria-label={`ลบทริป ${trip.trip_name || 'แผนการเดินทาง'}`}
+                      >
+                        <Trash2 />
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              )
+            })}
+          </section>
+        )}
       </div>
     </div>
   )

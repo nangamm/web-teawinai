@@ -32,6 +32,8 @@ export function Navbar() {
   const isAuthenticated = localStorage.getItem('token')
   const isAdminUser = isAdmin()
   const canAddPlace = hasRole(['admin', 'owner'])
+  const isHomePage = location.pathname === '/'
+  const usesSoftNavbar = !isHomePage
   const visibleNotificationCount = notificationCount > 99 ? '99+' : notificationCount
   const avatarSrc = currentUser?.avatar
     ? (currentUser.avatar.startsWith('http') ? currentUser.avatar : `${API_ORIGIN}${currentUser.avatar}`)
@@ -249,13 +251,12 @@ export function Navbar() {
   }
 
   return (
-    <nav className="navbar">
+    <nav className={`navbar${isHomePage ? ' navbar-home' : ''}${usesSoftNavbar ? ' navbar-soft' : ''}`}>
       <div className="navbar-inner">
 
         {/* Logo */}
         <Link to="/" className="navbar-logo">
-          <MapPin className="navbar-logo-icon" />
-          <img src="/images/Gemini_Generated_Image_a4isqwa4isqwa4is-removebg-preview.png" alt="Teawinai Logo" />
+          <span className="navbar-logo-text">Teawinai</span>
         </Link>
 
         {/* Desktop links */}
