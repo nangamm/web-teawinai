@@ -1,13 +1,65 @@
 /**
- * Budget Algorithm for selecting places based on budget and preferences
- * Uses Greedy Algorithm to maximize rating/price ratio
+ * Budget Algorithm for selecting places based on budget and preferences.
+ * Prioritizes category coverage first, then fills remaining slots by value.
  */
+
+function getCategoryName(place) {
+    return place?.category?.name || place?.category || '';
+}
+
+function normalizeCategory(category) {
+    return String(category || '').trim().toLowerCase();
+}
+
+function getPlaceCost(place) {
+    const priceMin = Number(place?.price_min || 0);
+    return Number.isFinite(priceMin) && priceMin > 0 ? priceMin : 0;
+}
+
+function getPlaceScore(place) {
+    const rating = Number(place?.rating || 0);
+    const cost = getPlaceCost(place);
+    return cost > 0 ? rating / cost : rating;
+}
+
+function sortByValue(a, b) {
+    if (b.ratio !== a.ratio) return b.ratio - a.ratio;
+    if ((b.rating || 0) !== (a.rating || 0)) return (b.rating || 0) - (a.rating || 0);
+    return getPlaceCost(a) - getPlaceCost(b);
+}
+
+function toTripPlace(place) {
+    return {
+        ...place,
+        selectedCost: getPlaceCost(place)
+    };
+}
+
+function buildCategorySummary(selectedPlaces, requestedCategories, availableCategories) {
+    const categoryCounts = selectedPlaces.reduce((summary, place) => {
+        const categoryName = getCategoryName(place);
+        if (!categoryName) return summary;
+        summary[categoryName] = (summary[categoryName] || 0) + 1;
+        return summary;
+    }, {});
+
+    return {
+        requestedCategories,
+        categoryCounts,
+        missingCategories: requestedCategories.filter(category => !categoryCounts[category]),
+        unavailableCategories: requestedCategories.filter(category => (
+            !availableCategories.has(normalizeCategory(category))
+        ))
+    };
+}
 
 function selectPlacesByBudget(places, budget, options = {}) {
     const { categories = [], maxPlaces = 10 } = options;
-    
+    const parsedBudget = Number(budget);
+    const parsedMaxPlaces = Number(maxPlaces);
+
     // Validate inputs
-    if (!Array.isArray(places) || typeof budget !== 'number' || budget <= 0) {
+    if (!Array.isArray(places) || !Number.isFinite(parsedBudget) || parsedBudget <= 0) {
         return {
             selectedPlaces: [],
             budget_total: budget,
@@ -16,64 +68,67 @@ function selectPlacesByBudget(places, budget, options = {}) {
         };
     }
 
-    // Step 1: Filter by categories
-    let filteredPlaces = places;
-    if (categories.length > 0) {
-        filteredPlaces = places.filter(place => 
-            categories.includes(place.category?.name || place.category)
-        );
-    }
+    const placeLimit = Number.isInteger(parsedMaxPlaces) && parsedMaxPlaces > 0
+        ? parsedMaxPlaces
+        : 10;
+    const requestedCategories = Array.isArray(categories)
+        ? [...new Set(categories.map(category => String(category || '').trim()).filter(Boolean))]
+        : [];
+    const requestedCategoryKeys = new Set(requestedCategories.map(normalizeCategory));
 
-    // Step 2: Calculate rating/price_min ratio and sort
-    const placesWithRatio = filteredPlaces.map(place => {
-        const priceMin = place.price_min || 0;
-        const rating = place.rating || 0;
-        const ratio = priceMin > 0 ? rating / priceMin : rating; // Handle free places
-        
-        return {
+    const filteredPlaces = requestedCategories.length > 0
+        ? places.filter(place => requestedCategoryKeys.has(normalizeCategory(getCategoryName(place))))
+        : places;
+    const placesWithRatio = filteredPlaces
+        .map(place => ({
             ...place,
-            ratio
-        };
-    });
+            ratio: getPlaceScore(place)
+        }))
+        .sort(sortByValue);
+    const availableCategories = new Set(placesWithRatio.map(place => normalizeCategory(getCategoryName(place))));
 
-    // Sort by ratio (highest first), then by rating (highest first)
-    placesWithRatio.sort((a, b) => {
-        if (b.ratio !== a.ratio) {
-            return b.ratio - a.ratio;
-        }
-        return b.rating - a.rating;
-    });
-
-    // Step 3: Greedy selection
     const selectedPlaces = [];
+    const selectedIds = new Set();
     let budgetUsed = 0;
 
-    for (const place of placesWithRatio) {
-        if (selectedPlaces.length >= maxPlaces) {
-            break;
-        }
+    const getPlaceId = (place) => String(place._id || place.id || place.name);
+    const canSelect = (place) => (
+        !selectedIds.has(getPlaceId(place)) && getPlaceCost(place) <= parsedBudget - budgetUsed
+    );
+    const addPlace = (place) => {
+        selectedIds.add(getPlaceId(place));
+        selectedPlaces.push(toTripPlace(place));
+        budgetUsed += getPlaceCost(place);
+    };
 
-        const placeCost = place.price_min || 0;
-        const remainingBudget = budget - budgetUsed;
+    // Cover requested categories before allowing duplicate categories.
+    if (requestedCategories.length > 0) {
+        for (const category of requestedCategories) {
+            if (selectedPlaces.length >= placeLimit) break;
 
-        // Check if we can afford this place
-        if (placeCost <= remainingBudget) {
-            selectedPlaces.push({
-                ...place,
-                selectedCost: placeCost
-            });
-            budgetUsed += placeCost;
+            const categoryKey = normalizeCategory(category);
+            const bestCategoryPlace = placesWithRatio.find(place => (
+                normalizeCategory(getCategoryName(place)) === categoryKey && canSelect(place)
+            ));
+
+            if (bestCategoryPlace) addPlace(bestCategoryPlace);
         }
     }
 
-    // Step 4: Calculate results
-    const budgetRemaining = budget - budgetUsed;
+    // Fill remaining slots from the requested category pool only.
+    for (const place of placesWithRatio) {
+        if (selectedPlaces.length >= placeLimit) break;
+        if (canSelect(place)) addPlace(place);
+    }
+
+    const budgetRemaining = parsedBudget - budgetUsed;
 
     return {
         selectedPlaces,
-        budget_total: budget,
+        budget_total: parsedBudget,
         budget_used: budgetUsed,
-        budget_remaining: budgetRemaining
+        budget_remaining: budgetRemaining,
+        category_summary: buildCategorySummary(selectedPlaces, requestedCategories, availableCategories)
     };
 }
 
@@ -152,6 +207,37 @@ function runTests() {
     const result6 = selectPlacesByBudget(places6, 150, { maxPlaces: 1 });
     console.assert(result6.selectedPlaces[0]?.name === 'High Ratio', 'Should select place with higher ratio first');
     console.log('✅ Test 6 passed\n');
+
+    // Test 7: Category coverage before duplicates
+    console.log('Test 7: Category coverage before duplicates');
+    const places7 = [
+        { name: 'Temple A', price_min: 0, price_max: 0, rating: 4.9, category: 'Temple' },
+        { name: 'Temple B', price_min: 0, price_max: 0, rating: 4.8, category: 'Temple' },
+        { name: 'Park A', price_min: 0, price_max: 0, rating: 4.7, category: 'Park' },
+        { name: 'Park B', price_min: 0, price_max: 0, rating: 4.6, category: 'Park' },
+        { name: 'Cafe A', price_min: 50, price_max: 100, rating: 4.5, category: 'Cafe' },
+        { name: 'Museum A', price_min: 50, price_max: 100, rating: 4.1, category: 'Museum' }
+    ];
+    const result7 = selectPlacesByBudget(places7, 500, {
+        categories: ['Temple', 'Park', 'Cafe', 'Museum'],
+        maxPlaces: 5
+    });
+    const result7Categories = new Set(result7.selectedPlaces.map(place => place.category));
+    console.assert(result7.selectedPlaces.length === 5, 'Should fill the requested number of places when possible');
+    console.assert(result7Categories.has('Temple'), 'Should include Temple');
+    console.assert(result7Categories.has('Park'), 'Should include Park');
+    console.assert(result7Categories.has('Cafe'), 'Should include Cafe');
+    console.assert(result7Categories.has('Museum'), 'Should include Museum');
+    console.log('Test 7 passed\n');
+
+    // Test 8: Do not fill with unrequested categories
+    console.log('Test 8: Do not fill with unrequested categories');
+    const result8 = selectPlacesByBudget(places7, 500, {
+        categories: ['Cafe'],
+        maxPlaces: 4
+    });
+    console.assert(result8.selectedPlaces.every(place => place.category === 'Cafe'), 'Should only select requested categories');
+    console.log('Test 8 passed\n');
 
     console.log('=== All Tests Passed! ===');
 }
