@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { authAPI } from '../services/api'
 
-const API_BASE = 'http://localhost:5001'
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001'
 
 const getSavedPlacesKey = (user) => {
   const userId = user?.id || user?._id || 'guest'
@@ -57,11 +57,31 @@ export function Profile() {
 
   useEffect(() => { fetchUserData() }, [fetchUserData])
 
+  const fetchUserPlaces = useCallback(async () => {
+    try {
+      const response = await authAPI.getUserPlaces()
+      setUserPlaces(response.data.places)
+    } catch (error) {
+      console.error('Failed to fetch user places:', error)
+      toast.error('ไม่สามารถดึงข้อมูลสถานที่ได้')
+    }
+  }, [])
+
+  const fetchUserReviews = useCallback(async () => {
+    try {
+      const response = await authAPI.getUserReviews()
+      setUserReviews(response.data.reviews)
+    } catch (error) {
+      console.error('Failed to fetch user reviews:', error)
+      toast.error('ไม่สามารถดึงข้อมูลรีวิวได้')
+    }
+  }, [])
+
   useEffect(() => {
     if (!user) return
     fetchUserPlaces()
     fetchUserReviews()
-  }, [user])
+  }, [user, fetchUserPlaces, fetchUserReviews])
 
   useEffect(() => {
     if (!user) return undefined
@@ -76,26 +96,6 @@ export function Profile() {
       window.removeEventListener('storage', syncSavedPlaces)
     }
   }, [user])
-
-  const fetchUserPlaces = async () => {
-    try {
-      const response = await authAPI.getUserPlaces()
-      setUserPlaces(response.data.places)
-    } catch (error) {
-      console.error('Failed to fetch user places:', error)
-      toast.error('ไม่สามารถดึงข้อมูลสถานที่ได้')
-    }
-  }
-
-  const fetchUserReviews = async () => {
-    try {
-      const response = await authAPI.getUserReviews()
-      setUserReviews(response.data.reviews)
-    } catch (error) {
-      console.error('Failed to fetch user reviews:', error)
-      toast.error('ไม่สามารถดึงข้อมูลรีวิวได้')
-    }
-  }
 
   const handleEditProfile = () => {
     setEditForm({ username: user.username || '', bio: user.bio || '', avatar: user.avatar || '', preferences: user.preferences || [] })
@@ -361,8 +361,8 @@ export function Profile() {
             {[
               { num: userPlaces.length, label: 'สถานที่ที่เพิ่ม' },
               { num: userReviews.length, label: 'รีวิว' },
-              { num: user.stats.followers, label: 'ผู้ติดตาม' },
-              { num: user.stats.following, label: 'กำลังติดตาม' },
+              { num: user.stats?.followers || 0, label: 'ผู้ติดตาม' },
+              { num: user.stats?.following || 0, label: 'กำลังติดตาม' },
             ].map(s => (
               <div key={s.label} className="profile-stat">
                 <div className="profile-stat-num">{s.num}</div>
@@ -396,7 +396,7 @@ export function Profile() {
               <div key={place._id} className="profile-place-card" onClick={() => navigate(`/places/${place._id}`)}>
                 {place.images?.length > 0 ? (
                   <img
-                    src={place.images[0].startsWith('http') ? place.images[0] : `http://localhost:5001${place.images[0]}`}
+                    src={getPlaceImage(place.images[0])}
                     alt={place.name}
                     className="profile-place-img"
                     onError={e => {
@@ -454,13 +454,15 @@ export function Profile() {
                       src={getPlaceImage(review.placeImage)}
                       alt={review.placeName}
                       className="profile-review-img"
-                      onError={e => { e.currentTarget.style.display = 'none' }}
+                      onError={e => {
+                        e.currentTarget.style.display = 'none'
+                        e.currentTarget.nextElementSibling?.style?.setProperty('display', 'flex')
+                      }}
                     />
-                  ) : (
-                    <div className="profile-review-img-placeholder">
-                      <MapPin />
-                    </div>
-                  )}
+                  ) : null}
+                  <div className="profile-review-img-placeholder" style={{ display: review.placeImage ? 'none' : 'flex' }}>
+                    <MapPin />
+                  </div>
                   <div className="profile-review-body">
                     <div className="profile-review-top">
                       <span className="profile-review-place">{review.placeName}</span>
@@ -512,13 +514,15 @@ export function Profile() {
                           src={getPlaceImage(place.image)}
                           alt={place.name}
                           className="profile-saved-img"
-                          onError={e => { e.currentTarget.style.display = 'none' }}
+                          onError={e => {
+                            e.currentTarget.style.display = 'none'
+                            e.currentTarget.nextElementSibling?.style?.setProperty('display', 'flex')
+                          }}
                         />
-                      ) : (
-                        <div className="profile-saved-img-placeholder">
-                          <Bookmark />
-                        </div>
-                      )}
+                      ) : null}
+                      <div className="profile-saved-img-placeholder" style={{ display: place.image ? 'none' : 'flex' }}>
+                        <Bookmark />
+                      </div>
                       <div className="profile-saved-body">
                         <div className="profile-saved-name">{place.name}</div>
                         <div className="profile-saved-meta">
