@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
+const USERNAME_PATTERN = /^[\p{L}\p{N}_ -]+$/u;
+
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -13,13 +15,12 @@ const userSchema = new mongoose.Schema({
     unique: true,
     sparse: true,
     trim: true,
-    minlength: 3,
     maxlength: 30,
     validate: {
       validator: function(v) {
-        return !v || /^[a-zA-Z0-9_]+$/.test(v);
+        return !v || USERNAME_PATTERN.test(v);
       },
-      message: 'Username can only contain letters, numbers, and underscores'
+      message: 'Username can only contain letters, numbers, spaces, underscores, and hyphens'
     }
   },
   email: {

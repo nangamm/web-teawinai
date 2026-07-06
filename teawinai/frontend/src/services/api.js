@@ -46,11 +46,7 @@ export const authAPI = {
   updateProfile: (profileData) => {
     // Handle FormData for file uploads
     if (profileData instanceof FormData) {
-      return api.put('/auth/profile', profileData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      })
+      return api.put('/auth/profile', profileData)
     }
     // Regular JSON data
     return api.put('/auth/profile', profileData)
@@ -69,11 +65,7 @@ export const placesAPI = {
   createPlace: (placeData) => {
   // Check if it's FormData (for file uploads)
   if (placeData instanceof FormData) {
-    return api.post('/places', placeData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
+    return api.post('/places', placeData)
   }
   // Regular JSON data
   return api.post('/places', placeData)
@@ -81,11 +73,7 @@ export const placesAPI = {
   updatePlace: (id, placeData) => {
     // Handle FormData for file uploads
     if (placeData instanceof FormData) {
-      return api.put(`/places/${id}`, placeData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      })
+      return api.put(`/places/${id}`, placeData)
     }
     // Regular JSON data
     return api.put(`/places/${id}`, placeData)

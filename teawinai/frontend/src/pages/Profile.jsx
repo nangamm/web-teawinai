@@ -5,6 +5,8 @@ import toast from 'react-hot-toast'
 import { authAPI } from '../services/api'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001'
+const USERNAME_PATTERN = /^[\p{L}\p{N}_ -]+$/u
+const ALLOWED_AVATAR_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
 
 const getSavedPlacesKey = (user) => {
   const userId = user?.id || user?._id || 'guest'
@@ -118,13 +120,20 @@ export function Profile() {
 
   const handleSaveProfile = async () => {
     try {
+      const nextUsername = editForm.username.trim()
+
+      if (nextUsername && !USERNAME_PATTERN.test(nextUsername)) {
+        toast.error('Username can only contain letters, numbers, spaces, underscores, and hyphens')
+        return
+      }
+
       const formData = new FormData()
-      formData.append('username', editForm.username)
+      formData.append('username', nextUsername)
       formData.append('bio', editForm.bio)
       formData.append('preferences', JSON.stringify(editForm.preferences))
       if (avatarFile) {
         formData.append('avatar', avatarFile)
-      } else if (editForm.avatar) {
+      } else if (typeof editForm.avatar === 'string' && editForm.avatar.trim()) {
         formData.append('avatarUrl', editForm.avatar)
       }
       const response = await authAPI.updateProfile(formData)
@@ -135,7 +144,8 @@ export function Profile() {
       toast.success('อัพเดทโปรไฟล์สำเร็จ')
     } catch (error) {
       console.error('Failed to update profile:', error)
-      toast.error('ไม่สามารถอัพเดทโปรไฟล์ได้')
+      console.error('Update profile response:', error.response?.data)
+      toast.error(error.response?.data?.error || error.response?.data?.message || 'Failed to update profile')
     }
   }
 
@@ -167,7 +177,7 @@ export function Profile() {
   const handleFileSelect = (event) => {
     const file = event.target.files[0]
     if (file) {
-      if (file.type.startsWith('image/')) {
+      if (ALLOWED_AVATAR_TYPES.has(file.type)) {
         setAvatarFile(file)
         const reader = new FileReader()
         reader.onload = (e) => {
@@ -580,7 +590,7 @@ export function Profile() {
             <div className="profile-modal-field">
               <label className="profile-modal-label">รูปโปรไฟล์</label>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} style={{ display: 'none' }} id="avatar-upload" />
+                <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleFileSelect} style={{ display: 'none' }} id="avatar-upload" />
                 <label htmlFor="avatar-upload" className="profile-modal-upload-label" style={{ flex: 1 }}>
                   <Upload />เลือกรูปภาพ
                 </label>

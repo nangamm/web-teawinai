@@ -436,7 +436,7 @@ exports.createPlace = async (req, res) => {
 
         // Handle image uploads
         if (req.files && req.files.length > 0) {
-            placeData.images = req.files.map(file => `/uploads/${file.filename}`);
+            placeData.images = req.files.map(file => file.path);
             console.log('Image paths:', placeData.images);
         } else {
             placeData.images = [];
@@ -541,7 +541,7 @@ exports.updatePlace = async (req, res) => {
 
         // Handle image uploads (new images from multer)
         if (req.files && req.files.length > 0) {
-            const newImagePaths = req.files.map(file => `/uploads/${file.filename}`);
+            const newImagePaths = req.files.map(file => file.path);
             // Merge with existing images if provided via existing_images field
             const existingImages = updateData.existing_images
                 ? (typeof updateData.existing_images === 'string'

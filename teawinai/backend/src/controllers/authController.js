@@ -129,7 +129,7 @@ const getMe = async (req, res) => {
             user: {
                 id: user._id,
                 name: user.name,
-                username: user.username || user.name.toLowerCase().replace(/\s+/g, '_'),
+                username: user.username || '',
                 email: user.email,
                 role: user.role,
                 phone: user.phone,
@@ -150,31 +150,15 @@ const getMe = async (req, res) => {
 };
 
 const multer = require('multer');
-const path = require('path');
-
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads/avatars');
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-    }
-});
+const { avatarStorage, imageFileFilter } = require('../config/cloudinary');
+const USERNAME_PATTERN = /^[\p{L}\p{N}_ -]+$/u;
 
 const upload = multer({ 
-    storage: storage,
+  storage: avatarStorage,
     limits: {
         fileSize: 5 * 1024 * 1024 // 5MB limit
     },
-    fileFilter: function (req, file, cb) {
-        if (file.mimetype.startsWith('image/')) {
-            cb(null, true);
-        } else {
-            cb(new Error('Only image files are allowed'), false);
-        }
-    }
+    fileFilter: imageFileFilter
 });
 
 // @desc    Update user profile
@@ -192,7 +176,10 @@ const updateProfile = async (req, res) => {
             } : 'No file'
         })
         
-        const { username, bio, preferences } = req.body;
+        const { username, bio, preferences, avatar, avatarUrl } = req.body;
+        const avatarValue = [avatar, avatarUrl].find(value => (
+            typeof value === 'string' && value.trim()
+        ));
         
         // Find user
         const user = await User.findById(req.user.id);
@@ -204,28 +191,48 @@ const updateProfile = async (req, res) => {
             });
         }
 
-        // Check if username is taken by another user
-        if (username && username !== user.username) {
-            const existingUser = await User.findOne({ username });
+        if (username !== undefined) {
+            const nextUsername = String(username).trim();
+
+            if (nextUsername && !USERNAME_PATTERN.test(nextUsername)) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Invalid username',
+                    error: 'Username can only contain letters, numbers, spaces, underscores, and hyphens'
+                });
+            }
+
+            const existingUser = nextUsername
+                ? await User.findOne({ username: nextUsername, _id: { $ne: user._id } })
+                : null;
+
             if (existingUser) {
                 return res.status(400).json({
                     success: false,
                     message: 'Username is already taken'
                 });
             }
+
+            user.username = nextUsername || undefined;
         }
 
         // Update allowed fields
-        if (username !== undefined) user.username = username;
         if (bio !== undefined) user.bio = bio;
-        if (preferences !== undefined) user.preferences = JSON.parse(preferences);
+        if (preferences !== undefined) {
+            try {
+                user.preferences = typeof preferences === 'string' ? JSON.parse(preferences) : preferences;
+            } catch (error) {
+                console.error('Error parsing preferences:', error);
+                user.preferences = [];
+            }
+        }
         
-        // Handle avatar upload
+        // Handle avatar upload (Cloudinary URL from frontend or file upload)
         if (req.file) {
-            user.avatar = `/uploads/avatars/${req.file.filename}`;
+            user.avatar = req.file.path;
             console.log('Avatar set to:', user.avatar);
-        } else if (req.body.avatarUrl) {
-            user.avatar = req.body.avatarUrl;
+        } else if (avatarValue) {
+            user.avatar = avatarValue.trim();
             console.log('Avatar URL set to:', user.avatar);
         }
 
@@ -251,9 +258,12 @@ const updateProfile = async (req, res) => {
         });
     } catch (error) {
         console.error('Update profile error:', error);
-        res.status(500).json({
+        const isValidationError = error.name === 'ValidationError';
+
+        res.status(isValidationError ? 400 : 500).json({
             success: false,
-            message: 'Failed to update profile'
+            message: isValidationError ? 'Invalid profile data' : 'Failed to update profile',
+            error: error.message
         });
     }
 };
