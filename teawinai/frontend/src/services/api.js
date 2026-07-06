@@ -5,10 +5,10 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api'
 // Create axios instance
 const api = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 })
+// Note: Do not set a default `Content-Type` header here so that
+// axios can automatically set the correct headers for FormData
+// (including the multipart boundary) when uploading files.
 
 // Add request interceptor to include auth token
 api.interceptors.request.use(

@@ -3,6 +3,7 @@ import { MapPin, Star, Settings, LogOut, Camera, Upload, Crop, ZoomIn, ZoomOut, 
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { authAPI } from '../services/api'
+import { buildImageUrl } from '../utils/image'
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001'
 const USERNAME_PATTERN = /^[\p{L}\p{N}_ -]+$/u
@@ -36,6 +37,8 @@ export function Profile() {
   const [cropData, setCropData] = useState({ scale: 1, positionX: 0, positionY: 0, rotation: 0 })
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+  const [savingProfile, setSavingProfile] = useState(false)
+  const saveRef = useRef(false)
   const fileInputRef = useRef(null)
   const canvasRef = useRef(null)
   const cropContainerRef = useRef(null)
@@ -119,6 +122,10 @@ export function Profile() {
   }
 
   const handleSaveProfile = async () => {
+    if (saveRef.current) return
+    saveRef.current = true
+    setSavingProfile(true)
+
     try {
       const nextUsername = editForm.username.trim()
 
@@ -146,6 +153,9 @@ export function Profile() {
       console.error('Failed to update profile:', error)
       console.error('Update profile response:', error.response?.data)
       toast.error(error.response?.data?.error || error.response?.data?.message || 'Failed to update profile')
+    } finally {
+      setSavingProfile(false)
+      saveRef.current = false
     }
   }
 
@@ -284,15 +294,12 @@ export function Profile() {
     return icons[category] || '📍'
   }
 
-  const getPlaceImage = (image) => {
-    if (!image) return ''
-    return image.startsWith('http') ? image : `${API_BASE}${image}`
-  }
+  // use shared `buildImageUrl` from utils
 
   const avatarSrc = user
     ? (user.avatar
-        ? (user.avatar.startsWith('http') ? user.avatar : `http://localhost:5001${user.avatar}`)
-        : `https://ui-avatars.com/api/?name=${user.username}&background=116045&color=fff&size=100`)
+        ? buildImageUrl(user.avatar)
+        : `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username)}&background=116045&color=fff&size=100`)
     : ''
 
   // ── Loading ──
@@ -406,7 +413,7 @@ export function Profile() {
               <div key={place._id} className="profile-place-card" onClick={() => navigate(`/places/${place._id}`)}>
                 {place.images?.length > 0 ? (
                   <img
-                    src={getPlaceImage(place.images[0])}
+                    src={buildImageUrl(place.images[0])}
                     alt={place.name}
                     className="profile-place-img"
                     onError={e => {
@@ -461,7 +468,7 @@ export function Profile() {
                 >
                   {review.placeImage ? (
                     <img
-                      src={getPlaceImage(review.placeImage)}
+                      src={buildImageUrl(review.placeImage)}
                       alt={review.placeName}
                       className="profile-review-img"
                       onError={e => {
@@ -521,7 +528,7 @@ export function Profile() {
                     >
                       {place.image ? (
                         <img
-                          src={getPlaceImage(place.image)}
+                          src={buildImageUrl(place.image)}
                           alt={place.name}
                           className="profile-saved-img"
                           onError={e => {
@@ -619,8 +626,10 @@ export function Profile() {
             </div>
 
             <div className="profile-modal-footer">
-              <button className="profile-modal-cancel" onClick={handleCancelEdit}>ยกเลิก</button>
-              <button className="profile-modal-save" onClick={handleSaveProfile}>บันทึก</button>
+              <button className="profile-modal-cancel" onClick={handleCancelEdit} disabled={savingProfile}>ยกเลิก</button>
+              <button className="profile-modal-save" onClick={handleSaveProfile} disabled={savingProfile}>
+                {savingProfile ? 'กำลังบันทึก...' : 'บันทึก'}
+              </button>
             </div>
           </div>
         </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Clock,
@@ -127,6 +127,7 @@ export function AddPlace() {
 
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(false)
+  const submitRef = useRef(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -154,7 +155,11 @@ export function AddPlace() {
 
 
   const handleSubmit = async (e) => {
+    if (submitRef.current) return
     e.preventDefault()
+
+    submitRef.current = true
+    setLoading(true)
 
     // Check required fields based on whether it's free or paid
     const isFreePlace = formData.is_free === 'true'
@@ -174,16 +179,18 @@ export function AddPlace() {
     
     if (requiredFields.some(field => !field)) {
       toast.error('กรุณากรอกข้อมูลที่จำเป็นให้ครบถ้วน')
+      setLoading(false)
+      submitRef.current = false
       return
     }
 
     // Only validate price range if it's not a free place
     if (!isFreePlace && parseFloat(formData.price_min) > parseFloat(formData.price_max)) {
       toast.error('ราคาต่ำสุดต้องไม่มากกว่าราคาสูงสุด')
+      setLoading(false)
+      submitRef.current = false
       return
     }
-
-    setLoading(true)
 
     try {
       // Create full address from province, district, subdistrict and detailed address
@@ -233,6 +240,7 @@ export function AddPlace() {
       toast.error(error.response?.data?.message || 'เกิดข้อผิดพลาดในการเพิ่มสถานที่')
     } finally {
       setLoading(false)
+      submitRef.current = false
     }
   }
 

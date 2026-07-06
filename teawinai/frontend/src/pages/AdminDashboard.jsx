@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { CheckCircle, XCircle, TrendingUp, Search, Star, Edit, Trash2, AlertCircle, LayoutDashboard, Banknote } from 'lucide-react'
 import { placesAPI, priceUpdatesAPI, authAPI, categoriesAPI } from '@/services/api'
@@ -38,6 +38,7 @@ export function AdminDashboard() {
     อาทิตย์: { open: '', close: '', closed: false }
   })
   const [images, setImages] = useState([])
+  const [savingPlace, setSavingPlace] = useState(false)
 
   const normalizeOpeningHours = (raw) => {
     const defaultHours = {
@@ -226,8 +227,10 @@ export function AdminDashboard() {
     return { className: 'draft', label: 'INACTIVE' }
   }
 
-  const handleFormSubmit = (e) => {
+  const handleFormSubmit = async (e) => {
+    if (savingPlace) return
     e.preventDefault()
+
     const formData = new FormData(e.target)
     const isFreePlace = isFree === 'true'
     const fd = new FormData()
@@ -243,7 +246,13 @@ export function AdminDashboard() {
       if (img.file) fd.append('images', img.file)
       else if (img.existingUrl) fd.append('existing_images', img.existingUrl)
     })
-    handleEditPlace(fd)
+
+    setSavingPlace(true)
+    try {
+      await handleEditPlace(fd)
+    } finally {
+      setSavingPlace(false)
+    }
   }
 
   const updateHour = (day, field, value) => {
@@ -543,7 +552,9 @@ export function AdminDashboard() {
 
               <div className="admin-modal-footer">
                 <button type="button" className="admin-modal-cancel" onClick={() => { setShowAddModal(false); setEditingPlace(null) }}>ยกเลิก</button>
-                <button type="submit" className="admin-modal-submit">{editingPlace ? 'แก้ไข' : 'บันทึก'}</button>
+                <button type="submit" className="admin-modal-submit" disabled={savingPlace}>
+                  {savingPlace ? 'กำลังบันทึก...' : editingPlace ? 'แก้ไข' : 'บันทึก'}
+                </button>
               </div>
             </form>
           </div>

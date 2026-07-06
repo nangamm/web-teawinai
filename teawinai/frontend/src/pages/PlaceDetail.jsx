@@ -16,10 +16,10 @@ import {
 } from 'lucide-react'
 import { placesAPI } from '@/services/api'
 import { getUser, isAuthenticated } from '@/utils/auth'
+import { buildImageUrl } from '../utils/image'
 import { hasInappropriateContent } from '@/utils/contentModeration'
 import toast from 'react-hot-toast'
 
-const API_BASE = 'http://localhost:5001'
 const thaiDays = ['จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์', 'อาทิตย์']
 const thaiDayKeys = ['วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์', 'วันอาทิตย์']
 const defaultTags = ['อาหารไทย', 'อาหารจานเดียว', 'ต้มยำ', 'ราคาดี', 'อาหารเช้า']
@@ -29,10 +29,7 @@ const getDisplayName = (user, fallback = 'นักเดินทาง') => (
 )
 
 const getAvatarSrc = (user, displayName) => {
-  if (user?.avatar) {
-    return user.avatar.startsWith('http') ? user.avatar : `${API_BASE}${user.avatar}`
-  }
-
+  if (user?.avatar) return buildImageUrl(user.avatar)
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=116045&color=fff&size=96`
 }
 

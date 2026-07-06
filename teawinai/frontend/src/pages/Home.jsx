@@ -6,8 +6,6 @@ import { DEFAULT_PROVINCE, getDistrictsByProvince, getSubdistrictsByDistrict, pr
 import { isAuthenticated } from '@/utils/auth'
 import toast from 'react-hot-toast'
 
-const API_ORIGIN = (import.meta.env.VITE_API_URL || 'http://localhost:5001/api').replace(/\/api\/?$/, '')
-
 const CAT_EMOJI = {
   'วัด': '⛩', 'Temples': '⛩',
   'ร้านอาหาร': '🍽', 'Restaurants': '🍽',
@@ -28,21 +26,16 @@ const formatPrice = (place) => {
   return 'ดูรายละเอียด'
 }
 
-const getPlaceImage = (place) => {
-  const firstImage = place.images?.[0]
-  if (!firstImage) return ''
-  return firstImage.startsWith('http') ? firstImage : `${API_ORIGIN}${firstImage}`
-}
+import { buildImageUrl } from '../utils/image'
+
+const getPlaceImage = (place) => buildImageUrl(place.images?.[0])
 
 const getDisplayName = (user, fallback = 'นักเดินทาง') => (
   user?.username || user?.name || fallback
 )
 
 const getAvatarSrc = (user, displayName) => {
-  if (user?.avatar) {
-    return user.avatar.startsWith('http') ? user.avatar : `${API_ORIGIN}${user.avatar}`
-  }
-
+  if (user?.avatar) return buildImageUrl(user.avatar)
   return `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=116045&color=fff&size=96`
 }
 
