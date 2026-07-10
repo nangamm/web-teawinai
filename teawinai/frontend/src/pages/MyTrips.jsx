@@ -29,10 +29,11 @@ export function MyTrips() {
   useEffect(() => {
     if (!isAuthenticated()) {
       setLoading(false)
+      navigate('/login')
       return
     }
     fetchTrips()
-  }, [])
+  }, [navigate])
 
   const fetchTrips = async () => {
     try {
@@ -59,16 +60,20 @@ export function MyTrips() {
   }
 
   const viewTrip = (trip) => {
+    const budgetTotal = Number(trip.budget_total || 0)
+    const budgetUsed = Number(trip.budget_used || 0)
+
     navigate('/result', {
       state: {
         tripName: trip.trip_name,
         tripPlan: {
-          budget_total: trip.budget_total || 0,
-          budget_used: trip.budget_used || 0,
-          selectedPlaces: trip.trip_items?.map((item) => ({
+          budget_total: budgetTotal,
+          budget_used: budgetUsed,
+          budget_remaining: Math.max(0, budgetTotal - budgetUsed),
+          selectedPlaces: (trip.trip_items || []).map((item) => ({
             ...(item.place_id || {}),
-            selectedCost: item.estimated_cost || 0,
-          })) || [],
+            selectedCost: Number(item.estimated_cost || 0),
+          })),
         },
       },
     })

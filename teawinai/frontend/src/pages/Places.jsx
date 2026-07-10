@@ -6,10 +6,10 @@ import toast from 'react-hot-toast'
 
 const CAT_EMOJI = {
   'คาเฟ่': '☕', 'Cafe': '☕',
-  'วัด': '⛩', 'Temples': '⛩',
-  'ร้านอาหาร': '🍽', 'Restaurants': '🍽',
+  'วัด': '⛩️', 'Temples': '⛩️',
+  'ร้านอาหาร': '🍽️', 'Restaurants': '🍽️',
   'สวนสาธารณะ': '🌳', 'Park': '🌳',
-  'พิพิธภัณฑ์': '🏛', 'Museum': '🏛',
+  'พิพิธภัณฑ์': '🖼️', 'Museum': '🖼️',
   'ตลาด': '🏪', 'Market': '🏪',
 }
 

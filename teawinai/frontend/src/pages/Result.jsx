@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { MapPin, Clock, Star, Save, RotateCcw, Edit3 } from 'lucide-react'
 import { tripsAPI } from '@/services/api'
 import { isAuthenticated } from '@/utils/auth'
+import { buildImageUrl } from '@/utils/image'
 
 export function Result() {
   const location = useLocation()
@@ -62,9 +63,9 @@ export function Result() {
 
   const getRisk = () => {
     const p = getBudgetPercentage()
-    if (p < 50) return { key: 'low', label: 'Low Risk' }
-    if (p < 80) return { key: 'mid', label: 'Medium Risk' }
-    return { key: 'high', label: 'High Risk' }
+    if (p < 50) return { key: 'low', label: 'ความเสี่ยงต่ำ' }
+    if (p < 80) return { key: 'mid', label: 'ความเสี่ยงปานกลาง' }
+    return { key: 'high', label: 'ความเสี่ยงสูง' }
   }
 
   // Estimate category spend from places
@@ -109,11 +110,11 @@ export function Result() {
       <div className="result-inner">
 
         {/* ── Header ── */}
-        <div className="result-eyebrow">UBON RATCHATHANI HERITAGE</div>
-        <h1 className="result-title">One Day in the<br />Emerald City</h1>
+        <div className="result-eyebrow">มรดกอุบลราชธานี</div>
+        <h1 className="result-title">หนึ่งวันใน<br />เมืองมรกต</h1>
         <p className="result-subtitle">
-          A curated editorial journey through the spiritual heart of Isan. From the golden glow
-          of morning temples to the serene twilight by the Mun River.
+          แผนการเดินทางที่คัดสรรอย่างใส่ใจ สู่หัวใจแห่งวัฒนธรรมอีสาน
+          จากแสงทองยามเช้าที่วัดถึงความสงบของยามเย็นริมแม่น้ำมูล
         </p>
 
         {/* Trip Name */}
@@ -146,7 +147,7 @@ export function Result() {
                   {/* Image */}
                   {place.images?.length > 0 ? (
                     <img
-                      src={`http://localhost:5001${place.images[0]}`}
+                      src={buildImageUrl(place.images[0])}
                       alt={place.name}
                       className="result-place-img"
                       onError={e => {
@@ -162,7 +163,7 @@ export function Result() {
                   <div className="result-place-content">
                     <div className="result-place-name">{place.name}
                       <span className={`result-place-cost${isFree ? ' free' : ''}`}>
-                        {isFree ? '฿0 Entrance' : `฿${cost} Est. Cost`}
+                        {isFree ? 'เข้าฟรี' : `ประมาณ ฿${cost}`}
                       </span>
                     </div>
 
@@ -205,10 +206,10 @@ export function Result() {
 
             {/* Budget Intelligence */}
             <div className="result-budget-card">
-              <div className="result-budget-title">Budget Intelligence</div>
+              <div className="result-budget-title">ข้อมูลงบประมาณ</div>
 
               <div className="result-util-row">
-                <span>Daily Utilization</span>
+                <span>การใช้จ่าย</span>
                 <span className="result-util-pct">{pct.toFixed(0)}%</span>
               </div>
 
@@ -221,44 +222,44 @@ export function Result() {
 
               <div className="result-budget-boxes">
                 <div className="result-budget-box">
-                  <div className="result-budget-box-label">Total Spent</div>
+                  <div className="result-budget-box-label">รวมใช้ไป</div>
                   <div className="result-budget-box-num">฿{tripPlan.budget_used?.toLocaleString()}</div>
                 </div>
                 <div className="result-budget-box">
-                  <div className="result-budget-box-label">Remaining</div>
+                  <div className="result-budget-box-label">คงเหลือ</div>
                   <div className="result-budget-box-num">฿{tripPlan.budget_remaining?.toLocaleString()}</div>
                 </div>
               </div>
 
               <div className="result-risk-row">
                 <div>
-                  <div style={{ marginBottom: 3 }}>Projected Overload</div>
+                  <div style={{ marginBottom: 3 }}>ความเสี่ยงงบเกิน</div>
                   <span className={`result-risk-badge ${risk.key}`}>{risk.label}</span>
                 </div>
-                <button className="result-edit-budget">Edit Budget →</button>
+                <button className="result-edit-budget">แก้ไขงบ →</button>
               </div>
             </div>
 
             {/* Category spend */}
             <div className="result-cat-grid">
               <div className="result-cat-box">
-                <div className="result-cat-icon">🍽</div>
-                <div className="result-cat-label">Dining</div>
+                <div className="result-cat-icon">🍽️</div>
+                <div className="result-cat-label">อาหาร</div>
                 <div className="result-cat-amount">฿{catSpend.dining.toLocaleString()}</div>
               </div>
               <div className="result-cat-box">
-                <div className="result-cat-icon">⛩</div>
-                <div className="result-cat-label">Tours</div>
+                <div className="result-cat-icon">⛩️</div>
+                <div className="result-cat-label">ทัวร์</div>
                 <div className="result-cat-amount">฿{catSpend.tours.toLocaleString()}</div>
               </div>
               <div className="result-cat-box">
                 <div className="result-cat-icon">🚌</div>
-                <div className="result-cat-label">Transport</div>
+                <div className="result-cat-label">เดินทาง</div>
                 <div className="result-cat-amount">฿0</div>
               </div>
               <div className="result-cat-box">
-                <div className="result-cat-icon">🛍</div>
-                <div className="result-cat-label">Shopping</div>
+                <div className="result-cat-icon">🛒</div>
+                <div className="result-cat-label">ช็อปปิ้ง</div>
                 <div className="result-cat-amount">฿0</div>
               </div>
             </div>
@@ -269,7 +270,7 @@ export function Result() {
               {saving ? 'กำลังบันทึก...' : 'บันทึกแผน'}
             </button>
 
-            <button className="result-share-btn">Share with Travel Partners</button>
+            <button className="result-share-btn">แชร์กับเพื่อนร่วมทริป</button>
 
             <button className="result-replан-btn" onClick={() => navigate('/')}>
               <RotateCcw />วางแผนใหม่

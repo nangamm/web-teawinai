@@ -6,9 +6,9 @@ import { isAdmin } from '@/utils/auth'
 import toast from 'react-hot-toast'
 
 const CAT_EMOJI = {
-  'ร้านอาหาร': '🍽', 'Restaurants': '🍽',
+  'ร้านอาหาร': '🍽️', 'Restaurants': '🍽️',
   'คาเฟ่': '☕', 'Cafe': '☕',
-  'วัด': '⛩', 'Temples': '⛩',
+  'วัด': '⛩️', 'Temples': '⛩️',
   'ธรรมชาติ': '🌿', 'Nature': '🌿',
   'ที่พัก': '🏨', 'Accommodation': '🏨',
   'ทัวร์': '🚴', 'Tour': '🚴',
