@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { MapPin, Star, Search, Filter } from 'lucide-react'
+import { Gift, MapPin, Star, Search, Filter } from 'lucide-react'
 import { placesAPI, categoriesAPI } from '@/services/api'
 import toast from 'react-hot-toast'
 
@@ -29,6 +29,7 @@ export function Places() {
   const [places, setPlaces] = useState([])
   const [categories, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
+  const [promoState, setPromoState] = useState({ placeId: null, promotions: [], loading: false })
   const [filters, setFilters] = useState({
     category: searchParams.get('category') || '',
     province: searchParams.get('province') || '',
@@ -76,6 +77,27 @@ export function Places() {
     e.preventDefault()
     const value = e.target.searchQuery.value.trim()
     handleFilterChange('search', value)
+  }
+
+  const handleTogglePromotions = async (placeId) => {
+    if (promoState.placeId === placeId && promoState.promotions.length) {
+      setPromoState({ placeId: null, promotions: [], loading: false })
+      return
+    }
+
+    setPromoState({ placeId, promotions: [], loading: true })
+
+    try {
+      const response = await placesAPI.getPlacePromotions(placeId)
+      setPromoState({
+        placeId,
+        promotions: Array.isArray(response.data.data) ? response.data.data : [],
+        loading: false,
+      })
+    } catch (error) {
+      console.error('Unable to fetch place promotions:', error)
+      setPromoState({ placeId, promotions: [], loading: false })
+    }
   }
 
   const handlePlaceDetail = (id) => navigate(`/places/${id}`)
@@ -252,13 +274,51 @@ export function Places() {
                         <span className="place-card-rating-num">{place.rating}</span>
                         <span style={{ color: '#bbb' }}>(0 รีวิว)</span>
                       </div>
-                      <button
-                        className="place-card-detail-btn"
-                        onClick={e => { e.stopPropagation(); handlePlaceDetail(place._id) }}
-                      >
-                        ดูรายละเอียด →
-                      </button>
+                      <div className="place-card-actions">
+                        <button
+                          type="button"
+                          className="place-card-promo-btn"
+                          onClick={e => { e.stopPropagation(); handleTogglePromotions(place._id) }}
+                        >
+                          <Gift size={13} />
+                          {promoState.placeId === place._id && promoState.loading
+                            ? 'กำลังโหลด...'
+                            : promoState.placeId === place._id && promoState.promotions.length
+                              ? 'ซ่อนโปรโมชั่น'
+                              : 'ดูโปรโมชั่น'}
+                        </button>
+                        <button
+                          className="place-card-detail-btn"
+                          onClick={e => { e.stopPropagation(); handlePlaceDetail(place._id) }}
+                        >
+                          ดูรายละเอียด →
+                        </button>
+                      </div>
                     </div>
+
+                    {promoState.placeId === place._id && (
+                      <div className="place-card-promo-panel">
+                        {promoState.loading ? (
+                          <div className="place-card-promo-empty">กำลังโหลดโปรโมชั่น...</div>
+                        ) : promoState.promotions.length > 0 ? (
+                          promoState.promotions.map((promo, index) => (
+                            <div key={`${promo._id || index}`} className="place-card-promo-item">
+                              <div className="place-card-promo-title">{promo.promotion}</div>
+                              <div className="place-card-promo-meta">
+                                {promo.new_price_min != null && promo.new_price_max != null ? (
+                                  <span>ราคาใหม่: ฿{Number(promo.new_price_min).toLocaleString()} - ฿{Number(promo.new_price_max).toLocaleString()}</span>
+                                ) : null}
+                                {promo.reviewed_at ? (
+                                  <span>อัปเดตล่าสุด: {new Date(promo.reviewed_at).toLocaleDateString('th-TH')}</span>
+                                ) : null}
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="place-card-promo-empty">ยังไม่มีโปรโมชั่นสำหรับร้านนี้ในตอนนี้</div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               )

@@ -60,8 +60,10 @@ export const authAPI = {
 // Places API
 export const placesAPI = {
   getPlaces: (params) => api.get('/places', { params }),
+  getHomeReviews: (params) => api.get('/places/reviews/home', { params }),
   getAdminPlaces: (params) => api.get('/places/admin/all', { params }),
   getPlace: (id) => api.get(`/places/${id}`),
+  getPlacePromotions: (id) => api.get(`/places/${id}/promotions`),
   createPlace: (placeData) => {
   // Check if it's FormData (for file uploads)
   if (placeData instanceof FormData) {

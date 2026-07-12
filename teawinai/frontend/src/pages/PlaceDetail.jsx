@@ -459,6 +459,7 @@ export function PlaceDetail() {
                   )}
                 </div>
               </div>
+
             </section>
 
             <section className="detail-food-section">

@@ -1,5 +1,5 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { Search, User, LogOut, MapPin, Settings, Menu, X, Bell } from 'lucide-react'
+import { Search, User, LogOut, Settings, Menu, X, Bell } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import { isAdmin, hasRole } from '@/utils/auth'
 import { authAPI, notificationsAPI } from '@/services/api'

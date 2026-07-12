@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { CheckCircle, XCircle, TrendingUp, Search, Star, Edit, Trash2, AlertCircle, LayoutDashboard, Banknote } from 'lucide-react'
 import { placesAPI, priceUpdatesAPI, authAPI, categoriesAPI } from '@/services/api'
@@ -131,31 +131,7 @@ export function AdminDashboard() {
     }
   }
 
-  const handleApprovePlace = async (placeId) => {
-    try {
-      await placesAPI.approvePlace(placeId)
-      setPendingPlaces(prev => prev.filter(place => place._id !== placeId))
-      setStats(prev => ({ ...prev, pendingPlaces: Math.max(0, (prev.pendingPlaces || 0) - 1) }))
-      toast.success('อนุมัติสถานที่สำเร็จ')
-      fetchDashboardData()
-    } catch (error) {
-      console.error('Error approving place:', error)
-      toast.error('ไม่สามารถอนุมัติสถานที่ได้')
-    }
-  }
 
-  const handleRejectPlace = async (placeId) => {
-    try {
-      await placesAPI.rejectPlace(placeId)
-      setPendingPlaces(prev => prev.filter(place => place._id !== placeId))
-      setStats(prev => ({ ...prev, pendingPlaces: Math.max(0, (prev.pendingPlaces || 0) - 1) }))
-      toast.success('ปฏิเสธสถานที่แล้ว')
-      fetchDashboardData()
-    } catch (error) {
-      console.error('Error rejecting place:', error)
-      toast.error('ไม่สามารถปฏิเสธสถานที่ได้')
-    }
-  }
 
   const handleApprovePriceUpdate = async (updateId, reviewNote) => {
     try {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AlertCircle, Heart, Loader2, MapPin, Star, Tag } from 'lucide-react'
-import { categoriesAPI, placesAPI, tripsAPI } from '@/services/api'
+import { AlertCircle, Loader2, MapPin } from 'lucide-react'
+import { categoriesAPI, tripsAPI } from '@/services/api'
 import { DEFAULT_PROVINCE, getDistrictsByProvince, getSubdistrictsByDistrict, provinces } from '@/data/ubonLocations'
 import { isAuthenticated } from '@/utils/auth'
 import toast from 'react-hot-toast'
@@ -14,29 +14,6 @@ const CAT_EMOJI = {
   'ช็อปปิ้ง': '🛍', 'Shopping': '🛍',
   'พิพิธภัณฑ์': '🏛', 'Museum': '🏛',
   'ตลาด': '🏪', 'Market': '🏪',
-}
-
-const formatPrice = (place) => {
-  if (place.is_free) return 'ฟรี'
-  if (place.price_min && place.price_max && place.price_min !== place.price_max) {
-    return `฿${place.price_min.toLocaleString()} - ฿${place.price_max.toLocaleString()}`
-  }
-  if (place.price_min) return `เริ่มต้น ฿${place.price_min.toLocaleString()}`
-  if (place.price_max) return `ไม่เกิน ฿${place.price_max.toLocaleString()}`
-  return 'ดูรายละเอียด'
-}
-
-import { buildImageUrl } from '../utils/image'
-
-const getPlaceImage = (place) => buildImageUrl(place.images?.[0])
-
-const getDisplayName = (user, fallback = 'นักเดินทาง') => (
-  user?.username || user?.name || fallback
-)
-
-const getAvatarSrc = (user, displayName) => {
-  if (user?.avatar) return buildImageUrl(user.avatar)
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=116045&color=fff&size=96`
 }
 
 export function Home() {
@@ -53,20 +30,10 @@ export function Home() {
   const [categoriesLoading, setCategoriesLoading] = useState(true)
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
-  const [featuredPlaces, setFeaturedPlaces] = useState([])
-  const [featuredLoading, setFeaturedLoading] = useState(true)
-  const [featuredCategory, setFeaturedCategory] = useState('')
-  const [homeReviews, setHomeReviews] = useState([])
-  const [homeReviewsLoading, setHomeReviewsLoading] = useState(true)
   
   useEffect(() => {
     fetchCategories()
-    fetchHomeReviews()
   }, [])
-
-  useEffect(() => {
-    fetchFeaturedPlaces(featuredCategory)
-  }, [featuredCategory])
 
   const fetchCategories = async () => {
     setCategoriesLoading(true)
@@ -77,58 +44,6 @@ export function Home() {
       toast.error('ไม่สามารถดึงข้อมูลหมวดหมู่ได้')
     } finally {
       setCategoriesLoading(false)
-    }
-  }
-
-  const fetchFeaturedPlaces = async (categoryId = '') => {
-    setFeaturedLoading(true)
-    try {
-      const params = { province: DEFAULT_PROVINCE, limit: 8 }
-      if (categoryId) params.category = categoryId
-      const response = await placesAPI.getPlaces(params)
-      const places = response.data.data || response.data || []
-      setFeaturedPlaces(Array.isArray(places) ? places.slice(0, 6) : [])
-    } catch (error) {
-      console.error('Unable to fetch featured places:', error)
-      setFeaturedPlaces([])
-    } finally {
-      setFeaturedLoading(false)
-    }
-  }
-
-  const fetchHomeReviews = async () => {
-    setHomeReviewsLoading(true)
-    try {
-      const response = await placesAPI.getPlaces({ province: DEFAULT_PROVINCE, limit: 10 })
-      const places = response.data.data || response.data || []
-      const visiblePlaces = Array.isArray(places) ? places.slice(0, 10) : []
-      const detailedPlaces = await Promise.all(
-        visiblePlaces.map(place => placesAPI.getPlace(place._id).then(res => res.data.data || res.data).catch(() => null))
-      )
-
-      const reviews = detailedPlaces
-        .filter(Boolean)
-        .flatMap(place => {
-          const placeReviews = Array.isArray(place.reviews) ? place.reviews : []
-          return placeReviews.map(review => ({
-            ...review,
-            place: {
-              _id: place._id,
-              name: place.name,
-              category: place.category?.name || place.category,
-            }
-          }))
-        })
-        .filter(review => review.comment || review.content)
-        .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
-        .slice(0, 9)
-
-      setHomeReviews(reviews)
-    } catch (error) {
-      console.error('Unable to fetch home reviews:', error)
-      setHomeReviews([])
-    } finally {
-      setHomeReviewsLoading(false)
     }
   }
 
@@ -399,166 +314,6 @@ export function Home() {
         </form>
       </div>
 
-      <section className="home-showcase" aria-labelledby="home-showcase-title">
-        <div className="home-showcase-inner">
-          <div className="home-showcase-header">
-            <div>
-              <h2 id="home-showcase-title">สถานที่น่าไปในอุบลราชธานี</h2>
-            </div>
-          </div>
-
-          <div className="home-showcase-tabs" aria-label="เลือกหมวดหมู่สถานที่แนะนำ">
-            <button
-              type="button"
-              className={`home-showcase-tab${featuredCategory === '' ? ' active' : ''}`}
-              onClick={() => setFeaturedCategory('')}
-            >
-              ทั้งหมด
-            </button>
-            {categories.map(category => (
-              <button
-                type="button"
-                key={category._id}
-                className={`home-showcase-tab${featuredCategory === category._id ? ' active' : ''}`}
-                onClick={() => setFeaturedCategory(category._id)}
-              >
-                {category.name}
-              </button>
-            ))}
-          </div>
-
-          {featuredLoading ? (
-            <div className="home-destination-rail" aria-label="กำลังโหลดสถานที่แนะนำ">
-              {[1, 2, 3, 4].map(item => (
-                <div key={item} className="home-destination-card skeleton" />
-              ))}
-            </div>
-          ) : featuredPlaces.length > 0 ? (
-            <div className="home-destination-rail auto" aria-label="สถานที่แนะนำ">
-              <div className="home-destination-track">
-              {[...featuredPlaces, ...featuredPlaces].map((place, index) => {
-                const catName = place.category?.name || place.category || 'สถานที่'
-                const imageSrc = getPlaceImage(place)
-
-                return (
-                  <article
-                    key={`${place._id}-${index}`}
-                    className="home-destination-card"
-                    onClick={() => navigate(`/places/${place._id}`)}
-                    aria-hidden={index >= featuredPlaces.length}
-                  >
-                    {imageSrc ? (
-                      <img
-                        src={imageSrc}
-                        alt={place.name}
-                        onError={event => {
-                          event.currentTarget.style.display = 'none'
-                        }}
-                      />
-                    ) : (
-                      <div className="home-destination-placeholder">
-                        <MapPin />
-                      </div>
-                    )}
-                    <button
-                      type="button"
-                      className="home-destination-heart"
-                      aria-label={`บันทึก ${place.name}`}
-                      onClick={event => event.stopPropagation()}
-                    >
-                      <Heart size={20} />
-                    </button>
-                    <div className="home-destination-content">
-                      <div className="home-destination-category">{CAT_EMOJI[catName] || '📍'} {catName}</div>
-                      <h3>{place.name}</h3>
-                      <p>{place.address || 'อุบลราชธานี'}</p>
-                      <div className="home-destination-meta">
-                        <span><Tag size={15} />{formatPrice(place)}</span>
-                        <span><Star size={15} />{place.rating || 'ใหม่'}</span>
-                      </div>
-                      <button
-                        type="button"
-                        className="home-destination-cta"
-                        onClick={event => {
-                          event.stopPropagation()
-                          navigate(`/places/${place._id}`)
-                        }}
-                      >
-                        ดูรายละเอียด
-                      </button>
-                    </div>
-                  </article>
-                )
-              })}
-              </div>
-            </div>
-          ) : (
-            <div className="home-showcase-empty">
-              ยังไม่มีสถานที่ให้แสดงในตอนนี้
-            </div>
-          )}
-        </div>
-      </section>
-
-      <section className="home-reviews" aria-labelledby="home-reviews-title">
-        <div className="home-reviews-inner">
-          <div className="home-reviews-header">
-            <h2 id="home-reviews-title">เสียงจากนักเดินทาง</h2>
-            <p>รีวิวจริงจากผู้ใช้ที่เคยแบ่งปันประสบการณ์ในสถานที่ต่าง ๆ</p>
-          </div>
-
-          {homeReviewsLoading ? (
-            <div className="home-reviews-grid" aria-label="กำลังโหลดรีวิว">
-              {[1, 2, 3, 4, 5, 6].map(item => (
-                <div key={item} className="home-review-card skeleton" />
-              ))}
-            </div>
-          ) : homeReviews.length > 0 ? (
-            <div className="home-reviews-grid">
-              {homeReviews.map(review => {
-                const displayName = getDisplayName(review.user, review.name || 'นักเดินทาง')
-                const avatarSrc = getAvatarSrc(review.user, displayName)
-                const placeName = review.place?.name || 'สถานที่ในอุบลราชธานี'
-                const reviewDate = review.createdAt
-                  ? new Date(review.createdAt).toLocaleDateString('th-TH', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric'
-                    })
-                  : 'ไม่นานมานี้'
-
-                return (
-                  <article
-                    key={review._id || `${placeName}-${review.createdAt}`}
-                    className="home-review-card"
-                    onClick={() => review.place?._id && navigate(`/places/${review.place._id}`)}
-                  >
-                    <div className="home-review-top">
-                      <img src={avatarSrc} alt={displayName} loading="lazy" />
-                      <div>
-                        <strong>{displayName}</strong>
-                        <span>{placeName}</span>
-                      </div>
-                    </div>
-                    <p>{review.comment || review.content}</p>
-                    <div className="home-review-foot">
-                      <span className="home-review-score">
-                        <Star size={15} />
-                        {Number(review.rating || 0).toFixed(1)}
-                      </span>
-                      <time dateTime={review.createdAt}>{reviewDate}</time>
-                    </div>
-                  </article>
-                )
-              })}
-            </div>
-          ) : (
-            <div className="home-reviews-empty">
-              ยังไม่มีรีวิวให้แสดงในตอนนี้
-            </div>
-          )}
-        </div>
-      </section>
     </div>
   )
 }

@@ -3,6 +3,7 @@ const Category = require('../models/Category');
 const Review = require('../models/Review');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
+const PriceUpdate = require('../models/PriceUpdate');
 const { hasInappropriateContent } = require('../utils/contentModeration');
 
 const populatePlace = (query) => query
@@ -128,6 +129,103 @@ exports.getPlaces = async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'เกิดข้อผิดพลาดในการดึงข้อมูลสถานที่'
+        });
+    }
+};
+
+// @desc    Get recent reviews for home page
+// @route   GET /api/places/reviews/home
+// @access  Public
+exports.getHomeReviews = async (req, res) => {
+    try {
+        const { province, limit = 9 } = req.query;
+        const reviewLimit = Math.min(Math.max(parseInt(limit, 10) || 9, 1), 20);
+
+        const placeFilter = { status: 'active' };
+        if (province) {
+            placeFilter.province = province;
+        }
+
+        const places = await Place.find(placeFilter)
+            .select('_id name category')
+            .populate('category', 'name')
+            .lean();
+
+        if (!places.length) {
+            return res.json({ success: true, data: [] });
+        }
+
+        const placeMap = new Map(
+            places.map(place => [String(place._id), place])
+        );
+
+        const reviews = await Review.find({
+            place: { $in: places.map(place => place._id) },
+            comment: { $exists: true, $nin: [null, ''] }
+        })
+            .populate('user', 'name username avatar role')
+            .sort({ createdAt: -1 })
+            .limit(reviewLimit)
+            .lean();
+
+        const data = reviews.map(review => {
+            const place = placeMap.get(String(review.place));
+
+            return {
+                ...review,
+                place: place ? {
+                    _id: place._id,
+                    name: place.name,
+                    category: place.category?.name || place.category
+                } : null
+            };
+        });
+
+        res.json({
+            success: true,
+            data
+        });
+    } catch (error) {
+        console.error('Get home reviews error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'เกิดข้อผิดพลาดในการดึงข้อมูลรีวิว'
+        });
+    }
+};
+
+// @desc    Get promotions for a place
+// @route   GET /api/places/:id/promotions
+// @access   Public
+exports.getPlacePromotions = async (req, res) => {
+    try {
+        const place = await Place.findById(req.params.id).select('_id name');
+
+        if (!place) {
+            return res.status(404).json({
+                success: false,
+                message: 'ไม่พบสถานที่ที่ต้องการ'
+            });
+        }
+
+        const promotions = await PriceUpdate.find({
+            place_id: place._id,
+            approval_status: 'approved',
+            promotion: { $exists: true, $ne: '' }
+        })
+            .sort({ reviewed_at: -1, submitted_at: -1 })
+            .select('promotion new_price_min new_price_max reviewed_at submitted_at')
+            .lean();
+
+        res.json({
+            success: true,
+            data: promotions
+        });
+    } catch (error) {
+        console.error('Get place promotions error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'เกิดข้อผิดพลาดในการดึงข้อมูลโปรโมชั่น'
         });
     }
 };
