@@ -1,4 +1,5 @@
 import { Routes, Route, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
 import { Navbar } from '@/components/Navbar'
 import { Footer } from '@/components/Footer'
 import ProtectedRoute from '@/components/ProtectedRoute'
@@ -16,6 +17,17 @@ import { AddPlace } from '@/pages/AddPlace'
 import { NotFound } from '@/pages/NotFound'
 import About from '@/pages/About'
 import Contact from '@/pages/Contact'
+import { Promotions } from '@/pages/Promotions'
+
+function ScrollToTop() {
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+
+  return null
+}
 
 function App() {
   const location = useLocation()
@@ -23,6 +35,7 @@ function App() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <ScrollToTop />
       {!hideAppChrome && <Navbar />}
       <main className="flex-grow">
         <Routes>
@@ -35,6 +48,7 @@ function App() {
           <Route path="/places/:id" element={<PlaceDetail />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/promotions" element={<Promotions />} />
           
           {/* Protected routes */}
           <Route 

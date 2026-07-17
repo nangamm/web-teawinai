@@ -21,11 +21,15 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const [notificationOpen, setNotificationOpen] = useState(false)
+  const [placesMenuOpen, setPlacesMenuOpen] = useState(false)
+  const placesMenuTimeoutRef = useRef(null)
+  const dropdownTimeoutRef = useRef(null)
   const [notificationCount, setNotificationCount] = useState(0)
   const [notifications, setNotifications] = useState([])
   const [currentUser, setCurrentUser] = useState(() => readStoredUser())
   const dropdownRef = useRef(null)
   const notificationRef = useRef(null)
+  const placesMenuRef = useRef(null)
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -46,6 +50,7 @@ export function Navbar() {
   useEffect(() => { setMobileOpen(false) }, [location.pathname])
   useEffect(() => { setDropdownOpen(false) }, [location.pathname])
   useEffect(() => { setNotificationOpen(false) }, [location.pathname])
+  useEffect(() => { setPlacesMenuOpen(false) }, [location.pathname])
 
   useEffect(() => {
     const syncStoredUser = () => setCurrentUser(readStoredUser())
@@ -180,6 +185,30 @@ export function Navbar() {
     }
   }, [notificationOpen])
 
+  useEffect(() => {
+    if (!placesMenuOpen) return
+
+    const handlePointerDown = (event) => {
+      if (!placesMenuRef.current?.contains(event.target)) {
+        setPlacesMenuOpen(false)
+      }
+    }
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setPlacesMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [placesMenuOpen])
+
   const isActive = (path) => location.pathname === path
   const mobileLinkProps = (path) => ({
     className: `navbar-mobile-link${isActive(path) ? ' active' : ''}`,
@@ -197,6 +226,40 @@ export function Navbar() {
   const handleNotificationToggle = () => {
     setNotificationOpen(value => !value)
     setDropdownOpen(false)
+  }
+
+  const handlePlacesMenuToggle = () => {
+    setPlacesMenuOpen(value => !value)
+    setDropdownOpen(false)
+    setNotificationOpen(false)
+  }
+
+  const handlePlacesMenuEnter = () => {
+    if (placesMenuTimeoutRef.current) {
+      clearTimeout(placesMenuTimeoutRef.current)
+      placesMenuTimeoutRef.current = null
+    }
+    setPlacesMenuOpen(true)
+  }
+
+  const handlePlacesMenuLeave = () => {
+    placesMenuTimeoutRef.current = setTimeout(() => {
+      setPlacesMenuOpen(false)
+    }, 200)
+  }
+
+  const handleDropdownEnter = () => {
+    if (dropdownTimeoutRef.current) {
+      clearTimeout(dropdownTimeoutRef.current)
+      dropdownTimeoutRef.current = null
+    }
+    setDropdownOpen(true)
+  }
+
+  const handleDropdownLeave = () => {
+    dropdownTimeoutRef.current = setTimeout(() => {
+      setDropdownOpen(false)
+    }, 200)
   }
 
   const handleMarkAllNotificationsRead = async () => {
@@ -267,12 +330,38 @@ export function Navbar() {
           >
             วางแผนเที่ยว
           </Link>
-          <Link
-            to="/places"
-            className={`navbar-link${isActive('/places') ? ' active' : ''}`}
-          >
-            สำรวจสถานที่
-          </Link>
+          <div className="navbar-link-dropdown" ref={placesMenuRef} onMouseEnter={handlePlacesMenuEnter} onMouseLeave={handlePlacesMenuLeave}>
+            <button
+              type="button"
+              className={`navbar-link navbar-link-button${isActive('/places') ? ' active' : ''}`}
+              onClick={handlePlacesMenuToggle}
+              aria-expanded={placesMenuOpen}
+              aria-haspopup="menu"
+              aria-label="เมนูสำรวจสถานที่"
+            >
+              สำรวจสถานที่
+            </button>
+            {placesMenuOpen && (
+              <div className="navbar-link-menu" role="menu" aria-label="เมนูสำรวจสถานที่">
+                <Link
+                  to="/places"
+                  className="navbar-dropdown-item"
+                  onClick={() => setPlacesMenuOpen(false)}
+                  role="menuitem"
+                >
+                  สถานที่ท่องเที่ยว
+                </Link>
+                <Link
+                  to="/promotions"
+                  className="navbar-dropdown-item"
+                  onClick={() => setPlacesMenuOpen(false)}
+                  role="menuitem"
+                >
+                  โปรโมชั่น
+                </Link>
+              </div>
+            )}
+          </div>
           <Link
             to="/about"
             className={`navbar-link${isActive('/about') ? ' active' : ''}`}
@@ -378,7 +467,7 @@ export function Navbar() {
                 )}
               </Link>
               {/* Account menu */}
-              <div className="navbar-dropdown-container" ref={dropdownRef}>
+              <div className="navbar-dropdown-container" ref={dropdownRef} onMouseEnter={handleDropdownEnter} onMouseLeave={handleDropdownLeave}>
                 <button
                   type="button"
                   className="navbar-icon-btn"
@@ -481,8 +570,8 @@ export function Navbar() {
           {/* Mobile links */}
           <Link to="/" {...mobileLinkProps('/')}>วางแผนเที่ยว</Link>
           <Link to="/places" {...mobileLinkProps('/places')}>สำรวจสถานที่</Link>
+          <Link to="/promotions" {...mobileLinkProps('/promotions')}>โปรโมชั่น</Link>
           <Link to="/about" {...mobileLinkProps('/about')}>เกี่ยวกับเรา</Link>
-          <Link to="/login" {...mobileLinkProps('/login')}>เข้าสู่ระบบผู้ดูแล</Link>
           {isAuthenticated && (
             <Link to="/my-trips" {...mobileLinkProps('/my-trips')}>ทริปของฉัน</Link>
           )}

@@ -5,7 +5,6 @@ import toast from 'react-hot-toast'
 import { authAPI } from '../services/api'
 import { buildImageUrl } from '../utils/image'
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001'
 const USERNAME_PATTERN = /^[\p{L}\p{N}_ -]+$/u
 const ALLOWED_AVATAR_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
 
