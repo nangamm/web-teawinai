@@ -11,7 +11,7 @@ React · Node.js · MongoDB
 - Browse recommended places in Ubon Ratchathani
 
 ## Live Demo
-(https://teawinai.vercel.app) *(เปลี่ยนเป็น URL production ที่ตั้งใหม่หลังแก้ domain แล้ว)*
+(https://teawinai.vercel.app)
 
 ## Getting Started
 \`\`\`bash
