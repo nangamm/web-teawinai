@@ -5,21 +5,4 @@ A full-stack web app that plans one-day trips in Ubon Ratchathani based on your 
 ## Tech Stack
 React · Node.js · MongoDB
 
-## Features
-- Set a budget and get an optimized one-day trip plan
-- Cost breakdown to avoid overspending
-- Browse recommended places in Ubon Ratchathani
-
-## Live Demo
-(https://teawinai.vercel.app)
-
-## Getting Started
-\`\`\`bash
-git clone https://github.com/nangamm/teawinai.git
-cd teawinai
-npm install
-npm run dev
-\`\`\`
-
-## Author
-**Wutthinan Nangam** — [GitHub](https://github.com/nangamm) · wutthinan.fordd@gmail.com
+## Live Demo https://teawinai.vercel.app
