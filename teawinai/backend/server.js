@@ -14,10 +14,27 @@ const categoryRoutes = require('./src/routes/categoryRoutes');
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Database connection
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.error('MongoDB connection error:', err));
+// Database connection (serverless-friendly: cache connection, wait before handling requests)
+let isConnected = false;
+
+async function connectDB() {
+  if (isConnected) return;
+  await mongoose.connect(process.env.MONGODB_URI, {
+    serverSelectionTimeoutMS: 20000,
+  });
+  isConnected = true;
+  console.log('MongoDB connected');
+}
+
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error('MongoDB connection error:', err);
+    res.status(500).json({ success: false, message: 'Database connection failed' });
+  }
+});
 
 // Middleware
 app.use(cors());
@@ -43,17 +60,17 @@ app.use('/api/categories', categoryRoutes);
 // Global error handler middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).json({ 
+  res.status(500).json({
     success: false,
-    message: 'Something went wrong!' 
+    message: 'Something went wrong!'
   });
 });
 
 // 404 handler
 app.use('*', (req, res) => {
-  res.status(404).json({ 
+  res.status(404).json({
     success: false,
-    message: 'Route not found' 
+    message: 'Route not found'
   });
 });
 
