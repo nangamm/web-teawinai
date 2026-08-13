@@ -328,7 +328,7 @@ export function Navbar() {
             to="/"
             className={`navbar-link${isActive('/') ? ' active' : ''}`}
           >
-            วางแผนเที่ยว
+            Home
           </Link>
           <div className="navbar-link-dropdown" ref={placesMenuRef} onMouseEnter={handlePlacesMenuEnter} onMouseLeave={handlePlacesMenuLeave}>
             <button
@@ -339,7 +339,7 @@ export function Navbar() {
               aria-haspopup="menu"
               aria-label="เมนูสำรวจสถานที่"
             >
-              สำรวจสถานที่
+              Places
             </button>
             {placesMenuOpen && (
               <div className="navbar-link-menu" role="menu" aria-label="เมนูสำรวจสถานที่">
@@ -363,34 +363,17 @@ export function Navbar() {
             )}
           </div>
           <Link
-            to="/about"
-            className={`navbar-link${isActive('/about') ? ' active' : ''}`}
-          >
-            เกี่ยวกับเรา
-          </Link>
-          <Link
             to="/contact"
             className={`navbar-link${isActive('/contact') ? ' active' : ''}`}
           >
-            ติดต่อ
+            Contact Us
           </Link>
         </div>
 
 
 
         {/* Desktop actions */}
-        <div className="navbar-actions">
-          {/* Desktop search */}
-          <form onSubmit={handleSearch} className="navbar-search">
-            <Search />
-            <input
-              type="text"
-              className="navbar-search-input"
-              placeholder="ค้นหาสถานที่..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-            />
-          </form>
+        <div className="navbar-actions">  
 
           {isAuthenticated ? (
             <>
@@ -532,10 +515,10 @@ export function Navbar() {
           ) : (
             <>
               <Link to="/login" className="navbar-cta-ghost">
-                เข้าสู่ระบบ
+                Login
               </Link>
               <Link to="/register" className="navbar-cta">
-                ลงทะเบียน
+                Register
               </Link>
             </>
           )}

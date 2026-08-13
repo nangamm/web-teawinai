@@ -30,7 +30,7 @@ export function Home() {
   const [categoriesLoading, setCategoriesLoading] = useState(true)
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
-  
+
   useEffect(() => {
     fetchCategories()
   }, [])
@@ -114,32 +114,16 @@ export function Home() {
       {/* Hero image — วางรูปจริงที่ public/images/hero-temple.jpg */}
       <img
         className="hero-img"
-        src="/images/pexels-nsu-mon-1803488-3759941.jpg"
+        src="/images/ubon-hero-4k.png"
         alt="วัดในอีสาน"
         onError={e => { e.currentTarget.style.display = 'none' }}
       />
-      <div className="hero-bg-overlay" />
 
       <div className="hero-content">
-        <div className="hero-copy">
-          <div className="eyebrow">Ubon Ratchathani Heritage</div>
-          <h1 className="hero-title">
-            The Emerald<br />of Isan.
-          </h1>
-          <p className="hero-helper">
-            วางแผนเที่ยวอุบลจากงบ ความสนใจ และพื้นที่ที่คุณอยากไป
-          </p>
-        </div>
 
         {/* Planner Card */}
         <form onSubmit={handleSubmit} className="planner-form">
           <div className="booking-card">
-            <div className="booking-card-header">
-              <div className="booking-kicker">Your journey</div>
-              <button type="button" className="reset-btn" onClick={resetPlanner}>
-                ล้างค่า
-              </button>
-            </div>
 
             {/* Location details */}
             <div className="location-details" id="location-details">
@@ -262,33 +246,36 @@ export function Home() {
             {/* Categories */}
             <div className="chips-section">
               <div className="field-group">
-              <label className="field-label" htmlFor="categories">หมวดหมู่</label>
-              <div className="chips-row">
-                {categoriesLoading && (
-                  <div className="chips-empty" role="status" aria-live="polite">กำลังโหลดหมวดหมู่...</div>
-                )}
-                {!categoriesLoading && categories.length === 0 && (
-                  <div className="chips-empty" role="status">ยังไม่มีหมวดหมู่ให้เลือก ลองใหม่อีกครั้งภายหลัง</div>
-                )}
-                {!categoriesLoading && categories.map(cat => (
-                  <button
-                    type="button"
-                    key={cat._id}
-                    className={`chip${formData.categories.includes(cat.name) ? ' active' : ''}`}
-                    onClick={() => toggleCategory(cat.name)}
-                  >
-                    {CAT_EMOJI[cat.name]
-                      ? <span className="chip-emoji">{CAT_EMOJI[cat.name]}</span>
-                      : null}
-                    {cat.name}
+                <label className="field-label" htmlFor="categories">หมวดหมู่</label>
+                <div className="chips-row">
+                  {categoriesLoading && (
+                    <div className="chips-empty" role="status" aria-live="polite">กำลังโหลดหมวดหมู่...</div>
+                  )}
+                  {!categoriesLoading && categories.length === 0 && (
+                    <div className="chips-empty" role="status">ยังไม่มีหมวดหมู่ให้เลือก ลองใหม่อีกครั้งภายหลัง</div>
+                  )}
+                  {!categoriesLoading && categories.map(cat => (
+                    <button
+                      type="button"
+                      key={cat._id}
+                      className={`chip${formData.categories.includes(cat.name) ? ' active' : ''}`}
+                      onClick={() => toggleCategory(cat.name)}
+                    >
+                      {CAT_EMOJI[cat.name]
+                        ? <span className="chip-emoji">{CAT_EMOJI[cat.name]}</span>
+                        : null}
+                      {cat.name}
+                    </button>
+                  ))}
+                  <button type="button" className="reset-btn" onClick={resetPlanner}>
+                    ล้างค่า
                   </button>
-                ))}
-              </div>
-              {errors.categories && (
-                <div className="field-error" style={{ marginTop: 8 }}>
-                  <AlertCircle size={11} />{errors.categories}
                 </div>
-              )}
+                {errors.categories && (
+                  <div className="field-error" style={{ marginTop: 8 }}>
+                    <AlertCircle size={11} />{errors.categories}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -308,7 +295,7 @@ export function Home() {
                 : 'Plan My Heritage Trip'}
             </button>
 
-            
+
 
           </div>
         </form>
