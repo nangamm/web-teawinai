@@ -328,7 +328,7 @@ export function Navbar() {
             to="/"
             className={`navbar-link${isActive('/') ? ' active' : ''}`}
           >
-            Home
+            หน้าแรก
           </Link>
           <div className="navbar-link-dropdown" ref={placesMenuRef} onMouseEnter={handlePlacesMenuEnter} onMouseLeave={handlePlacesMenuLeave}>
             <button
@@ -339,7 +339,7 @@ export function Navbar() {
               aria-haspopup="menu"
               aria-label="เมนูสำรวจสถานที่"
             >
-              Places
+              สำรวจสถานที่
             </button>
             {placesMenuOpen && (
               <div className="navbar-link-menu" role="menu" aria-label="เมนูสำรวจสถานที่">
@@ -366,7 +366,7 @@ export function Navbar() {
             to="/contact"
             className={`navbar-link${isActive('/contact') ? ' active' : ''}`}
           >
-            Contact Us
+            ติดต่อเรา
           </Link>
         </div>
 
@@ -515,10 +515,10 @@ export function Navbar() {
           ) : (
             <>
               <Link to="/login" className="navbar-cta-ghost">
-                Login
+                เข้าสู่ระบบ
               </Link>
               <Link to="/register" className="navbar-cta">
-                Register
+                สมัครสมาชิก
               </Link>
             </>
           )}

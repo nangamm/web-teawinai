@@ -6,15 +6,15 @@ import { DEFAULT_PROVINCE, getDistrictsByProvince, getSubdistrictsByDistrict, pr
 import { isAuthenticated } from '@/utils/auth'
 import toast from 'react-hot-toast'
 
-const CAT_EMOJI = {
-  'วัด': '⛩', 'Temples': '⛩',
-  'ร้านอาหาร': '🍽', 'Restaurants': '🍽',
-  'ธรรมชาติ': '🌿', 'Nature': '🌿',
-  'คาเฟ่': '☕', 'Cafe': '☕',
-  'ช็อปปิ้ง': '🛍', 'Shopping': '🛍',
-  'พิพิธภัณฑ์': '🏛', 'Museum': '🏛',
-  'ตลาด': '🏪', 'Market': '🏪',
-}
+// const CAT_EMOJI = {
+//   'วัด': '⛩', 'Temples': '⛩',
+//   'ร้านอาหาร': '🍽', 'Restaurants': '🍽',
+//   'ธรรมชาติ': '🌿', 'Nature': '🌿',
+//   'คาเฟ่': '☕', 'Cafe': '☕',
+//   'ช็อปปิ้ง': '🛍', 'Shopping': '🛍',
+//   'พิพิธภัณฑ์': '🏛', 'Museum': '🏛',
+//   'ตลาด': '🏪', 'Market': '🏪',
+// }
 
 export function Home() {
   const navigate = useNavigate()
@@ -261,9 +261,6 @@ export function Home() {
                       className={`chip${formData.categories.includes(cat.name) ? ' active' : ''}`}
                       onClick={() => toggleCategory(cat.name)}
                     >
-                      {CAT_EMOJI[cat.name]
-                        ? <span className="chip-emoji">{CAT_EMOJI[cat.name]}</span>
-                        : null}
                       {cat.name}
                     </button>
                   ))}

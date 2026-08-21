@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@100..900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Leckerli+One&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -2370,8 +2371,8 @@ body {
   min-height: 44px;
   border: none;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.52);
-  color: #174737;
+  background: #A8223B;
+  color: white;
   font-family: 'Noto Sans Thai', sans-serif;
   font-size: 12px;
   font-weight: 700;
@@ -2381,8 +2382,9 @@ body {
 }
 
 .reset-btn:hover {
-  background: rgba(255, 255, 255, 0.75);
-  color: var(--green);
+  background: #a8283f ;
+  color: white;
+  transform: translateY(-1px);
 }
 
 .reset-btn:focus-visible,
@@ -2408,6 +2410,11 @@ body {
   margin-bottom: 0;
 }
 
+.card-row > .field-group,
+.card-row-3 > .field-group {
+  min-width: 0;
+}
+
 .field-group {
   display: flex;
   flex-direction: column;
@@ -2427,6 +2434,8 @@ body {
   align-items: center;
   gap: 8px;
   min-height: 42px;
+  width: 100%;
+  box-sizing: border-box;
   background: rgba(255, 255, 255, 0.72);
   border: 1.5px solid transparent;
   border-radius: 25px;
@@ -2450,7 +2459,7 @@ body {
 
 .input-box svg {
   flex-shrink: 0;
-  color: var(--green);
+  color: #FBAE42;
   width: 15px;
   height: 15px;
 }
@@ -2478,7 +2487,7 @@ body {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: var(--green);
+  background: #FBAE42;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2495,15 +2504,23 @@ body {
 
 .chips-row {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
+  width: 100%;
+}
+
+.chip,
+.chips-row .reset-btn {
+  flex: 1 1 120px;
+  min-width: 0;
 }
 
 .chip {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
-  min-height: 34px;
+  min-height: 44px;
   padding: 7px 13px;
   border-radius: 100px;
   font-size: 12px;
@@ -2581,7 +2598,7 @@ body {
   width: 100%;
   min-height: 48px;
   padding: 14px;
-  background: linear-gradient(180deg, #0e6b4c 0%, #0c573e 100%);
+  background: linear-gradient(180deg, #a8283f 0%, #A8223B 100%);
   color: #fff;
   font-family: 'Noto Sans Thai', sans-serif;
   font-size: 14px;
@@ -2590,7 +2607,6 @@ body {
   border: none;
   border-radius: 25px;
   cursor: pointer;
-  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2598,9 +2614,9 @@ body {
 }
 
 .cta-btn:hover:not(:disabled) {
-  background: #0d4e38;
+  background: #A8223B;
   transform: translateY(-1px);
-  box-shadow: 0 6px 8px rgba(17, 96, 69, 0.26);
+  box-shadow: 0 6px 8px rgba(168, 34, 59, 0.26);
 }
 
 .cta-btn:active:not(:disabled) {

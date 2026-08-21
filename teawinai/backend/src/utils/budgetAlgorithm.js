@@ -16,12 +16,14 @@ function getPlaceCost(place) {
     return Number.isFinite(priceMin) && priceMin > 0 ? priceMin : 0;
 }
 
+//คำนวณ "คุ้มค่า"
 function getPlaceScore(place) {
     const rating = Number(place?.rating || 0);
     const cost = getPlaceCost(place);
     return cost > 0 ? rating / cost : rating;
 }
 
+//เรียงลำดับจากคุ้มค่าที่สุดไปน้อยที่สุด
 function sortByValue(a, b) {
     if (b.ratio !== a.ratio) return b.ratio - a.ratio;
     if ((b.rating || 0) !== (a.rating || 0)) return (b.rating || 0) - (a.rating || 0);
@@ -101,7 +103,7 @@ function selectPlacesByBudget(places, budget, options = {}) {
         budgetUsed += getPlaceCost(place);
     };
 
-    // Cover requested categories before allowing duplicate categories.
+    // ตรวจสอบหมวดหมู่ที่ร้องขอก่อนที่จะอนุญาตให้มีหมวดหมู่ซ้ำ
     if (requestedCategories.length > 0) {
         for (const category of requestedCategories) {
             if (selectedPlaces.length >= placeLimit) break;
@@ -115,7 +117,7 @@ function selectPlacesByBudget(places, budget, options = {}) {
         }
     }
 
-    // Fill remaining slots from the requested category pool only.
+    // เติมช่องว่างที่เหลือจากกลุ่มหมวดหมู่ที่ระบุไว้เท่านั้น
     for (const place of placesWithRatio) {
         if (selectedPlaces.length >= placeLimit) break;
         if (canSelect(place)) addPlace(place);
