@@ -197,10 +197,10 @@ export function AdminDashboard() {
   const filteredPlaces = places.filter(p => p.name?.toLowerCase().includes(searchQuery.toLowerCase()))
 
   const getPlaceStatusMeta = (status) => {
-    if (status === 'active' || status === 'published') return { className: 'published', label: 'ACTIVE' }
-    if (status === 'pending') return { className: 'pending', label: 'PENDING' }
-    if (status === 'rejected') return { className: 'rejected', label: 'REJECTED' }
-    return { className: 'draft', label: 'INACTIVE' }
+    if (status === 'active' || status === 'published') return { className: 'published', label: 'ใช้งานอยู่' }
+    if (status === 'pending') return { className: 'pending', label: 'รอดำเนินการ' }
+    if (status === 'rejected') return { className: 'rejected', label: 'ไม่อนุมัติ' }
+    return { className: 'draft', label: 'ไม่ใช้งาน' }
   }
 
   const handleFormSubmit = async (e) => {
@@ -257,9 +257,9 @@ export function AdminDashboard() {
   }
 
   const PLACEHOLDER_PLACES = [
-    { name: 'Wat Phra That Nong Bua', sub: 'Ubon City Center', cat: 'Heritage / Temple', rating: 4.9, status: 'published', emoji: '⛩' },
-    { name: 'Sam Phan Bok', sub: 'Khong Chiam', cat: 'Nature / Landmark', rating: 4.8, status: 'published', emoji: '🌿' },
-    { name: 'The Moon River Resort', sub: 'Warinchamrap', cat: 'Accommodation', rating: 4.5, status: 'draft', emoji: '🏨' },
+    { name: 'Wat Phra That Nong Bua', sub: 'ใจกลางเมืองอุบลราชธานี', cat: 'มรดก / วัด', rating: 4.9, status: 'published', emoji: '⛩' },
+    { name: 'Sam Phan Bok', sub: 'โขงเจียม', cat: 'ธรรมชาติ / จุดชมวิว', rating: 4.8, status: 'published', emoji: '🌿' },
+    { name: 'The Moon River Resort', sub: 'วารินชำราบ', cat: 'ที่พัก', rating: 4.5, status: 'draft', emoji: '🏨' },
   ]
 
   return (
@@ -269,10 +269,9 @@ export function AdminDashboard() {
       <div className="admin-hero">
         <div className="admin-hero-inner">
           <div>
-            <h1 className="admin-hero-title">Admin Console</h1>
+            <h1 className="admin-hero-title">แผงควบคุมผู้ดูแลระบบ</h1>
             <p className="admin-hero-sub">
-              Managing the cultural heritage and editorial integrity of Ubon
-              Ratchathani's premier destination guide.
+              จัดการข้อมูลแหล่งท่องเที่ยวและดูแลคุณภาพเนื้อหาสถานที่สำคัญของจังหวัดอุบลราชธานี
             </p>
           </div>
         </div>
@@ -282,10 +281,10 @@ export function AdminDashboard() {
       <div className="admin-tab-nav">
         <nav className="admin-tab-bar">
           <button className={`admin-tab-btn${activeTab === 'dashboard' ? ' active' : ''}`} onClick={() => setActiveTab('dashboard')}>
-            <LayoutDashboard size={16} />Dashboard
+            <LayoutDashboard size={16} />ภาพรวม
           </button>
           <Link className="admin-tab-btn" to="/admin/approval-queue">
-            <Banknote size={16} />Approval Queue
+            <Banknote size={16} />รายการรออนุมัติ
             {(pendingPlaces.length + pendingUpdates.length) > 0 && (
               <span className="admin-tab-badge">{pendingPlaces.length + pendingUpdates.length}</span>
             )}
@@ -298,19 +297,19 @@ export function AdminDashboard() {
         <>
           <div className="admin-stats">
             <div className="admin-stat-card">
-              <div className="admin-stat-eyebrow">Total Engagement <TrendingUp /></div>
+              <div className="admin-stat-eyebrow">การเข้าชมทั้งหมด <TrendingUp /></div>
               <div className="admin-stat-num">{(stats.totalPlaces * 1000 + 142890).toLocaleString()}</div>
-              <div className="admin-stat-desc">Views across all curated heritage sites this month</div>
+              <div className="admin-stat-desc">จำนวนการเข้าชมสถานที่ที่คัดสรรทั้งหมดในเดือนนี้</div>
               <div className="admin-stat-progress"><div className="admin-stat-progress-fill" style={{ width: '72%' }} /></div>
             </div>
 
             <div className="admin-stat-card">
-              <div className="admin-stat-eyebrow">Pending Reviews</div>
+              <div className="admin-stat-eyebrow">รายการรอตรวจสอบ</div>
               <div className="admin-stat-num">{(stats.pendingPlaces || 0) + (stats.pendingUpdates || 0)}</div>
-              <div className="admin-stat-desc">Place submissions and price updates awaiting approval</div>
+              <div className="admin-stat-desc">สถานที่ใหม่และการอัปเดตราคาที่รอการอนุมัติ</div>
               <div className="admin-stat-progress"><div className="admin-stat-progress-fill" style={{ width: `${Math.min(100, ((stats.pendingPlaces || 0) + (stats.pendingUpdates || 0)) * 4)}%` }} /></div>
               <Link className="admin-stat-link" to="/admin/approval-queue">
-                Review Queue →
+                ดูรายการรออนุมัติ →
               </Link>
             </div>
 
@@ -324,23 +323,23 @@ export function AdminDashboard() {
           </div>
 
           <div className="admin-main">
-            {/* Place Database */}
+            {/* ฐานข้อมูลสถานที่ */}
             <div>
               <div className="admin-db-header">
-                <div className="admin-db-title">Place Database</div>
+                <div className="admin-db-title">ฐานข้อมูลสถานที่</div>
                 <div className="admin-search-wrap">
                   <Search />
-                  <input type="text" className="admin-search-input" placeholder="Search attractions..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+                  <input type="text" className="admin-search-input" placeholder="ค้นหาสถานที่..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
                 </div>
               </div>
 
               <div className="admin-table-wrap">
                 <div className="admin-table-head">
-                  <div className="admin-table-head-cell">Attraction</div>
-                  <div className="admin-table-head-cell">Category</div>
-                  <div className="admin-table-head-cell">Rating</div>
-                  <div className="admin-table-head-cell">Status</div>
-                  <div className="admin-table-head-cell">Actions</div>
+                  <div className="admin-table-head-cell">สถานที่</div>
+                  <div className="admin-table-head-cell">หมวดหมู่</div>
+                  <div className="admin-table-head-cell">คะแนน</div>
+                  <div className="admin-table-head-cell">สถานะ</div>
+                  <div className="admin-table-head-cell">การจัดการ</div>
                 </div>
 
                 {(filteredPlaces.length > 0 ? filteredPlaces.slice(0,10) : PLACEHOLDER_PLACES).map((place, i) => {

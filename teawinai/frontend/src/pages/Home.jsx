@@ -118,11 +118,16 @@ export function Home() {
         alt="วัดในอีสาน"
         onError={e => { e.currentTarget.style.display = 'none' }}
       />
+      <div className="hero-bg-overlay" aria-hidden="true" />
 
       <div className="hero-content">
 
         {/* Planner Card */}
         <form onSubmit={handleSubmit} className="planner-form">
+          <div className="planner-hook">
+            <h1>วางแผนทริปในฝันของคุณ</h1>
+            <p>สัมผัสหัวใจแห่งอีสานได้ในไม่กี่คลิก</p>
+          </div>
           <div className="booking-card">
 
             {/* Location details */}

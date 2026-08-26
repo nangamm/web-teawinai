@@ -451,12 +451,6 @@ export function PlaceDetail() {
                 <div>
                   <div className="detail-address-label">ที่อยู่</div>
                   <p>{place.address || 'ยังไม่มีข้อมูลที่อยู่'}</p>
-                  {place.map_link && (
-                    <button type="button" className="detail-map-link" onClick={handleNavigate}>
-                      ดูบนแผนที่
-                      <ExternalLink />
-                    </button>
-                  )}
                 </div>
               </div>
 

@@ -70,9 +70,9 @@ export function Result() {
 
   // Estimate category spend from places
   const getCatSpend = (places) => {
-    const dining = places?.filter(p => ['ร้านอาหาร','Restaurants','คาเฟ่','Cafe'].includes(p.category?.name))
+    const dining = places?.filter(p => ['ร้านอาหาร', 'Restaurants', 'คาเฟ่', 'Cafe'].includes(p.category?.name))
       .reduce((s, p) => s + (p.selectedCost || p.price_min || 0), 0) || 0
-    const tours = places?.filter(p => ['วัด','Temples'].includes(p.category?.name))
+    const tours = places?.filter(p => ['วัด', 'Temples'].includes(p.category?.name))
       .reduce((s, p) => s + (p.selectedCost || p.price_min || 0), 0) || 0
     return { dining, tours }
   }
@@ -84,7 +84,7 @@ export function Result() {
         <div className="result-skeleton-line" style={{ width: '50%', height: 36, marginBottom: 16 }} />
         <div className="result-skeleton-line" style={{ width: '60%' }} />
         <div className="result-skeleton-line" style={{ width: '45%', marginBottom: 32 }} />
-        {[1,2,3].map(i => <div key={i} className="result-skeleton-card" />)}
+        {[1, 2, 3].map(i => <div key={i} className="result-skeleton-card" />)}
       </div>
     )
   }
@@ -110,11 +110,10 @@ export function Result() {
       <div className="result-inner">
 
         {/* ── Header ── */}
-        <div className="result-eyebrow">มรดกอุบลราชธานี</div>
-        <h1 className="result-title">หนึ่งวันใน<br />เมืองมรกต</h1>
+        <div className="result-eyebrow">แผนเที่ยวอุบลราชธานี</div>
+        <h1 className="result-title">หนึ่งวันใน<br />เมืองดอกบัว</h1>
         <p className="result-subtitle">
-          แผนการเดินทางที่คัดสรรอย่างใส่ใจ สู่หัวใจแห่งวัฒนธรรมอีสาน
-          จากแสงทองยามเช้าที่วัดถึงความสงบของยามเย็นริมแม่น้ำมูล
+          แผนการเดินทางที่คัดสรรอย่างใส่ใจ สู่หัวใจแห่งวัฒนธรรมอีสาน จากแสงทองยามเช้าที่วัด ถึงความสงบของยามเย็นริมแม่น้ำมูล
         </p>
 
         {/* Trip Name */}
@@ -188,8 +187,8 @@ export function Result() {
                         {place.opening_hours?.['จันทร์']
                           ? `${place.opening_hours['จันทร์'].open} - ${place.opening_hours['จันทร์'].close}`
                           : place.open_time && place.close_time
-                          ? `${place.open_time} - ${place.close_time}`
-                          : 'ไม่ระบุเวลา'}
+                            ? `${place.open_time} - ${place.close_time}`
+                            : 'ไม่ระบุเวลา'}
                       </div>
                       <button className="result-place-detail-btn" onClick={() => handlePlaceDetail(place._id)}>
                         ดูรายละเอียด →

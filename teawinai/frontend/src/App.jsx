@@ -6,7 +6,6 @@ import ProtectedRoute from '@/components/ProtectedRoute'
 import { Home } from '@/pages/Home'
 import { Result } from '@/pages/Result'
 import { Login } from '@/pages/Login'
-import { Register } from '@/pages/Register'
 import { MyTrips } from '@/pages/MyTrips'
 import { AdminDashboard } from '@/pages/AdminDashboard'
 import { ApprovalQueue } from '@/pages/ApprovalQueue'
@@ -15,7 +14,6 @@ import { Places } from '@/pages/Places'
 import { PlaceDetail } from '@/pages/PlaceDetail'
 import { AddPlace } from '@/pages/AddPlace'
 import { NotFound } from '@/pages/NotFound'
-import About from '@/pages/About'
 import Contact from '@/pages/Contact'
 import { Promotions } from '@/pages/Promotions'
 
@@ -31,7 +29,7 @@ function ScrollToTop() {
 
 function App() {
   const location = useLocation()
-  const hideAppChrome = ['/login', '/register'].includes(location.pathname)
+  const hideAppChrome = location.pathname === '/login'
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -43,10 +41,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/result" element={<Result />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
           <Route path="/places" element={<Places />} />
           <Route path="/places/:id" element={<PlaceDetail />} />
-          <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/promotions" element={<Promotions />} />
           

@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom'
 import {
   AlertCircle,
   ArrowLeft,
-  Facebook,
   Eye,
   EyeOff,
   Loader2,
@@ -151,25 +150,8 @@ export function Login() {
                   )}
                 </button>
 
-                <div className="login-divider">
-                  <span>เข้าสู่ระบบอย่างรวดเร็ว</span>
-                </div>
-
-                <div className="login-social-grid" aria-label="ตัวเลือกเข้าสู่ระบบด้วยโซเชียล">
-                  <button type="button">
-                    <span className="login-google-mark" aria-hidden="true">G</span>
-                    เข้าสู่ระบบด้วย Google
-                  </button>
-                  <button type="button">
-                    <Facebook aria-hidden="true" />
-                    เข้าสู่ระบบด้วย Facebook
-                  </button>
-                </div>
               </form>
 
-              <p className="login-register">
-                ยังไม่มีบัญชี? <Link to="/register">สมัครสมาชิก</Link>
-              </p>
             </div>
           </div>
         </div>

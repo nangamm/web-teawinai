@@ -43,7 +43,7 @@ export default function Contact() {
                   alignItems: 'center',
                   justifyContent: 'center'
                 }}>
-                  <Mail style={{ width: '20px', height: '20px', color: '#116045' }} />
+                  <Mail style={{ width: '20px', height: '20px', color: '#A8223B' }} />
                 </div>
                 <div>
                   <div style={{ fontSize: '12px', color: '#888', marginBottom: '2px' }}>อีเมล</div>
@@ -61,7 +61,7 @@ export default function Contact() {
                   alignItems: 'center',
                   justifyContent: 'center'
                 }}>
-                  <Phone style={{ width: '20px', height: '20px', color: '#116045' }} />
+                  <Phone style={{ width: '20px', height: '20px', color: '#A8223B' }} />
                 </div>
                 <div>
                   <div style={{ fontSize: '12px', color: '#888', marginBottom: '2px' }}>โทรศัพท์</div>
@@ -79,7 +79,7 @@ export default function Contact() {
                   alignItems: 'center',
                   justifyContent: 'center'
                 }}>
-                  <MapPin style={{ width: '20px', height: '20px', color: '#116045' }} />
+                  <MapPin style={{ width: '20px', height: '20px', color: '#A8223B' }} />
                 </div>
                 <div>
                   <div style={{ fontSize: '12px', color: '#888', marginBottom: '2px' }}>ที่อยู่</div>
@@ -114,7 +114,7 @@ export default function Contact() {
                     outline: 'none',
                     transition: 'border-color 0.2s'
                   }}
-                  onFocus={(e) => e.target.style.borderColor = '#116045'}
+                  onFocus={(e) => e.target.style.borderColor = '#A8223B'}
                   onBlur={(e) => e.target.style.borderColor = 'transparent'}
                   required
                 />
@@ -138,7 +138,7 @@ export default function Contact() {
                     outline: 'none',
                     transition: 'border-color 0.2s'
                   }}
-                  onFocus={(e) => e.target.style.borderColor = '#116045'}
+                  onFocus={(e) => e.target.style.borderColor = '#A8223B'}
                   onBlur={(e) => e.target.style.borderColor = 'transparent'}
                   required
                 />
@@ -162,7 +162,7 @@ export default function Contact() {
                     outline: 'none',
                     transition: 'border-color 0.2s'
                   }}
-                  onFocus={(e) => e.target.style.borderColor = '#116045'}
+                  onFocus={(e) => e.target.style.borderColor = '#A8223B'}
                   onBlur={(e) => e.target.style.borderColor = 'transparent'}
                   required
                 />
@@ -188,7 +188,7 @@ export default function Contact() {
                     resize: 'vertical',
                     fontFamily: 'Noto Sans Thai, sans-serif'
                   }}
-                  onFocus={(e) => e.target.style.borderColor = '#116045'}
+                  onFocus={(e) => e.target.style.borderColor = '#A8223B'}
                   onBlur={(e) => e.target.style.borderColor = 'transparent'}
                   required
                 />
@@ -199,7 +199,7 @@ export default function Contact() {
                 style={{
                   width: '100%',
                   padding: '12px',
-                  background: '#116045',
+                  background: '#A8223B',
                   color: '#fff',
                   border: 'none',
                   borderRadius: '10px',
@@ -212,8 +212,8 @@ export default function Contact() {
                   gap: '8px',
                   transition: 'background 0.2s'
                 }}
-                onMouseOver={(e) => e.target.style.background = '#0d4e38'}
-                onMouseOut={(e) => e.target.style.background = '#116045'}
+                onMouseOver={(e) => e.target.style.background = '#8f1d32'}
+                onMouseOut={(e) => e.target.style.background = '#A8223B'}
               >
                 <Send style={{ width: '16px', height: '16px' }} />
                 ส่งข้อความ

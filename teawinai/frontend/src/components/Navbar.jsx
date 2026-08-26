@@ -36,8 +36,6 @@ export function Navbar() {
   const isAuthenticated = localStorage.getItem('token')
   const isAdminUser = isAdmin()
   const canAddPlace = hasRole(['admin', 'owner'])
-  const isHomePage = location.pathname === '/'
-  const usesSoftNavbar = !isHomePage
   const visibleNotificationCount = notificationCount > 99 ? '99+' : notificationCount
   const avatarSrc = currentUser?.avatar
     ? (currentUser.avatar.startsWith('http') ? currentUser.avatar : `${API_ORIGIN}${currentUser.avatar}`)
@@ -314,7 +312,7 @@ export function Navbar() {
   }
 
   return (
-    <nav className={`navbar${isHomePage ? ' navbar-home' : ''}${usesSoftNavbar ? ' navbar-soft' : ''}`}>
+    <nav className="navbar navbar-soft">
       <div className="navbar-inner">
 
         {/* Logo */}
@@ -517,9 +515,6 @@ export function Navbar() {
               <Link to="/login" className="navbar-cta-ghost">
                 เข้าสู่ระบบ
               </Link>
-              <Link to="/register" className="navbar-cta">
-                สมัครสมาชิก
-              </Link>
             </>
           )}
 
@@ -554,7 +549,6 @@ export function Navbar() {
           <Link to="/" {...mobileLinkProps('/')}>วางแผนเที่ยว</Link>
           <Link to="/places" {...mobileLinkProps('/places')}>สำรวจสถานที่</Link>
           <Link to="/promotions" {...mobileLinkProps('/promotions')}>โปรโมชั่น</Link>
-          <Link to="/about" {...mobileLinkProps('/about')}>เกี่ยวกับเรา</Link>
           {isAuthenticated && (
             <Link to="/my-trips" {...mobileLinkProps('/my-trips')}>ทริปของฉัน</Link>
           )}
@@ -601,9 +595,6 @@ export function Navbar() {
               <>
                 <Link to="/login" className="navbar-cta-ghost navbar-mobile-auth-link">
                   เข้าสู่ระบบ
-                </Link>
-                <Link to="/register" className="navbar-cta navbar-mobile-auth-link">
-                  เริ่มวางแผน
                 </Link>
               </>
             )}
