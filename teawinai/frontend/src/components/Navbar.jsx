@@ -515,6 +515,9 @@ export function Navbar() {
               <Link to="/login" className="navbar-cta-ghost">
                 เข้าสู่ระบบ
               </Link>
+              <Link to="/register" className="navbar-cta">
+                สมัครสมาชิก
+              </Link>
             </>
           )}
 
@@ -595,6 +598,9 @@ export function Navbar() {
               <>
                 <Link to="/login" className="navbar-cta-ghost navbar-mobile-auth-link">
                   เข้าสู่ระบบ
+                </Link>
+                <Link to="/register" className="navbar-cta navbar-mobile-auth-link">
+                  เริ่มวางแผน
                 </Link>
               </>
             )}

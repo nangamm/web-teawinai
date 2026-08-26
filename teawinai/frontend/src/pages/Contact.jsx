@@ -107,16 +107,13 @@ export default function Contact() {
                   style={{
                     width: '100%',
                     padding: '10px 14px',
-                    border: '1.5px solid transparent',
+                    border: '1.5px solid #9d9ca0',
                     borderRadius: '8px',
                     background: '#f4f2ee',
                     fontSize: '13px',
                     outline: 'none',
                     transition: 'border-color 0.2s'
                   }}
-                  onFocus={(e) => e.target.style.borderColor = '#A8223B'}
-                  onBlur={(e) => e.target.style.borderColor = 'transparent'}
-                  required
                 />
               </div>
 
@@ -131,16 +128,13 @@ export default function Contact() {
                   style={{
                     width: '100%',
                     padding: '10px 14px',
-                    border: '1.5px solid transparent',
+                    border: '1.5px solid #9d9ca0',
                     borderRadius: '8px',
                     background: '#f4f2ee',
                     fontSize: '13px',
                     outline: 'none',
                     transition: 'border-color 0.2s'
                   }}
-                  onFocus={(e) => e.target.style.borderColor = '#A8223B'}
-                  onBlur={(e) => e.target.style.borderColor = 'transparent'}
-                  required
                 />
               </div>
 
@@ -155,16 +149,13 @@ export default function Contact() {
                   style={{
                     width: '100%',
                     padding: '10px 14px',
-                    border: '1.5px solid transparent',
+                    border: '1.5px solid #9d9ca0',
                     borderRadius: '8px',
                     background: '#f4f2ee',
                     fontSize: '13px',
                     outline: 'none',
                     transition: 'border-color 0.2s'
                   }}
-                  onFocus={(e) => e.target.style.borderColor = '#A8223B'}
-                  onBlur={(e) => e.target.style.borderColor = 'transparent'}
-                  required
                 />
               </div>
 
@@ -179,7 +170,7 @@ export default function Contact() {
                   style={{
                     width: '100%',
                     padding: '10px 14px',
-                    border: '1.5px solid transparent',
+                    border: '1.5px solid #9d9ca0',
                     borderRadius: '8px',
                     background: '#f4f2ee',
                     fontSize: '13px',
@@ -188,9 +179,6 @@ export default function Contact() {
                     resize: 'vertical',
                     fontFamily: 'Noto Sans Thai, sans-serif'
                   }}
-                  onFocus={(e) => e.target.style.borderColor = '#A8223B'}
-                  onBlur={(e) => e.target.style.borderColor = 'transparent'}
-                  required
                 />
               </div>
 
@@ -210,10 +198,7 @@ export default function Contact() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px',
-                  transition: 'background 0.2s'
                 }}
-                onMouseOver={(e) => e.target.style.background = '#8f1d32'}
-                onMouseOut={(e) => e.target.style.background = '#A8223B'}
               >
                 <Send style={{ width: '16px', height: '16px' }} />
                 ส่งข้อความ

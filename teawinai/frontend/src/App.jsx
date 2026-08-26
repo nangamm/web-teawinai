@@ -6,6 +6,7 @@ import ProtectedRoute from '@/components/ProtectedRoute'
 import { Home } from '@/pages/Home'
 import { Result } from '@/pages/Result'
 import { Login } from '@/pages/Login'
+import { Register } from '@/pages/Register'
 import { MyTrips } from '@/pages/MyTrips'
 import { AdminDashboard } from '@/pages/AdminDashboard'
 import { ApprovalQueue } from '@/pages/ApprovalQueue'
@@ -29,7 +30,7 @@ function ScrollToTop() {
 
 function App() {
   const location = useLocation()
-  const hideAppChrome = location.pathname === '/login'
+  const hideAppChrome = ['/login', '/register'].includes(location.pathname)
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -41,6 +42,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/result" element={<Result />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/places" element={<Places />} />
           <Route path="/places/:id" element={<PlaceDetail />} />
           <Route path="/contact" element={<Contact />} />

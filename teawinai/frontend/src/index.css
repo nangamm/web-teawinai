@@ -185,14 +185,14 @@ body {
 .login-field input:focus,
 .login-password-control:focus-within {
   outline: none;
-  border-color: #A8223B;
+  border-color: #FBAE42;
   box-shadow: 0 0 0 3px rgba(17, 96, 69, 0.08);
   background: #fdfefd;
 }
 
 .login-field input.has-error,
 .login-password-control.has-error {
-  border-color: #e05252;
+  border-color: #FBAE42;
 }
 
 .login-password-control {
@@ -228,7 +228,7 @@ body {
 
 .login-password-control button:hover,
 .login-password-control button:focus-visible {
-  color: #A8223B;
+  color: #FBAE42;
   background: #e7f0ec;
   outline: none;
 }
@@ -321,6 +321,25 @@ body {
   cursor: not-allowed;
   opacity: 0.68;
   transform: none;
+}
+
+.login-register {
+  margin: 18px 0 0;
+  color: #766e67;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.login-register a {
+  color: #5c4632;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.login-register a:hover {
+  color: #3f3024;
+  text-decoration: underline;
 }
 
 .login-spin {
@@ -492,7 +511,7 @@ body {
   background:
     linear-gradient(180deg, rgba(8, 18, 13, 0.18) 0%, rgba(8, 18, 13, 0.08) 38%, rgba(8, 18, 13, 0.68) 100%),
     linear-gradient(90deg, rgba(8, 18, 13, 0.5) 0%, rgba(8, 18, 13, 0.12) 52%, rgba(8, 18, 13, 0.04) 100%),
-    url('/images/pexels-nsu-mon-1803488-3759941.jpg') center / cover no-repeat;
+    url('/images/fa6dec2785180e3f6486b6bf762d5292.jpg') center / cover no-repeat;
   color: #fff;
   isolation: auto;
 }
@@ -516,7 +535,7 @@ body {
 
 .login-brand:hover,
 .login-brand:focus-visible {
-  background: rgba(17, 96, 69, 0.82);
+  background: #FBAE42;
   outline: none;
   transform: translateY(-1px);
 }
@@ -613,7 +632,6 @@ body {
 .login-field input,
 .login-password-control {
   min-height: 48px;
-  border: 1.4px solid #091033;
   border-radius: 6px;
   color: #10152f;
   font-size: 13px;
@@ -630,12 +648,12 @@ body {
 
 .login-field input:hover,
 .login-password-control:hover {
-  border-color: #A8223B;
+  border-color: #FBAE42;
 }
 
 .login-field input:focus,
 .login-password-control:focus-within {
-  border-color: #A8223B;
+  border-color: #FBAE42;
   box-shadow: 0 0 0 3px rgba(17, 96, 69, 0.1);
 }
 
@@ -762,7 +780,268 @@ body {
 }
 
 /* =============================================
-  Home Page
+   Register Page
+   ============================================= */
+
+.register-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  background: #f7f6f2;
+  color: #2f2a26;
+}
+
+.register-shell {
+  width: min(100%, 980px);
+}
+
+.register-card {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  overflow: hidden;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 18px 50px rgba(47, 42, 38, 0.12);
+}
+
+.register-art-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 640px;
+  padding: 36px;
+  background: linear-gradient(145deg, #8f1d32, #a8223b 58%, #461522);
+  color: #fff;
+}
+
+.register-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.register-brand-mark {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #fbae42;
+  color: #461522;
+}
+
+.register-brand-mark svg {
+  width: 16px;
+  height: 16px;
+}
+
+.register-art-copy h2 {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.2;
+}
+
+.register-art-copy p {
+  max-width: 320px;
+  margin: 14px 0 0;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.6;
+}
+
+.register-form-panel {
+  padding: 52px 56px;
+  background: #fff;
+}
+
+.register-form-wrap {
+  width: min(100%, 380px);
+  margin: 0 auto;
+}
+
+.register-heading {
+  margin-bottom: 26px;
+}
+
+.register-heading h1 {
+  margin: 0;
+  color: #2f2a26;
+  font-size: 28px;
+}
+
+.register-heading p,
+.register-login {
+  color: #766e67;
+  font-size: 13px;
+}
+
+.register-heading p {
+  margin: 8px 0 0;
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.register-field label,
+.register-modal-label {
+  display: block;
+  margin-bottom: 6px;
+  color: #4d453e;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.register-field input,
+.register-password-control {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 44px;
+  border: 1px solid #d9d0c7;
+  border-radius: 8px;
+  background: #fff;
+  color: #2f2a26;
+  font: inherit;
+}
+
+.register-field input {
+  padding: 10px 12px;
+}
+
+.register-password-control {
+  display: flex;
+  align-items: center;
+  padding-right: 8px;
+}
+
+.register-password-control input {
+  border: 0;
+  outline: 0;
+  background: transparent;
+}
+
+.register-password-control button {
+  border: 0;
+  background: transparent;
+  color: #766e67;
+  cursor: pointer;
+}
+
+.register-password-control button svg {
+  width: 17px;
+  height: 17px;
+}
+
+.register-field input:focus,
+.register-password-control:focus-within {
+  outline: none;
+  border-color: #fbae42;
+  box-shadow: 0 0 0 3px rgba(251, 174, 66, 0.2);
+}
+
+.register-field input.has-error,
+.register-password-control.has-error {
+  border-color: #e05252;
+}
+
+.register-field-error {
+  margin: 5px 0 0;
+  color: #b72d2d;
+  font-size: 11px;
+}
+
+.register-terms {
+  display: flex;
+  gap: 8px;
+  color: #766e67;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.register-terms input {
+  accent-color: #fbae42;
+}
+
+.register-terms a,
+.register-login a {
+  color: #5c4632;
+  font-weight: 700;
+}
+
+.register-error,
+.register-success {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.register-error {
+  background: #fff1f1;
+  color: #b72d2d;
+}
+
+.register-success {
+  background: #fff6e8;
+  color: #5c4632;
+}
+
+.register-submit {
+  min-height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: #a8223b;
+  color: #fff;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.register-submit:hover {
+  background: #8f1d32;
+}
+
+.register-spin {
+  width: 16px;
+  height: 16px;
+  vertical-align: -3px;
+  animation: loginSpin 800ms linear infinite;
+}
+
+.register-login {
+  margin: 18px 0 0;
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .register-page {
+    padding: 16px;
+  }
+
+  .register-card {
+    grid-template-columns: 1fr;
+  }
+
+  .register-art-panel {
+    min-height: 280px;
+    padding: 28px;
+  }
+
+  .register-form-panel {
+    padding: 32px 24px;
+  }
+}
+
+/* =============================================
+   Home Page
   ============================================= */
 
 :root {
@@ -1032,7 +1311,7 @@ body {
   font-family: 'Noto Sans Thai', sans-serif;
   font-size: 12.5px;
   font-weight: 600;
-  color: #0a2f22;
+  color: black;
   width: 100%;
 }
 
@@ -1086,7 +1365,7 @@ body {
   border-radius: 100px;
   font-size: 12px;
   font-weight: 800;
-  color: #233c34;
+  color: black;
   background: rgba(255, 255, 255, 0.68);
   border: 1.5px solid transparent;
   cursor: pointer;
@@ -1103,9 +1382,9 @@ body {
 
 .chip.active {
   background: #f3dfbf;
-  border-color: #d9ae55;
-  color: #233c34;
-  font-weight: 500;
+  border-color: #FBAE42;
+  color: black;
+  font-weight: 800;
 }
 
 .chip-emoji {
@@ -1431,7 +1710,7 @@ body {
 
 .navbar-link {
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 500;
   color: rgba(255, 255, 255, 0.86);
   text-decoration: none;
   padding: 6px 12px;
@@ -1795,24 +2074,22 @@ body {
 .navbar-cta-ghost {
   display: inline-flex;
   align-items: center;
-  padding: 7px 16px;
-  background: transparent;
-  color: rgba(255, 255, 255, 0.88);
+  padding: 8px 18px;
+  background: #A8223B;
+  color: #fff;
   font-family: 'Noto Sans Thai', sans-serif;
   font-size: 14px;
-  font-weight: 400;
   border-radius: 100px;
   text-decoration: none;
-  border: 1.5px solid rgba(255, 255, 255, 0.24);
+  border: none;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background 0.2s, transform 0.15s;
   white-space: nowrap;
 }
 
 .navbar-cta-ghost:hover {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.42);
-  color: #fff;
+  background: #8f1d32;
+  transform: translateY(-1px);
 }
 
 /* Mobile menu */

@@ -152,6 +152,10 @@ export function Login() {
 
               </form>
 
+              <p className="login-register">
+                ยังไม่มีบัญชี? <Link to="/register">สมัครสมาชิก</Link>
+              </p>
+
             </div>
           </div>
         </div>
