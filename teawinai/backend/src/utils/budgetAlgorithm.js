@@ -11,6 +11,26 @@ function normalizeCategory(category) {
     return String(category || '').trim().toLowerCase();
 }
 
+function normalizeText(value) {
+    return String(value || '').trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+function getPlaceIdentity(place) {
+    const name = normalizeText(place?.name);
+    const mapLink = normalizeText(place?.map_link);
+    const address = normalizeText(place?.address);
+    const location = [place?.province, place?.district, place?.subdistrict]
+        .map(normalizeText)
+        .filter(Boolean)
+        .join('|');
+
+    if (name || mapLink || address || location) {
+        return [name, mapLink, address, location].join('|');
+    }
+
+    return String(place?._id || place?.id || 'unknown-place');
+}
+
 function getPlaceCost(place) {
     const priceMin = Number(place?.price_min || 0);
     return Number.isFinite(priceMin) && priceMin > 0 ? priceMin : 0;
@@ -37,6 +57,21 @@ function toTripPlace(place) {
     };
 }
 
+function pickWeightedPlace(places, random) {
+    if (places.length === 0) return null;
+
+    const weights = places.map(place => Math.pow(Math.max(getPlaceScore(place), 0.01), 0.75));
+    const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+    let target = random() * totalWeight;
+
+    for (let index = 0; index < places.length; index += 1) {
+        target -= weights[index];
+        if (target <= 0) return places[index];
+    }
+
+    return places[places.length - 1];
+}
+
 function buildCategorySummary(selectedPlaces, requestedCategories, availableCategories) {
     const categoryCounts = selectedPlaces.reduce((summary, place) => {
         const categoryName = getCategoryName(place);
@@ -56,7 +91,12 @@ function buildCategorySummary(selectedPlaces, requestedCategories, availableCate
 }
 
 function selectPlacesByBudget(places, budget, options = {}) {
-    const { categories = [], maxPlaces = 10 } = options;
+    const {
+        categories = [],
+        maxPlaces = 10,
+        random = Math.random,
+        excludePlaceIds = []
+    } = options;
     const parsedBudget = Number(budget);
     const parsedMaxPlaces = Number(maxPlaces);
 
@@ -77,23 +117,30 @@ function selectPlacesByBudget(places, budget, options = {}) {
         ? [...new Set(categories.map(category => String(category || '').trim()).filter(Boolean))]
         : [];
     const requestedCategoryKeys = new Set(requestedCategories.map(normalizeCategory));
+    const excludedIds = new Set(Array.isArray(excludePlaceIds) ? excludePlaceIds.map(String) : []);
 
     const filteredPlaces = requestedCategories.length > 0
         ? places.filter(place => requestedCategoryKeys.has(normalizeCategory(getCategoryName(place))))
         : places;
-    const placesWithRatio = filteredPlaces
+
+    const uniquePlaces = [...new Map(filteredPlaces
+        .filter(place => (
+            !excludedIds.has(String(place._id || place.id)) &&
+            !excludedIds.has(getPlaceIdentity(place))
+        ))
+        .map(place => [getPlaceIdentity(place), place])).values()];
+    const placesWithRatio = uniquePlaces
         .map(place => ({
             ...place,
             ratio: getPlaceScore(place)
-        }))
-        .sort(sortByValue);
+        }));
     const availableCategories = new Set(placesWithRatio.map(place => normalizeCategory(getCategoryName(place))));
 
     const selectedPlaces = [];
     const selectedIds = new Set();
     let budgetUsed = 0;
 
-    const getPlaceId = (place) => String(place._id || place.id || place.name);
+    const getPlaceId = (place) => getPlaceIdentity(place);
     const canSelect = (place) => (
         !selectedIds.has(getPlaceId(place)) && getPlaceCost(place) <= parsedBudget - budgetUsed
     );
@@ -109,18 +156,24 @@ function selectPlacesByBudget(places, budget, options = {}) {
             if (selectedPlaces.length >= placeLimit) break;
 
             const categoryKey = normalizeCategory(category);
-            const bestCategoryPlace = placesWithRatio.find(place => (
-                normalizeCategory(getCategoryName(place)) === categoryKey && canSelect(place)
-            ));
+            const categoryPlaces = placesWithRatio
+                .filter(place => normalizeCategory(getCategoryName(place)) === categoryKey && canSelect(place))
+                .sort(sortByValue);
+            const bestCategoryPlace = pickWeightedPlace(categoryPlaces, random);
 
             if (bestCategoryPlace) addPlace(bestCategoryPlace);
         }
     }
 
     // เติมช่องว่างที่เหลือจากกลุ่มหมวดหมู่ที่ระบุไว้เท่านั้น
-    for (const place of placesWithRatio) {
+    while (selectedPlaces.length < placeLimit) {
+        const availablePlaces = placesWithRatio
+            .filter(canSelect)
+            .sort(sortByValue);
+        const place = pickWeightedPlace(availablePlaces, random);
+        if (!place) break;
         if (selectedPlaces.length >= placeLimit) break;
-        if (canSelect(place)) addPlace(place);
+        addPlace(place);
     }
 
     const budgetRemaining = parsedBudget - budgetUsed;
@@ -191,10 +244,10 @@ function runTests() {
     // Test 5: Max places limit
     console.log('Test 5: Max places limit');
     const places5 = [
-        { name: 'Place 1', price_min: 10, price_max: 20, rating: 4.0, category: 'คาเฟ่' },
-        { name: 'Place 2', price_min: 10, price_max: 20, rating: 4.0, category: 'คาเฟ่' },
-        { name: 'Place 3', price_min: 10, price_max: 20, rating: 4.0, category: 'คาเฟ่' },
-        { name: 'Place 4', price_min: 10, price_max: 20, rating: 4.0, category: 'คาเฟ่' }
+        { _id: '1', name: 'Place 1', price_min: 10, price_max: 20, rating: 4.0, category: 'คาเฟ่' },
+        { _id: '2', name: 'Place 2', price_min: 10, price_max: 20, rating: 4.0, category: 'คาเฟ่' },
+        { _id: '3', name: 'Place 3', price_min: 10, price_max: 20, rating: 4.0, category: 'คาเฟ่' },
+        { _id: '4', name: 'Place 4', price_min: 10, price_max: 20, rating: 4.0, category: 'คาเฟ่' }
     ];
     const result5 = selectPlacesByBudget(places5, 100, { maxPlaces: 2 });
     console.assert(result5.selectedPlaces.length <= 2, 'Should not exceed max places limit');
@@ -206,8 +259,8 @@ function runTests() {
         { name: 'High Ratio', price_min: 50, price_max: 100, rating: 5.0, category: 'คาเฟ่' }, // ratio: 0.1
         { name: 'Low Ratio', price_min: 100, price_max: 200, rating: 4.0, category: 'คาเฟ่' }   // ratio: 0.04
     ];
-    const result6 = selectPlacesByBudget(places6, 150, { maxPlaces: 1 });
-    console.assert(result6.selectedPlaces[0]?.name === 'High Ratio', 'Should select place with higher ratio first');
+    const deterministicResult6 = selectPlacesByBudget(places6, 150, { maxPlaces: 1, random: () => 0 });
+    console.assert(deterministicResult6.selectedPlaces[0]?.name === 'High Ratio', 'Should prioritize higher ratio when random selects the first candidate');
     console.log('✅ Test 6 passed\n');
 
     // Test 7: Category coverage before duplicates
@@ -240,6 +293,31 @@ function runTests() {
     });
     console.assert(result8.selectedPlaces.every(place => place.category === 'Cafe'), 'Should only select requested categories');
     console.log('Test 8 passed\n');
+
+    // Test 9: Duplicate place records
+    console.log('Test 9: Duplicate place records');
+    const duplicatePlaces = [
+        { _id: '1', name: 'Same Cafe', address: 'Ubon', price_min: 50, rating: 4.5, category: 'Cafe' },
+        { _id: '2', name: 'Same Cafe', address: 'Ubon', price_min: 50, rating: 4.5, category: 'Cafe' },
+        { _id: '3', name: 'Another Cafe', address: 'Ubon', price_min: 50, rating: 4.2, category: 'Cafe' }
+    ];
+    const result9 = selectPlacesByBudget(duplicatePlaces, 200, {
+        categories: ['Cafe'],
+        maxPlaces: 5,
+        random: () => 0
+    });
+    console.assert(result9.selectedPlaces.length === 2, 'Should remove duplicate place records before selecting');
+    console.log('Test 9 passed\n');
+
+    // Test 10: Exclude places used by a previous search
+    console.log('Test 10: Exclude places used by a previous search');
+    const result10 = selectPlacesByBudget(places5, 100, {
+        maxPlaces: 2,
+        excludePlaceIds: ['1', '2'],
+        random: () => 0
+    });
+    console.assert(result10.selectedPlaces.every(place => !['1', '2'].includes(String(place._id))), 'Should exclude places from previous searches');
+    console.log('Test 10 passed\n');
 
     console.log('=== All Tests Passed! ===');
 }

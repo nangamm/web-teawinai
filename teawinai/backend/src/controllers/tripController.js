@@ -8,7 +8,13 @@ const { selectPlacesByBudget } = require('../utils/budgetAlgorithm');
 // @access   Public
 exports.planTrip = async (req, res) => {
     try {
-        const { budget, categories = [], maxPlaces = 10, location = {} } = req.body;
+        const {
+            budget,
+            categories = [],
+            maxPlaces = 10,
+            location = {},
+            excludePlaceIds = []
+        } = req.body;
         const { province, district, subdistrict } = location;
 
         if (!budget || budget <= 0) {
@@ -38,7 +44,19 @@ exports.planTrip = async (req, res) => {
             .lean();
 
         // Use budget algorithm to select places
-        const result = selectPlacesByBudget(places, budget, { categories, maxPlaces: parsedMaxPlaces });
+        let result = selectPlacesByBudget(places, budget, {
+            categories,
+            maxPlaces: parsedMaxPlaces,
+            excludePlaceIds
+        });
+
+        // Start a new rotation when all matching places were already used.
+        if (result.selectedPlaces.length === 0 && Array.isArray(excludePlaceIds) && excludePlaceIds.length > 0) {
+            result = selectPlacesByBudget(places, budget, {
+                categories,
+                maxPlaces: parsedMaxPlaces
+            });
+        }
 
         res.json({
             success: true,

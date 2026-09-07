@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { CheckCircle, XCircle, TrendingUp, Search, Star, Edit, Trash2, AlertCircle, LayoutDashboard, Banknote } from 'lucide-react'
+import { CheckCircle, XCircle, Search, Star, Edit, Trash2, AlertCircle, LayoutDashboard, Banknote } from 'lucide-react'
 import { placesAPI, priceUpdatesAPI, authAPI, categoriesAPI } from '@/services/api'
 import { isAdmin } from '@/utils/auth'
 import toast from 'react-hot-toast'
@@ -296,13 +296,6 @@ export function AdminDashboard() {
       {activeTab === 'dashboard' && (
         <>
           <div className="admin-stats">
-            <div className="admin-stat-card">
-              <div className="admin-stat-eyebrow">การเข้าชมทั้งหมด <TrendingUp /></div>
-              <div className="admin-stat-num">{(stats.totalPlaces * 1000 + 142890).toLocaleString()}</div>
-              <div className="admin-stat-desc">จำนวนการเข้าชมสถานที่ที่คัดสรรทั้งหมดในเดือนนี้</div>
-              <div className="admin-stat-progress"><div className="admin-stat-progress-fill" style={{ width: '72%' }} /></div>
-            </div>
-
             <div className="admin-stat-card">
               <div className="admin-stat-eyebrow">รายการรอตรวจสอบ</div>
               <div className="admin-stat-num">{(stats.pendingPlaces || 0) + (stats.pendingUpdates || 0)}</div>

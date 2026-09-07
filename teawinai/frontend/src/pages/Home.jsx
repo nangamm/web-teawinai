@@ -6,6 +6,38 @@ import { DEFAULT_PROVINCE, getDistrictsByProvince, getSubdistrictsByDistrict, pr
 import { isAuthenticated } from '@/utils/auth'
 import toast from 'react-hot-toast'
 
+const SEARCH_HISTORY_KEY = 'teawinai-trip-search-history'
+
+const buildSearchKey = ({ budget, categories, maxPlaces, location }) => JSON.stringify({
+  budget,
+  categories: [...categories].sort(),
+  maxPlaces,
+  location
+})
+
+const readSearchHistory = (searchKey) => {
+  try {
+    const history = JSON.parse(localStorage.getItem(SEARCH_HISTORY_KEY) || '{}')
+    return Array.isArray(history[searchKey]) ? history[searchKey] : []
+  } catch {
+    return []
+  }
+}
+
+const rememberSelectedPlaces = (searchKey, selectedPlaces) => {
+  try {
+    const history = JSON.parse(localStorage.getItem(SEARCH_HISTORY_KEY) || '{}')
+    const selectedIds = selectedPlaces
+      .map(place => place?._id || place?.id)
+      .filter(Boolean)
+      .map(String)
+    history[searchKey] = [...new Set([...(history[searchKey] || []), ...selectedIds])].slice(-200)
+    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history))
+  } catch {
+    // Ignore storage failures; the backend still returns a valid random result.
+  }
+}
+
 // const CAT_EMOJI = {
 //   'วัด': '⛩', 'Temples': '⛩',
 //   'ร้านอาหาร': '🍽', 'Restaurants': '🍽',
@@ -89,7 +121,7 @@ export function Home() {
     if (!validate()) return
     setLoading(true)
     try {
-      const res = await tripsAPI.planTrip({
+      const request = {
         budget: parseFloat(formData.budget),
         categories: formData.categories,
         maxPlaces: parseInt(formData.maxPlaces),
@@ -98,8 +130,12 @@ export function Home() {
           district: formData.district,
           subdistrict: formData.subdistrict
         }
-      })
-      navigate('/result', { state: { tripPlan: res.data.data || res.data } })
+      }
+      const searchKey = buildSearchKey(request)
+      const res = await tripsAPI.planTrip({ ...request, excludePlaceIds: readSearchHistory(searchKey) })
+      const tripPlan = res.data.data || res.data
+      rememberSelectedPlaces(searchKey, tripPlan.selectedPlaces || [])
+      navigate('/result', { state: { tripPlan } })
       toast.success('วางแผนทริปสำเร็จ!')
     } catch (err) {
       setErrors({ submit: err.response?.data?.message || 'ไม่สามารถวางแผนทริปได้ กรุณาลองใหม่' })
