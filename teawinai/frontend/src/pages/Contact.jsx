@@ -47,7 +47,7 @@ export default function Contact() {
                 </div>
                 <div>
                   <div style={{ fontSize: '12px', color: '#888', marginBottom: '2px' }}>อีเมล</div>
-                  <div style={{ fontSize: '14px', color: '#0e0e0e' }}>contact@emerald.com</div>
+                  <div style={{ fontSize: '14px', color: '#0e0e0e' }}>admin@teawinai.com</div>
                 </div>
               </div>
 
@@ -83,7 +83,7 @@ export default function Contact() {
                 </div>
                 <div>
                   <div style={{ fontSize: '12px', color: '#888', marginBottom: '2px' }}>ที่อยู่</div>
-                  <div style={{ fontSize: '14px', color: '#0e0e0e' }}>กรุงเทพมหานคร, ประเทศไทย</div>
+                  <div style={{ fontSize: '14px', color: '#0e0e0e' }}>อุบลราชธานี, ประเทศไทย</div>
                 </div>
               </div>
             </div>
